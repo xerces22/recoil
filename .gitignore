@@ -1,0 +1,8 @@
+/.godot/
+/export_templates/
+/feature_profiles/
+/script_templates/
+/text_editor_themes/
+*.exe
+*.pck
+*.zip

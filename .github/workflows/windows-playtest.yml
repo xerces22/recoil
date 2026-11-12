@@ -1,0 +1,67 @@
+name: Windows playtest build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-playtest
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GODOT_VERSION: 4.7.2
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot export tools
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot-tools
+            ~/.local/share/godot/export_templates
+          key: godot-${{ env.GODOT_VERSION }}-linux-x86_64-windows-template
+
+      - name: Install Godot and the Windows export template
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          release="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          editor="Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          template_dir="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$HOME/godot-tools" "$template_dir"
+          curl --fail --location --retry 3 "$release/$editor.zip" -o "$RUNNER_TEMP/godot.zip"
+          curl --fail --location --retry 3 "$release/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" -o "$RUNNER_TEMP/templates.tpz"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$HOME/godot-tools"
+          unzip -j "$RUNNER_TEMP/templates.tpz" 'templates/windows_release_x86_64.exe' -d "$template_dir"
+          chmod +x "$HOME/godot-tools/$editor"
+
+      - name: Export and zip the game
+        shell: bash
+        run: |
+          set -euo pipefail
+          editor="$HOME/godot-tools/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          build="$RUNNER_TEMP/recoil-windows"
+          mkdir -p "$build"
+          "$editor" --headless --path "$GITHUB_WORKSPACE" --export-release "Windows Desktop" "$build/RecoilLauncher.exe"
+          test -s "$build/RecoilLauncher.exe"
+          test -s "$build/RecoilLauncher.pck"
+          cd "$build"
+          zip "$RUNNER_TEMP/RecoilLauncher-Windows.zip" RecoilLauncher.exe RecoilLauncher.pck
+
+      - name: Publish the latest playtest build
+        shell: bash
+        run: |
+          gh release create "playtest-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}" \
+            "$RUNNER_TEMP/RecoilLauncher-Windows.zip" \
+            --target "$GITHUB_SHA" --latest --generate-notes \
+            --title "Windows playtest ${GITHUB_RUN_NUMBER}"
