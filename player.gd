@@ -3,6 +3,7 @@ extends CharacterBody2D
 const MAX_SHOTS := 2
 const GRAVITY := 880.0
 const RECOIL_SPEED := 580.0
+const SECOND_SHOT_MULTIPLIER := 0.5
 const RESPAWN_Y := 740.0
 
 @onready var respawn_position := position
@@ -20,7 +21,10 @@ func _unhandled_input(event: InputEvent) -> void:
 func _physics_process(delta: float) -> void:
 	velocity.y += GRAVITY * delta
 	if pending_shot != Vector2.ZERO:
-		velocity += pending_shot * RECOIL_SPEED
+		var recoil_speed := RECOIL_SPEED
+		if shots == 1:
+			recoil_speed *= SECOND_SHOT_MULTIPLIER
+		velocity += pending_shot * recoil_speed
 		pending_shot = Vector2.ZERO
 		shots -= 1
 
