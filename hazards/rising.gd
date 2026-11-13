@@ -49,7 +49,7 @@ func _physics_process(delta: float) -> void:
 	surface_y = minf(surface_y - _speed * delta, player_y + max_gap)
 	_wave += delta
 	if player_y + 12.0 >= surface_y:
-		player.die.call_deferred()
+		player.die.call_deferred("flood")
 	queue_redraw()
 
 

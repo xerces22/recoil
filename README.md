@@ -1,6 +1,6 @@
 # Recoil Launcher
 
-Mouse-only recoil climber made for 17 GameJam. Aim with the mouse and left-click to launch away from the cursor. Land to refill both shots.
+Mouse-only recoil climber made for 17 GameJam. Hold left-click to charge and release to launch away from the cursor. Each shot sets your velocity from your aim and charge. Charging the second shot in midair slows your movement so you can aim. Land to refill both shots.
 
 ## Play on Windows
 
@@ -9,6 +9,10 @@ Mouse-only recoil climber made for 17 GameJam. Aim with the mouse and left-click
 ## Work on the game
 
 Open `project.godot` in Godot 4.7.2 and press F5. Push changes to `main` to publish a new Windows playtest build.
+
+To build levels, read [LEVEL_DESIGN.md](LEVEL_DESIGN.md). It lists every mechanic, the reach numbers and the difficulty rules. Keys 1 to 9 and 0 switch levels while testing.
+
+Godot editor runs show live recoil stats and recent events. Each run writes a timestamped log in `playtest_logs/` in the project folder. If the project folder is read-only, the log goes to Godot's user data folder. Release builds hide the overlay and skip logging.
 
 ## Final draft
 

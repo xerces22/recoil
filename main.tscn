@@ -1,7 +1,8 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1"]
 [ext_resource type="Script" path="res://player.gd" id="2"]
+[ext_resource type="Script" path="res://playtest_debug.gd" id="3"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 12.0
@@ -47,7 +48,7 @@ text = "Left-click to recoil. Land to reload. Reach the top."
 
 [node name="Stats" type="Label" parent="HUD"]
 offset_left = 680.0
-offset_top = 16.0
+offset_top = 664.0
 offset_right = 1256.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
@@ -63,4 +64,21 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.3, 0.3, 0.3, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 4
-text = "1-6 switch level    R restart from checkpoint    N skip to next checkpoint"
+text = "1-9, 0 switch level    R restart from checkpoint    N next checkpoint    F7 debug flight"
+
+[node name="PlaytestDebug" type="Label" parent="HUD"]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -730.0
+offset_top = 20.0
+offset_right = -24.0
+grow_horizontal = 0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
+script = ExtResource("3")
+player_path = NodePath("../../Player")

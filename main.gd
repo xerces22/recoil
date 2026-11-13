@@ -9,6 +9,7 @@ const LEVELS: Array[String] = [
 	"res://levels/level_4_turrets.tscn",
 	"res://levels/level_5_mouths.tscn",
 	"res://levels/level_6_flood.tscn",
+	"res://levels/level_7_refills.tscn",
 ]
 
 @onready var player: RecoilPlayer = $Player
@@ -22,6 +23,7 @@ var level: Level
 var level_index := 0
 var checkpoints: Array[Checkpoint] = []
 var floods: Array[RisingHazard] = []
+var refills: Array[ShellRefill] = []
 var deaths := 0
 var elapsed := 0.0
 var cleared := false
@@ -35,11 +37,12 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	var number: int = event.keycode - KEY_1
+	# Keys 1-9 load levels 1-9, key 0 loads level 10.
+	var number: int = 9 if event.keycode == KEY_0 else event.keycode - KEY_1
 	if number >= 0 and number < LEVELS.size():
 		load_level(number)
 	elif event.keycode == KEY_R:
-		player.die()
+		player.die("restart key")
 	elif event.keycode == KEY_N:
 		skip_to_next_checkpoint()
 
@@ -54,6 +57,7 @@ func load_level(index: int) -> void:
 
 	checkpoints.clear()
 	floods.clear()
+	refills.clear()
 	_collect(level)
 	# Lowest first, so "next checkpoint" means the next one up.
 	checkpoints.sort_custom(func(a: Checkpoint, b: Checkpoint) -> bool:
@@ -63,7 +67,7 @@ func load_level(index: int) -> void:
 	elapsed = 0.0
 	cleared = false
 	player.respawn_position = (level.get_node("Start") as Node2D).global_position
-	player.respawn()
+	player.respawn("level %d loaded" % (index + 1))
 	title_label.text = "%d/%d  %s" % [index + 1, LEVELS.size(), level.title]
 	instructions.text = level.hint
 
@@ -74,6 +78,8 @@ func _collect(node: Node) -> void:
 			checkpoints.append(child)
 		elif child is RisingHazard:
 			floods.append(child)
+		elif child is ShellRefill:
+			refills.append(child)
 		_collect(child)
 
 
@@ -104,6 +110,8 @@ func _reach(checkpoint: Checkpoint) -> void:
 		if not cleared:
 			cleared = true
 			checkpoint.reached = true
+			player.debug_event.emit("Level clear at %s  time %s  deaths %d" % [
+				player.position.round(), _format_time(elapsed), deaths])
 			for flood in floods:
 				flood.stop()
 		return
@@ -115,6 +123,7 @@ func _reach(checkpoint: Checkpoint) -> void:
 		return
 	checkpoint.reached = true
 	player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
+	player.debug_event.emit("Checkpoint at %s" % player.position.round())
 	for flood in floods:
 		flood.give_breathing_room(player.global_position.y)
 
@@ -126,7 +135,7 @@ func skip_to_next_checkpoint() -> void:
 			var top := checkpoint.world_rect().position.y
 			checkpoint.reached = true
 			player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
-			player.respawn()
+			player.respawn("skipped to checkpoint")
 			for flood in floods:
 				flood.reset()
 			return
@@ -136,6 +145,8 @@ func _on_player_died() -> void:
 	deaths += 1
 	for flood in floods:
 		flood.reset()
+	for refill in refills:
+		refill.reset()
 
 
 func _format_time(seconds: float) -> String:
