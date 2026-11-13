@@ -10,33 +10,33 @@ script = ExtResource("level")
 title = "Wake Up, You're a Gun"
 hint = "Hold click to charge, release to blast away from the cursor. Two shells. Land to reload. Climb up and to the right."
 taunt = "Still kicking? Cute."
-bounds = Rect2(0, -880, 1920, 1600)
+bounds = Rect2(0, -816, 1920, 1536)
 
 [node name="Start" type="Marker2D" parent="."]
 position = Vector2(160, 546)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]
-position = Vector2(16, -80)
+position = Vector2(16, -48)
 script = ExtResource("block")
-size = Vector2(32, 1600)
+size = Vector2(32, 1536)
 
 [node name="WallRight" type="StaticBody2D" parent="."]
-position = Vector2(1904, -80)
+position = Vector2(1904, -48)
 script = ExtResource("block")
-size = Vector2(32, 1600)
+size = Vector2(32, 1536)
 
 [node name="CeilingLeft" type="StaticBody2D" parent="."]
-position = Vector2(208, -864)
+position = Vector2(208, -800)
 script = ExtResource("block")
 size = Vector2(416, 32)
 
 [node name="CeilingRight" type="StaticBody2D" parent="."]
-position = Vector2(1264, -864)
+position = Vector2(1264, -800)
 script = ExtResource("block")
 size = Vector2(1312, 32)
 
 [node name="Exit" type="Marker2D" parent="."]
-position = Vector2(512, -880)
+position = Vector2(512, -816)
 
 [node name="Ground" type="StaticBody2D" parent="."]
 position = Vector2(464, 569)

@@ -10,7 +10,8 @@ This is the toolkit for building Recoil Launcher levels. It lists every mechanic
 > - **One continuous tower.** Each "level" is a **floor**: its own `.tscn` file, built separately. The game stacks the floors on top of each other, so the whole game is one unbroken climb. You leave a floor through a **hole in its ceiling** and enter the next through a **hole in its ground**. Each floor shows its own title when you enter it, so the player feels the change. **Follow the floor rules in section 2 exactly**, or the floors won't line up.
 > - **Wide floors (done, use this now):** set `bounds` on the root and the camera follows on **both** axes. Paths go diagonally (up-right, up-left, switchbacks, corridors), not only straight up. See "World rules" and "Sideways reach" below, and `levels/level_01_wake_up.tscn` for a working example.
 > - **One hex orb, at the top of floor 10 only.** Break it (3 blasts) and a cutscene starts: the witch talks, you shoot her once, black screen, echoed shot, the end. Floors 1-9 have no orb; they end at their exit hole.
-> - **Coming (code, not level work):** stacking the floors into the tower, the floor title banner, the orb, the intro and the ending. Build floors now; they'll slot in.
+> - **Tower stacking works now.** Add your floor's path to `FLOORS` in `main.gd` (in order) and the game stacks it on the floor below and shows its title banner when you enter it. Press **T** to play the whole tower, or a number key to test one floor on its own.
+> - **Coming (code, not level work):** the orb, the intro and the ending.
 
 ---
 
@@ -91,10 +92,10 @@ The game stacks floor N+1 on top of floor N. It shifts floor N+1 sideways and up
 - **Exit hole (every floor except 10):** the top of the floor is a stone ceiling, 32 px thick, along the top edge of `bounds`, with **one gap exactly 192 px wide**. Add a `Marker2D` named exactly **`Exit`** at the centre of the gap, at the **top** of the ceiling (that's `bounds.position.y`).
 - **Entry hole (every floor except 1):** the ground at the bottom of the floor is a stone slab, 32 px thick, with its top at y = 560 (so it runs y 560 to 592). It has **one gap exactly 192 px wide**. Add a `Marker2D` named exactly **`Entry`** at the centre of the gap, at the **bottom** of the slab (y = 592). Floor 1 has no entry hole; its ground is solid.
 - **`Start`** sits on the ground slab **beside** the entry hole (not over it), 14 px above the slab top (y = 546). It's where the player spawns when the floor is loaded on its own, and the first respawn point on that floor.
-- **Make the exit reachable:** put a wide, safe ledge (ideally a checkpoint) under the exit hole, no more than **330 px** below the bottom of the ceiling, so two straight-up shots carry the player through.
+- **Make the exit reachable:** put a wide, safe ledge (ideally a checkpoint) under the exit hole, no more than **240 px** below the bottom of the ceiling. Two full shots rise ~380 px, and the player has to clear this ceiling (32 px) **and** the next floor's ground slab (32 px) with room to drift sideways and land beside the entry hole.
 - **Arrival is safe:** the player comes up through the entry hole with little speed left. Put the ground slab or a wide platform right beside the hole, and **no hazards within ~250 px** of it.
 - **Below the entry hole there is nothing** when the floor is played on its own: falling back down it is a death. In the tower it drops you into the floor below, which is fine.
-- **Until the tower code lands:** put an `is_finish` checkpoint on the ledge under the exit hole, so a floor can be cleared when tested on its own (keys 1-0). It gets removed later.
+- **No finish platform on floors 1-9.** When you test a floor on its own (number keys), flying up through its exit hole clears it. In the whole tower you just carry on into the next floor. (An `is_finish` checkpoint on floors 1-9 is harmless: in the tower it acts like a normal checkpoint.)
 - **Floor 10** has no exit hole. It ends in the orb room (see 3.11).
 
 ```
@@ -108,7 +109,7 @@ The game stacks floor N+1 on top of floor N. It shifts floor N+1 sideways and up
 - **Root node:** `Node2D` with the script `res://hazards/level.gd`. Set `title` (shown top-left) and `hint` (one sentence teaching the level's new idea).
 - **Wide floors:** set `bounds` on the root (see World rules). The `title` is shown big when the player enters the floor. Optional: `taunt` (Morwen's line, first floor of each zone) and `is_final` (floor 10 only). These two do nothing yet.
 - **`Start`:** a `Marker2D` child named exactly `Start`, where the player spawns. Put it 14 px above the ground top, e.g. `(640, 546)`.
-- **Register it:** add the path to `LEVELS` in `main.gd`. Keys 1 to 9 load levels 1 to 9 and key 0 loads level 10.
+- **Register it:** add the path to `FLOORS` in `main.gd`, bottom to top. The game stacks the floors in that order. Number keys 1 to 9 and 0 load floors 1 to 10 on their own; the old sandbox levels (in `SANDBOXES`) come after the floors.
 - All mechanics are direct children of the root. Positions of rectangles are their **centre**.
 - **Keep sizes and positions on a 16 px grid** where you can. The art tiles are 16×16, so this makes the art swap painless.
 
@@ -153,7 +154,8 @@ Look at `levels/level_01_wake_up.tscn` for a wide level, and `levels/level_1_bas
 
 | Key | Does |
 |---|---|
-| 1 to 9, 0 | Load level 1 to 10 |
+| 1 to 9, 0 | Load one floor on its own (floors first, then the sandboxes) |
+| T | Load the whole tower, all floors stacked |
 | R | Die and restart from the last checkpoint |
 | N | Jump to the next checkpoint (test a later section quickly) |
 | F7 | Debug flight: the player follows the mouse, ignoring physics |
@@ -187,7 +189,7 @@ Each entry gives its node type and script, what it does, how to use it, and whic
 ### 3.3 Checkpoint and Finish
 `StaticBody2D` + `res://hazards/checkpoint.gd`. Black, turns green when reached.
 
-- A normal platform that saves your respawn point when you land on it. Tick `is_finish` for the level goal.
+- A normal platform that saves your respawn point when you land on it. `is_finish` marks a goal, but only the top floor's finish ends the run; on lower floors it acts like a normal checkpoint.
 - Checkpoints only save upward, so landing on a lower one does nothing.
 - **Rules:**
   - Put one at the end of every section, about every 500 to 700 px of climbing.
@@ -347,7 +349,7 @@ The current `level_1` to `level_7` files are **sandboxes** for testing each mech
 
 | Floor | Zone | Title | New idea | Combines with | Shape | Size (w x climb) |
 |---|---|---|---|---|---|---|
-| 1 | Cellar | Wake Up, You're a Gun | Basics: charge, two shells, spikes | - | Diagonal up-right | 1920 x 1600 |
+| 1 | Cellar | Wake Up, You're a Gun | Basics: charge, two shells, spikes | - | Diagonal up-right | 1920 x 1536 |
 | 2 | Cellar | The Chain Lift | Moving platforms and lifts | spikes | Lightning bolt (up-right, left, up-right) | 2560 x 1400 |
 | 3 | Cellar | Loose Shells | Shell refills | moving platforms | Diagonal with a refill-only gap | 2560 x 1600 |
 | 4 | Library | Quiet Please | Bouncy pads and walls | refills | Wide room (across, up, back) | 3200 x 1400 |
@@ -381,7 +383,7 @@ If one section causes more than half of a level's deaths, it's too hard for its 
 - [ ] Checkpoints are wide, safe, and no more than ~700 px of climbing (or ~1200 px of sideways travel) apart.
 - [ ] `bounds` is set, the side edges have walls, and the top has a ceiling.
 - [ ] Exit hole (192 px gap, `Exit` marker on top of the ceiling) unless it's floor 10. Entry hole (192 px gap, `Entry` marker under the ground slab) unless it's floor 1.
-- [ ] A safe ledge under the exit (no more than 330 px below it) and a safe landing beside the entry, with no hazards within ~250 px.
+- [ ] A safe ledge under the exit (no more than 240 px below the ceiling) and a safe landing beside the entry, with no hazards within ~250 px.
 - [ ] The `hint` explains the new idea in one sentence.
 - [ ] Sizes and positions are on the 16 px grid where possible.
 

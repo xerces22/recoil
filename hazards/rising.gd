@@ -3,6 +3,7 @@ class_name RisingHazard
 extends Node2D
 ## Flood that rises from below once the player climbs above `trigger_y`. Touching it kills.
 ## Keep this node at the level origin (0, 0). It spans the level's `bounds` width.
+## All heights here are in the floor's own coordinates, so it works on any floor of the tower.
 
 
 ## The chase starts once the player is higher (smaller y) than this.
@@ -37,7 +38,7 @@ func _physics_process(delta: float) -> void:
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
 		return
-	var player_y := player.global_position.y
+	var player_y := to_local(player.global_position).y
 	if not active:
 		if player_y >= trigger_y:
 			return
@@ -65,9 +66,10 @@ func stop() -> void:
 	queue_redraw()
 
 
+## `player_y` is in world space.
 func give_breathing_room(player_y: float) -> void:
 	if active:
-		surface_y = maxf(surface_y, player_y + checkpoint_gap)
+		surface_y = maxf(surface_y, to_local(Vector2(0, player_y)).y + checkpoint_gap)
 		_speed = maxf(speed, _speed * 0.8)
 
 

@@ -64,7 +64,7 @@ mouse_filter = 2
 theme_override_colors/font_color = Color(0.3, 0.3, 0.3, 1)
 theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 4
-text = "1-9, 0 switch level    R restart from checkpoint    N next checkpoint    F7 debug flight"
+text = "1-9, 0 test one level    T whole tower    R restart from checkpoint    N next checkpoint    F7 debug flight"
 
 [node name="PlaytestDebug" type="Label" parent="HUD"]
 anchors_preset = 1

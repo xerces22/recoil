@@ -177,7 +177,7 @@ Same mechanic order as LEVEL_DESIGN.md. Each floor is a separate file; the game 
 
 | Floor | Zone | Title | New idea | Shape | Size (w × climb) |
 |---|---|---|---|---|---|
-| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗ | 1920 × 1600 |
+| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗ | 1920 × 1536 |
 | 2 | Cellar | The Chain Lift | Movers and lifts | Lightning bolt | 2560 × 1400 |
 | 3 | Cellar | Loose Shells | Refills (shell wisps) | Diagonal ↗ with a wisp-only gap over a spike pit | 2560 × 1600 |
 | 4 | Library | Quiet Please | Slime jelly pads | Wide room → ↑ ← | 3200 × 1400 |
@@ -199,14 +199,14 @@ Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sectio
 1. `level.gd` has `bounds` (Rect2). Levels without it act like the old 1280 px shaft.
 2. The camera follows x and y with smoothing and look-ahead, and stops at `bounds`.
 3. Leaving the sides or bottom of `bounds` by more than 24 px kills.
-4. The flood spans the level's `bounds` width.
+4. The flood spans the level's `bounds` width and works on any floor of the tower.
 5. LEVEL_DESIGN.md describes wide floors and the floor-stacking rules.
+6. **Tower stacking.** `main.gd` loads every floor in `FLOORS` and shifts each one so its `Entry` sits on the `Exit` of the floor below. The camera's sides follow the floor you're in; checkpoints, timer and deaths run for the whole tower. A flood stops once you leave its floor.
+7. **Floor title banner.** Rising into a new floor shows "FLOOR N", its title and Morwen's taunt (if set). Music follows the floor.
+8. **Single-floor testing.** Number keys load one floor; flying up through its `Exit` clears it. T loads the whole tower.
 
 **Next (code, not level work):**
 
-6. **Tower stacking.** Load all floors into one scene. Shift each floor so its `Entry` marker sits on the floor below's `Exit` marker. The camera's side limits follow the floor you're in; the flood, checkpoints, timer and deaths run for the whole tower.
-7. **Floor title banner.** When the player rises into a floor, show "FLOOR N · TITLE" big for ~2 s, plus the zone taunt if set. Switch music by zone.
-8. **Hex orb** (`hazards/orb.gd`, written, not wired in): 3 hits, hops between `spots`. On the third hit, start the ending.
-9. **Intro cards** (`story_cards.gd`, written, not wired in): the 3 setup screens before floor 1.
-10. **Ending:** Morwen's lines, the locked crosshair, one click, an instant black screen, an echoed blast, then "Thanks for playing".
-11. **Standalone floor testing:** when a single floor is loaded (keys 1-0), flying up through its `Exit` counts as clearing it.
+9. **Hex orb** (`hazards/orb.gd`, written, not wired in): 3 hits, hops between `spots`. On the third hit, start the ending.
+10. **Intro cards** (`story_cards.gd`, written, not wired in): the 3 setup screens before floor 1.
+11. **Ending:** Morwen's lines, the locked crosshair, one click, an instant black screen, an echoed blast, then "Thanks for playing".
