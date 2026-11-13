@@ -42,6 +42,10 @@ func _process(delta: float) -> void:
 	var stats := "%s  |  pos %s  |  velocity %s px/s  |  ammo %d/%d" % [
 		motion, player.position.round(), player.velocity.round(), player.shots, RecoilPlayer.MAX_SHOTS,
 	]
+	if player.charging:
+		stats += "  |  charge %.0f%%" % (player.charge_fraction() * 100.0)
+	if player.is_air_charging():
+		stats += "  |  slow aim"
 	text = "Playtest  |  %s\n%s\n%s" % [log_location, stats, "\n".join(recent_events)]
 	sample_elapsed += delta
 	if sample_elapsed >= SAMPLE_INTERVAL:
