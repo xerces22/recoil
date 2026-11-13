@@ -1,144 +1,142 @@
 extends Node2D
+## Loads one level at a time. Number keys switch levels for testing.
 
 const RecoilPlayer = preload("res://player.gd")
-const LOWER_CHECKPOINT := Rect2(475, -90, 160, 16)
-const UPPER_CHECKPOINT := Rect2(695, -650, 155, 16)
-const CHECKPOINTS: Array[Rect2] = [LOWER_CHECKPOINT, UPPER_CHECKPOINT]
-const FINISH := Rect2(520, -1350, 160, 16)
-const PLATFORMS: Array[Rect2] = [
-	Rect2(130, 560, 1020, 18),
-	Rect2(680, 405, 210, 16),
-	Rect2(390, 240, 185, 16),
-	Rect2(255, 65, 150, 16),
-	Rect2(645, 100, 150, 16),
-	LOWER_CHECKPOINT,
-	Rect2(770, -265, 160, 16),
-	Rect2(480, -460, 180, 16),
-	UPPER_CHECKPOINT,
-	Rect2(920, -825, 130, 16),
-	Rect2(610, -995, 124, 16),
-	Rect2(785, -1170, 130, 16),
-	FINISH,
+const LEVELS: Array[String] = [
+	"res://levels/level_1_basics.tscn",
+	"res://levels/level_2_bounce.tscn",
+	"res://levels/level_3_moving.tscn",
+	"res://levels/level_4_turrets.tscn",
+	"res://levels/level_5_mouths.tscn",
+	"res://levels/level_6_flood.tscn",
 ]
-const SPIKED_BLOCKS: Array[Rect2] = [
-	Rect2(540, 310, 115, 20),
-	Rect2(625, -190, 110, 20),
-	Rect2(615, -565, 74, 20),
-	Rect2(825, -808, 70, 80),
-	Rect2(777, -1000, 65, 85),
-	Rect2(707, -1140, 67, 72),
-	Rect2(680, -1305, 75, 65),
-]
-const SPIKED_EDGES: Array[Rect2] = [
-	Rect2(390, 240, 20, 26),
-	Rect2(255, 65, 40, 26),
-	Rect2(755, 100, 40, 26),
-	Rect2(890, -265, 40, 26),
-	Rect2(620, -460, 40, 26),
-	Rect2(1030, -825, 20, 26),
-	Rect2(610, -995, 20, 26),
-	Rect2(895, -1170, 20, 26),
-]
-const SPIKE_WIDTH := 20
 
 @onready var player: RecoilPlayer = $Player
 @onready var camera: Camera2D = $Camera2D
+@onready var title_label: Label = $HUD/Title
 @onready var instructions: Label = $HUD/Instructions
-var active_checkpoint := -1
+@onready var stats: Label = $HUD/Stats
+@onready var level_root: Node2D = $Level
+
+var level: Level
+var level_index := 0
+var checkpoints: Array[Checkpoint] = []
+var floods: Array[RisingHazard] = []
+var deaths := 0
+var elapsed := 0.0
+var cleared := false
 
 
 func _ready() -> void:
-	for rect in PLATFORMS:
-		add_platform(rect)
-	for rect in SPIKED_BLOCKS:
-		add_platform(rect)
-		add_spike_row(Rect2(rect.position, Vector2(rect.size.x, 26)))
-	for row in SPIKED_EDGES:
-		add_spike_row(row)
+	player.died.connect(_on_player_died)
+	load_level(0)
 
 
-func _process(_delta: float) -> void:
+func _unhandled_input(event: InputEvent) -> void:
+	if not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	var number: int = event.keycode - KEY_1
+	if number >= 0 and number < LEVELS.size():
+		load_level(number)
+	elif event.keycode == KEY_R:
+		player.die()
+	elif event.keycode == KEY_N:
+		skip_to_next_checkpoint()
+
+
+func load_level(index: int) -> void:
+	if level != null:
+		level_root.remove_child(level)
+		level.queue_free()
+	level_index = index
+	level = load(LEVELS[index]).instantiate()
+	level_root.add_child(level)
+
+	checkpoints.clear()
+	floods.clear()
+	_collect(level)
+	# Lowest first, so "next checkpoint" means the next one up.
+	checkpoints.sort_custom(func(a: Checkpoint, b: Checkpoint) -> bool:
+		return a.global_position.y > b.global_position.y)
+
+	deaths = 0
+	elapsed = 0.0
+	cleared = false
+	player.respawn_position = (level.get_node("Start") as Node2D).global_position
+	player.respawn()
+	title_label.text = "%d/%d  %s" % [index + 1, LEVELS.size(), level.title]
+	instructions.text = level.hint
+
+
+func _collect(node: Node) -> void:
+	for child in node.get_children():
+		if child is Checkpoint:
+			checkpoints.append(child)
+		elif child is RisingHazard:
+			floods.append(child)
+		_collect(child)
+
+
+func _process(delta: float) -> void:
 	camera.position.y = minf(360.0, player.position.y - 120.0)
 	camera.force_update_scroll()
+	if not cleared:
+		elapsed += delta
+
 	if player.is_on_floor():
-		var feet := player.position + Vector2(0, 13)
-		if FINISH.has_point(feet):
-			instructions.text = "Course clear."
-		else:
-			for index in range(active_checkpoint + 1, CHECKPOINTS.size()):
-				var platform := CHECKPOINTS[index]
-				if platform.has_point(feet):
-					active_checkpoint = index
-					player.respawn_position = Vector2(platform.get_center().x, platform.position.y - 14)
-					instructions.text = "Checkpoint set. Save your second shot for the turn."
-					queue_redraw()
-					break
+		var feet := player.global_position + Vector2(0, 13)
+		for checkpoint in checkpoints:
+			if checkpoint.world_rect().has_point(feet):
+				_reach(checkpoint)
+				break
+
+	var saved := checkpoints.filter(func(c: Checkpoint) -> bool: return c.reached and not c.is_finish).size()
+	var total := checkpoints.filter(func(c: Checkpoint) -> bool: return not c.is_finish).size()
+	var status := "Time %s   Deaths %d   Checkpoints %d/%d" % [_format_time(elapsed), deaths, saved, total]
+	if cleared:
+		var next := "Press %d for the next level." % (level_index + 2) if level_index + 1 < LEVELS.size() else "That was the last level."
+		status = "CLEAR!  " + status + "\n" + next
+	stats.text = status
 
 
-func _draw() -> void:
-	for index in range(CHECKPOINTS.size()):
-		var label := "CHECKPOINT SET" if index <= active_checkpoint else "CHECKPOINT"
-		draw_string(ThemeDB.fallback_font, CHECKPOINTS[index].position + Vector2(12, -10),
-			label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
-	draw_string(ThemeDB.fallback_font, FINISH.position + Vector2(12, -10),
-		"FINISH", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
+func _reach(checkpoint: Checkpoint) -> void:
+	if checkpoint.is_finish:
+		if not cleared:
+			cleared = true
+			checkpoint.reached = true
+			for flood in floods:
+				flood.stop()
+		return
+	if checkpoint.reached:
+		return
+	var top := checkpoint.world_rect().position.y
+	# Only move the respawn point upward.
+	if top - 14.0 >= player.respawn_position.y:
+		return
+	checkpoint.reached = true
+	player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
+	for flood in floods:
+		flood.give_breathing_room(player.global_position.y)
 
 
-func add_platform(rect: Rect2) -> void:
-	var body := StaticBody2D.new()
-	body.position = rect.get_center()
-
-	var shape := RectangleShape2D.new()
-	shape.size = rect.size
-	var collision := CollisionShape2D.new()
-	collision.shape = shape
-	body.add_child(collision)
-	add_child(body)
-
-	var surface := Polygon2D.new()
-	surface.polygon = PackedVector2Array([
-		rect.position,
-		Vector2(rect.end.x, rect.position.y),
-		rect.end,
-		Vector2(rect.position.x, rect.end.y),
-	])
-	surface.color = Color.BLACK
-	add_child(surface)
+## Testing shortcut: jump to the next checkpoint up.
+func skip_to_next_checkpoint() -> void:
+	for checkpoint in checkpoints:
+		if not checkpoint.reached and not checkpoint.is_finish:
+			var top := checkpoint.world_rect().position.y
+			checkpoint.reached = true
+			player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
+			player.respawn()
+			for flood in floods:
+				flood.reset()
+			return
 
 
-func add_spike_row(row: Rect2) -> void:
-	var hazard := Area2D.new()
-	hazard.position = row.position
-	hazard.body_entered.connect(_on_spike_entered)
-
-	# Cover the top surface continuously, including the seams between triangles.
-	var strip := RectangleShape2D.new()
-	strip.size = Vector2(row.size.x, 4.0)
-	var strip_collision := CollisionShape2D.new()
-	strip_collision.position = Vector2(row.size.x / 2.0, -1.0)
-	strip_collision.shape = strip
-	hazard.add_child(strip_collision)
-
-	var count := ceili(row.size.x / SPIKE_WIDTH)
-	var width := row.size.x / count
-	for index in range(count):
-		var left := index * width
-		var points := PackedVector2Array([
-			Vector2(left, 0),
-			Vector2(left + width / 2.0, -row.size.y),
-			Vector2(left + width, 0),
-		])
-		var collision := CollisionPolygon2D.new()
-		collision.polygon = points
-		hazard.add_child(collision)
-
-		var triangle := Polygon2D.new()
-		triangle.polygon = points
-		triangle.color = Color.BLACK
-		hazard.add_child(triangle)
-	add_child(hazard)
+func _on_player_died() -> void:
+	deaths += 1
+	for flood in floods:
+		flood.reset()
 
 
-func _on_spike_entered(body: Node2D) -> void:
-	if body == player:
-		player.respawn.call_deferred()
+func _format_time(seconds: float) -> String:
+	return "%d:%04.1f" % [int(seconds) / 60, fmod(seconds, 60.0)]
