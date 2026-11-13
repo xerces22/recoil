@@ -2,7 +2,14 @@
 
 This is the toolkit for building Recoil Launcher levels. It lists every mechanic, the numbers behind the movement, and the rules for keeping levels fair, fun and gradually harder. It's written so an AI (or a person) can mix and match mechanics into new levels.
 
-**Current goal:** build about 10 levels from placeholder shapes, playtest each one until the difficulty climbs smoothly, *then* swap in the art from `assets/`. Don't touch art yet.
+**Current goal:** build about 10 **wide** levels, playtest each one until the difficulty climbs smoothly. Castle art is being swapped in alongside.
+
+> **Read this first: what we're working on right now.**
+>
+> - **Story:** read [STORY.md](STORY.md). The witch Morwen cursed a witch hunter, Sir Barrett, into his own shotgun. He climbs Hexmoor Castle: **Cellar (levels 1-3) -> Library (4-7) -> Tower (8-10)**.
+> - **Wide levels (done, use this now):** levels are no longer a 1280 px shaft. Set `bounds` on the level root and the camera follows on **both** axes. Paths go diagonally (up-right, up-left, switchbacks, corridors), not only straight up. See "World rules" and "Sideways reach" below, and `levels/level_01_wake_up.tscn` for a working example.
+> - **Hex orb goal (coming):** each level will end with an orb you blast 3 times instead of the finish platform. Until it lands, end levels with an `is_finish` checkpoint and leave room for an orb room (see 3.11).
+> - **Intro/ending cards and Morwen taunts (coming).**
 
 ---
 
@@ -39,10 +46,36 @@ The movement is final. Design around these numbers; don't change them.
 
 ### World rules
 
-- The level is **1280 px wide** (x 0 to 1280). Leaving past x < -24 or x > 1304 kills.
-- **Up is negative y.** The ground's top sits at y = 560 and the climb goes up into negative numbers.
-- The camera follows height only. About 360 px is visible above the player, so the next platform should usually be on screen.
-- Falling more than 420 px below your checkpoint, or below y = 740, kills and respawns you at the checkpoint.
+- Each level sets **`bounds`** (a `Rect2`) on its root: the playable area. Width 1280 up to ~3840 px. `bounds.position` is the top-left corner, so a level 1920 wide that climbs to y = -1100 is `Rect2(0, -1100, 1920, 1820)`. Keep the bottom (`bounds.end.y`) at **720**, with the ground top at y = 560.
+- **Up is negative y.** The climb goes up into negative numbers.
+- The camera follows the player on **x and y** with smoothing. It leads ~120 px in the direction you're flying, keeps you ~100 px below the screen centre, and stops at `bounds`. The screen shows 1280 x 720.
+- Leaving the left, right or bottom of `bounds` by more than 24 px kills. Falling more than 420 px below your checkpoint also kills. You respawn at the checkpoint.
+- **Line the left and right edges with stone walls** (tall blocks just inside `bounds`) so players bonk instead of dying at the edge. Put a ceiling over the top of the level.
+- A level without `bounds` uses the old shaft: 1280 wide, x 0 to 1280, bottom at 720. The sandbox levels still work this way.
+- In the editor, the level root draws its `bounds` as a blue rectangle.
+
+### Sideways reach (wide levels)
+
+| Move | Across | Up |
+|---|---|---|
+| One full shot at 45 deg, land at the same height | ~380 px | 0 |
+| One full shot at 45 deg, land at the top of the arc | ~190 px | ~95 px |
+| Two angled shots | up to ~500 px | up to ~200 px |
+
+- **Easy sideways hop:** up to 300 px across at the same height. **Hard:** 300 to 380 px. Wider gaps need both shells, a refill, a pad or a mover.
+- The next platform must be on screen before the jump: never more than ~550 px away sideways.
+- Long sideways stretches need a ceiling now and then (~140 px headroom), or players just shoot up over everything.
+- Every level still ends **higher** than it starts. Sideways is for variety, not instead of climbing.
+
+### Section shapes
+
+Mix these. Each one is a section between checkpoints. STORY.md section 3 has sketches.
+
+- **Staircase:** diagonal line of ledges, each step ~200 px across and ~120 px up.
+- **Switchback:** up-right, a wall turns you up-left, then up-right again.
+- **Corridor:** flat run with a low ceiling. Good for turrets, crumbles and mouths in the floor.
+- **Shaft:** short straight climb, 480 px wide or less. A contrast between wide sections.
+- **Hall:** a wide room with a safe slow route and a fast risky one.
 
 ---
 
@@ -51,6 +84,7 @@ The movement is final. Design around these numbers; don't change them.
 Each level is one scene in `levels/`, e.g. `levels/level_08_name.tscn`.
 
 - **Root node:** `Node2D` with the script `res://hazards/level.gd`. Set `title` (shown top-left) and `hint` (one sentence teaching the level's new idea).
+- **Wide levels:** set `bounds` on the root (see World rules). Optional: `taunt` (Morwen's line, first level of each zone) and `is_final` (level 10 only). These two do nothing yet.
 - **`Start`:** a `Marker2D` child named exactly `Start`, where the player spawns. Put it 14 px above the ground top, e.g. `(640, 546)`.
 - **Register it:** add the path to `LEVELS` in `main.gd`. Keys 1 to 9 load levels 1 to 9 and key 0 loads level 10.
 - All mechanics are direct children of the root. Positions of rectangles are their **centre**.
@@ -69,6 +103,7 @@ Minimal level (text `.tscn`, which you can write by hand):
 script = ExtResource("level")
 title = "My Level"
 hint = "One sentence that teaches the new idea."
+bounds = Rect2(0, -800, 1920, 1520)
 
 [node name="Start" type="Marker2D" parent="."]
 position = Vector2(640, 546)
@@ -90,7 +125,7 @@ size = Vector2(160, 16)
 is_finish = true
 ```
 
-Look at `levels/level_1_basics.tscn` through `level_7_refills.tscn` for working examples of every mechanic.
+Look at `levels/level_01_wake_up.tscn` for a wide level, and `levels/level_1_basics.tscn` through `level_7_refills.tscn` for working examples of every mechanic.
 
 ### Testing keys (editor runs only)
 
@@ -256,6 +291,14 @@ Each entry gives its node type and script, what it does, how to use it, and whic
   - Spikes lining a refill shaft.
 - **Watch out:** air-slow only happens while charging the second shell. After a full refill your next shot is a "first" shot, so it isn't slowed. Space refill chains about 190 px apart for `amount = 1` and about 380 px for `amount = 2`.
 
+### 3.11 Hex orb (coming)
+`Node2D` + `res://hazards/orb.gd`. Not in the build yet.
+
+- The level goal. Blast it **3 times**: point the cursor at it and fire while it's within ~200 px and inside a ~35 deg cone. Walls block the blast. You fly away from it on every hit, so you climb back for the next one.
+- After each hit it hops to the next entry in `spots`. The third hit shatters it and loads the next level.
+- **Settings:** `hits` (3), `spots` (positions for hits 2 and 3).
+- **Build the orb room now:** a wide, safe floor (normal ground) at the end of the level, with open space ~150 to 350 px above it. For now put the `is_finish` checkpoint there. Spot 1 easy from the floor, spot 2 needs a hop, spot 3 a real mid-air shot.
+
 ---
 
 ## 4. Making levels fun and gradually harder
@@ -279,18 +322,20 @@ Every level has **3 sections** with a checkpoint between each:
 
 The current `level_1` to `level_7` files are **sandboxes** for testing each mechanic, not final levels. A suggested final order:
 
-| # | New idea | Combines with |
-|---|---|---|
-| 1 | Basics: charge, two shells, spikes | — |
-| 2 | Moving platforms and lifts | spikes |
-| 3 | Shell refills | moving platforms |
-| 4 | Bouncy pads and walls | refills |
-| 5 | Crumbling platforms | lifts, bounce |
-| 6 | Turrets | moving platforms |
-| 7 | Mouth gates | turrets (light) |
-| 8 | Flood (full-level chase) | refills, bounce |
-| 9 | Mixed gauntlet | everything except flood |
-| 10 | Finale | everything, with a flood chase over the last third |
+| # | Zone | Title | New idea | Combines with | Shape | Size (w x climb) |
+|---|---|---|---|---|---|---|
+| 1 | Cellar | Wake Up, You're a Gun | Basics: charge, two shells, spikes | - | Diagonal up-right | 1920 x 1200 |
+| 2 | Cellar | The Chain Lift | Moving platforms and lifts | spikes | Lightning bolt (up-right, left, up-right) | 2560 x 1400 |
+| 3 | Cellar | Loose Shells | Shell refills | moving platforms | Diagonal with a refill-only gap | 2560 x 1600 |
+| 4 | Library | Quiet Please | Bouncy pads and walls | refills | Wide room (across, up, back) | 3200 x 1400 |
+| 5 | Library | Rotten Shelves | Crumbling platforms | lifts, bounce | Switchback | 2560 x 1800 |
+| 6 | Library | Gargoyle Gallery | Turrets | moving platforms | Corridors | 3840 x 1400 |
+| 7 | Library | Mind the Doors | Mouth gates | turrets (light) | Shaft + halls | 1920 x 2200 |
+| 8 | Tower | It's Boiling | Flood (full-level chase) | refills, bounce | Spiral (up-right, up-left) | 2560 x 2400 |
+| 9 | Tower | Everything Hates You | Mixed gauntlet | everything except flood | Long lightning bolt | 3840 x 2400 |
+| 10 | Tower | Morwen | Finale, heart orb | everything, flood over the last third | Spiral | 2560 x 3000 |
+
+Level 1 exists as a first draft (`level_01_wake_up.tscn`). In-world names for each mechanic (gargoyles, mimic doors, slime, cauldron) are in STORY.md.
 
 ### Playtest targets
 
@@ -310,7 +355,8 @@ If one section causes more than half of a level's deaths, it's too hard for its 
 - [ ] Every hazard is visible before the player has to commit to a shot.
 - [ ] Every timed hazard (turret, mouth, mover) gives a warning or a readable rhythm.
 - [ ] No softlocks: there's always a way to continue, or a quick death that respawns.
-- [ ] Checkpoints are wide, safe, and no more than ~700 px of climbing apart.
+- [ ] Checkpoints are wide, safe, and no more than ~700 px of climbing (or ~1200 px of sideways travel) apart.
+- [ ] `bounds` is set, the side edges have walls, and the top has a ceiling.
 - [ ] The `hint` explains the new idea in one sentence.
 - [ ] Sizes and positions are on the 16 px grid where possible.
 

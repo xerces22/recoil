@@ -3,6 +3,7 @@ extends Node2D
 
 const RecoilPlayer = preload("res://player.gd")
 const LEVELS: Array[String] = [
+	"res://levels/level_01_wake_up.tscn",
 	"res://levels/level_1_basics.tscn",
 	"res://levels/level_2_bounce.tscn",
 	"res://levels/level_3_moving.tscn",
@@ -19,6 +20,12 @@ const LEVELS: Array[String] = [
 @onready var stats: Label = $HUD/Stats
 @onready var level_root: Node2D = $Level
 
+## Camera: how far ahead it leads in the flight direction, and how fast the lead catches up.
+const LOOK_AHEAD := 120.0
+const LOOK_SPEED := 3.0
+## The player sits this far below the screen centre, since the goal is usually above.
+const CAMERA_LIFT := 100.0
+
 var level: Level
 var level_index := 0
 var checkpoints: Array[Checkpoint] = []
@@ -27,10 +34,13 @@ var refills: Array[ShellRefill] = []
 var deaths := 0
 var elapsed := 0.0
 var cleared := false
+var look := Vector2.ZERO
 
 
 func _ready() -> void:
 	player.died.connect(_on_player_died)
+	camera.position_smoothing_enabled = true
+	camera.position_smoothing_speed = 6.0
 	load_level(0)
 
 
@@ -66,10 +76,15 @@ func load_level(index: int) -> void:
 	deaths = 0
 	elapsed = 0.0
 	cleared = false
+	player.bounds = level.bounds
+	_setup_camera()
 	player.respawn_position = (level.get_node("Start") as Node2D).global_position
 	player.respawn("level %d loaded" % (index + 1))
 	title_label.text = "%d/%d  %s" % [index + 1, LEVELS.size(), level.title]
 	instructions.text = level.hint
+	look = Vector2.ZERO
+	_update_camera(0.0)
+	camera.reset_smoothing()
 
 
 func _collect(node: Node) -> void:
@@ -84,8 +99,7 @@ func _collect(node: Node) -> void:
 
 
 func _process(delta: float) -> void:
-	camera.position.y = minf(360.0, player.position.y - 120.0)
-	camera.force_update_scroll()
+	_update_camera(delta)
 	if not cleared:
 		elapsed += delta
 
@@ -126,6 +140,27 @@ func _reach(checkpoint: Checkpoint) -> void:
 	player.debug_event.emit("Checkpoint at %s" % player.position.round())
 	for flood in floods:
 		flood.give_breathing_room(player.global_position.y)
+
+
+func _setup_camera() -> void:
+	var area := level.bounds
+	camera.limit_left = int(area.position.x)
+	camera.limit_top = int(area.position.y)
+	camera.limit_right = int(area.end.x)
+	camera.limit_bottom = int(area.end.y)
+
+
+## Follows the player on both axes, leading a little in the flight direction.
+func _update_camera(delta: float) -> void:
+	# Hold the lead still while aiming in slow motion, so the view doesn't swing.
+	if not player.is_air_charging():
+		var target := (player.velocity * 0.2).limit_length(LOOK_AHEAD)
+		look = look.lerp(target, minf(1.0, LOOK_SPEED * delta))
+	var goal := player.position + look - Vector2(0, CAMERA_LIFT)
+	camera.position = goal
+	# Respawns and checkpoint skips teleport the player: cut instead of panning.
+	if camera.get_screen_center_position().distance_to(goal) > 900.0:
+		camera.reset_smoothing()
 
 
 ## Testing shortcut: jump to the next checkpoint up.

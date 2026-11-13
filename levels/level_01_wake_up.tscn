@@ -1,0 +1,97 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="WakeUp" type="Node2D"]
+script = ExtResource("level")
+title = "Wake Up, You're a Gun"
+hint = "Hold click to charge, release to blast away from the cursor. Two shells. Land to reload. Climb up and to the right."
+taunt = "Still kicking? Cute."
+bounds = Rect2(0, -1100, 1920, 1820)
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(160, 546)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(16, -190)
+script = ExtResource("block")
+size = Vector2(32, 1820)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(1904, -190)
+script = ExtResource("block")
+size = Vector2(32, 1820)
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(960, -1084)
+script = ExtResource("block")
+size = Vector2(1920, 32)
+
+[node name="Ground" type="StaticBody2D" parent="."]
+position = Vector2(464, 569)
+script = ExtResource("block")
+size = Vector2(864, 18)
+
+[node name="PitFloor" type="StaticBody2D" parent="."]
+position = Vector2(1392, 569)
+script = ExtResource("block")
+size = Vector2(992, 18)
+
+[node name="PitSpikes" type="Area2D" parent="."]
+position = Vector2(896, 560)
+script = ExtResource("spikes")
+width = 992.0
+
+[node name="Step1" type="StaticBody2D" parent="."]
+position = Vector2(480, 440)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="Step2" type="StaticBody2D" parent="."]
+position = Vector2(736, 336)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="Checkpoint1" type="StaticBody2D" parent="."]
+position = Vector2(1008, 224)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="Step3" type="StaticBody2D" parent="."]
+position = Vector2(1296, 120)
+script = ExtResource("block")
+size = Vector2(128, 16)
+
+[node name="Step4" type="StaticBody2D" parent="."]
+position = Vector2(1520, 8)
+script = ExtResource("block")
+size = Vector2(128, 16)
+
+[node name="Checkpoint2" type="StaticBody2D" parent="."]
+position = Vector2(1760, -104)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="Step5" type="StaticBody2D" parent="."]
+position = Vector2(1504, -296)
+script = ExtResource("block")
+size = Vector2(128, 16)
+
+[node name="Step6" type="StaticBody2D" parent="."]
+position = Vector2(1200, -400)
+script = ExtResource("block")
+size = Vector2(128, 16)
+
+[node name="OrbRoomFloor" type="StaticBody2D" parent="."]
+position = Vector2(888, -528)
+script = ExtResource("block")
+size = Vector2(368, 32)
+
+[node name="Finish" type="StaticBody2D" parent="."]
+position = Vector2(512, -536)
+script = ExtResource("checkpoint")
+size = Vector2(384, 16)
+is_finish = true

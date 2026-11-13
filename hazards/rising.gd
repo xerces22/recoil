@@ -2,9 +2,8 @@
 class_name RisingHazard
 extends Node2D
 ## Flood that rises from below once the player climbs above `trigger_y`. Touching it kills.
-## Keep this node at the level origin (0, 0).
+## Keep this node at the level origin (0, 0). It spans the level's `bounds` width.
 
-const WIDTH := 1280.0
 
 ## The chase starts once the player is higher (smaller y) than this.
 @export var trigger_y := 0.0:
@@ -72,17 +71,29 @@ func give_breathing_room(player_y: float) -> void:
 		_speed = maxf(speed, _speed * 0.8)
 
 
+## Left edge and width of the level, so the water covers the whole room.
+func _span() -> Vector2:
+	var level := get_parent() as Level
+	var area := level.bounds if level != null else Level.SHAFT
+	return Vector2(area.position.x, area.size.x)
+
+
 func _draw() -> void:
+	var span := _span()
 	if Engine.is_editor_hint() or not active:
 		if Engine.is_editor_hint():
-			draw_dashed_line(Vector2(0, trigger_y), Vector2(WIDTH, trigger_y), Color(0.85, 0.1, 0.1, 0.6), 2.0, 12.0)
-			draw_string(ThemeDB.fallback_font, Vector2(12, trigger_y - 6), "FLOOD STARTS ABOVE THIS LINE",
+			draw_dashed_line(Vector2(span.x, trigger_y), Vector2(span.x + span.y, trigger_y), Color(0.85, 0.1, 0.1, 0.6), 2.0, 12.0)
+			draw_string(ThemeDB.fallback_font, Vector2(span.x + 12, trigger_y - 6), "FLOOD STARTS ABOVE THIS LINE",
 				HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color(0.85, 0.1, 0.1))
 		return
 	var water := Color(0.85, 0.1, 0.1, 0.55)
 	var points := PackedVector2Array()
-	for x in range(0, int(WIDTH) + 41, 40):
+	var left := span.x - 40.0
+	var right := span.x + span.y + 40.0
+	var x := left
+	while x <= right:
 		points.append(Vector2(x, surface_y + sin(_wave * 3.0 + x * 0.03) * 5.0))
-	points.append(Vector2(WIDTH + 40, surface_y + 2000))
-	points.append(Vector2(0, surface_y + 2000))
+		x += 40.0
+	points.append(Vector2(right, surface_y + 2000))
+	points.append(Vector2(left, surface_y + 2000))
 	draw_colored_polygon(points, water)

@@ -10,12 +10,13 @@ const RECOIL_SPEED := 580.0
 const MIN_CHARGED_RECOIL := 380.0
 const FULL_CHARGE_TIME := 0.40
 const AIR_CHARGE_TIME_SCALE := 0.35
-const RESPAWN_Y := 740.0
 const DEBUG_FLIGHT_SPEED := 850.0
 ## Share of current velocity kept when a turret bolt hits.
 const KNOCKBACK_KEEP := 0.25
 
 @onready var respawn_position := position
+## Playable area from the level. Set by main.gd on level load.
+var bounds := Level.SHAFT
 var shots := MAX_SHOTS
 var pending_shot := Vector2.ZERO
 var pending_power := RECOIL_SPEED
@@ -120,8 +121,8 @@ func _physics_process(delta: float) -> void:
 			ground.on_player_landed(self)
 
 	flash = maxf(0.0, flash - delta)
-	var fall_limit := minf(RESPAWN_Y, respawn_position.y + 420.0)
-	if position.y > fall_limit or position.x < -24.0 or position.x > 1304.0:
+	var fall_limit := minf(bounds.end.y + 20.0, respawn_position.y + 420.0)
+	if position.y > fall_limit or position.x < bounds.position.x - 24.0 or position.x > bounds.end.x + 24.0:
 		die("out of bounds")
 
 	queue_redraw()
