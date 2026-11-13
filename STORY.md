@@ -12,7 +12,7 @@ The tone is silly but straight-faced. The characters take it seriously; the play
 
 1. **Sir Barrett** was the finest witch hunter in the kingdom. He came to Hexmoor Castle with one weapon: his trusty double-barrel shotgun.
 2. The witch **Morwen the Unloaded** caught him in the cellar. She didn't kill him. She did something worse: she turned him **into the shotgun**.
-3. "A gun can't walk," she laughed, and floated up to her tower. Her magic lives in **hex orbs** hidden through the castle. Smash them all and the curse breaks.
+3. "A gun can't walk," she laughed, and floated up to the top of her tower. Her magic lives in the **hex orb** at the very top. Smash it and the curse breaks.
 
 Then the game starts. No more text than that. Each line fits on one screen in Press Start 2P.
 
@@ -29,24 +29,38 @@ Every mechanic should have an in-world reason, so the player never asks "why?":
 | Shell refill rings | **Shell wisps**: loose pieces of the curse floating around. Fly through one and it loads you. |
 | Respawn at a checkpoint | Braziers. Barrett's spirit drifts back to the last fire he lit. |
 
-### The hex orb (end of every level)
+### One continuous tower
 
-Each level ends at a **hex orb** instead of a plain finish platform. It takes **3 blasts** to break.
+The game is **one climb up one tower**. There are no level select screens and no loading between levels.
 
-- You hit it by firing **toward** it. The blast goes where the cursor points, and you fly the other way. So every hit also knocks you away from the orb, and you have to climb back for the next one. That's the fun part.
-- After each hit the orb cracks, flashes and **hops to a new spot** in the orb room (3 spots per room, set by the level designer). Hit 1 is easy, hit 3 asks for a real shot.
-- On the third hit it shatters, a jingle plays, and the next level loads.
-- A hit only counts within ~200 px and if the orb is inside a ~35° cone of the blast. Show the cone faintly while charging near an orb so players learn the range.
+- The tower is built from **10 floors**. Each floor is its own level file, made separately, and the game stacks them on top of each other.
+- You fly up through a **hole in the ceiling** of one floor and come out through a **hole in the ground** of the next. The climb never stops.
+- **Every floor feels different:** new title, new zone look, new mechanic. When you enter a floor, its title appears big on screen (for example "FLOOR 4 · QUIET PLEASE") so you feel the change and the progress.
+- Checkpoints (braziers) work across the whole tower. Falling sends you back to the last brazier you lit, never to the bottom.
 
-Each level's orb room has a safe floor (normal ground, reloads) so a miss never kills you. Orb rooms are the reward, not a skill wall.
+### The hex orb (top of the tower only)
 
-### Ending (after level 10)
+There is **one orb**, in the orb room at the top of floor 10. It takes **3 blasts** to break.
 
-The last orb is Morwen's **heart orb**, held in her hands at the tower top. Three hits, and she moves between hits like the others, but she also throws one bolt between hits (reuse the turret bolt: shoves, doesn't kill).
+- You hit it by firing **toward** it. The blast goes where the cursor points, and you fly the other way. So every hit also knocks you away from the orb, and you have to get back for the next one.
+- After each hit the orb cracks, flashes and **hops to a new spot** in the orb room. Hit 1 is easy, hit 3 asks for a real shot.
+- A hit only counts within ~200 px and if the orb is inside a ~35° cone of the blast. A faint cone shows while you charge near the orb, so players learn the range.
+- The orb room has a safe floor (normal ground, reloads), so a miss never kills you.
 
-On the third hit the curse breaks... and bounces. Barrett turns back into a man. **Morwen turns into a broom.** Barrett picks her up and sweeps the floor. Roll credits.
+### Ending: the witch
 
-Optional end-card line: *"He never fired a shotgun again. He just sort of hopped everywhere."*
+When the orb shatters:
+
+1. **Cutscene.** Everything stops. Morwen appears in front of you. Your controls lock. She talks, one line per click, in Press Start 2P text boxes:
+   - "My orb! Do you know how long that took to enchant?"
+   - "Fine. FINE. You win, little boomstick."
+   - "But think about it. Without me, you're just a gun on the floor. Who's going to carry you?"
+   - "...You're aiming at me. Why are you aiming at me?"
+2. **One click.** The cursor turns into a red crosshair locked on her. The charge bar fills on its own. A heartbeat sound. The player clicks once to fire.
+3. **Black screen, instantly.** Cut to pure black on the click, no fade. The shotgun blast plays with a long **echo** that rolls away into silence.
+4. **The game ends.** After the echo fades, show the title "RECOIL" and "Thanks for playing" in small text, then credits or back to the start. *(Optional: the time and death count from the whole run.)*
+
+The ending is the only time in the game you shoot something without flying away. That's the point: the last shot is the only one that isn't recoil.
 
 ---
 
@@ -54,13 +68,13 @@ Optional end-card line: *"He never fired a shotgun again. He just sort of hopped
 
 The climb goes **cellar → library → tower**. This matches the asset shortlist, so art and story line up.
 
-| Zone | Levels | Look (Whimsy Hallow + Dark Castle) | Music | Morwen's taunt on arrival |
+| Zone | Floors | Look (Whimsy Hallow + Dark Castle) | Music | Morwen's taunt on arrival |
 |---|---|---|---|---|
 | **The Cellar** | 1–3 | Grey stone, wood, wine racks as ledges, potion shelves, sewer grates | Castle in Darkness | "Still kicking? Cute." |
 | **The Library** | 4–7 | Stone, tall bookshelves as platforms and walls, candles, gargoyle statues | MonsterVania #2 | "Shhh. This is a library." |
 | **The Tower** | 8–10 | Sandstone, arched windows, chandeliers, balconies, night sky outside | Final Castle | "You're not supposed to be up here." |
 
-The taunt is the level's `title` card subtitle on the first level of each zone. Everywhere else, `hint` stays a one-sentence mechanic tip.
+The taunt shows under the floor title on the first floor of each zone (set `taunt` on that floor). Everywhere else, `hint` stays a one-sentence mechanic tip.
 
 ### Mechanics as Morwen's stuff
 
@@ -78,11 +92,11 @@ Rename the mechanics in-world so they belong to the castle. Code names stay the 
 | Mouth | Mimic door | A wooden trapdoor with teeth |
 | Flood | Overflowing cauldron | Rising hex brew (purple-green instead of red) |
 | Refill | Shell wisp | Gold ring with shell icons |
-| Finish | Hex orb | Glowing purple orb, 3 hits |
+| Finish | Hex orb | Glowing purple orb, 3 hits. Top of floor 10 only. |
 
 ---
 
-## 3. Wider levels: climb diagonally, not just up
+## 3. Wide floors: climb diagonally, not just up
 
 ### The change
 
@@ -148,42 +162,51 @@ Mix these inside a level. Each one is a section between checkpoints.
 
 Draw each level as a rough path before placing blocks. A few patterns:
 
-- **Diagonal (↗):** start bottom-left, orb top-right. The simplest.
+Every floor starts at its **entry hole** (bottom) and ends at its **exit hole** (top). The shape is the path between them.
+
+- **Diagonal (↗):** enter bottom-left, exit top-right. The simplest.
 - **Lightning bolt (↗ ← ↗):** up-right, a corridor back left, up-right again.
 - **Tower spiral (↗ ↖ ↗ ↖):** switchbacks the whole way. Good for the Tower zone.
-- **Wide room (→ ↑ ←):** cross the room on the floor, climb the far wall, come back across the top to the orb.
+- **Wide room (→ ↑ ←):** cross the room on the floor, climb the far wall, come back across the top to the exit.
 
 ---
 
-## 4. The 10 levels
+## 4. The 10 floors
 
-Same mechanic order as LEVEL_DESIGN.md, now with zone, shape and orb room.
+Same mechanic order as LEVEL_DESIGN.md. Each floor is a separate file; the game stacks them into one tower.
 
-| # | Zone | Title | New idea | Shape | Size (w × climb) | Orb room |
-|---|---|---|---|---|---|---|
-| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗ | 1920 × 1200 | Wide wine-cellar floor, orb hops between barrels |
-| 2 | Cellar | The Chain Lift | Movers and lifts | Lightning bolt | 2560 × 1400 | Orb sits on a moving chain platform |
-| 3 | Cellar | Loose Shells | Refills (shell wisps) | Diagonal ↗ with a wisp-only gap over a spike pit | 2560 × 1600 | Orb floats over a pit; wisps let you hover near it |
-| 4 | Library | Quiet Please | Slime jelly pads | Wide room → ↑ ← | 3200 × 1400 | Slime floor; you bounce while aiming |
-| 5 | Library | Rotten Shelves | Crumbling shelves | Switchback | 2560 × 1800 | Floor is crumble, walls are safe |
-| 6 | Library | Gargoyle Gallery | Gargoyles (turrets) | Corridor-heavy lightning bolt | 3840 × 1400 | Gargoyles on both sides between hits |
-| 7 | Library | Mind the Doors | Mimic doors (mouths) | Shaft + halls, gates as floors | 1920 × 2200 | Orb behind one mimic door |
-| 8 | Tower | It's Boiling | Cauldron flood (chase) | Tower spiral | 2560 × 2400 | Flood stops when you reach the orb room |
-| 9 | Tower | Everything Hates You | Mixed gauntlet | Lightning bolt, long | 3840 × 2400 | Mix of all |
-| 10 | Tower | Morwen | Finale + heart orb | Spiral, flood over last third | 2560 × 3000 | Morwen herself, throws bolts between hits |
+| Floor | Zone | Title | New idea | Shape | Size (w × climb) |
+|---|---|---|---|---|---|
+| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗ | 1920 × 1600 |
+| 2 | Cellar | The Chain Lift | Movers and lifts | Lightning bolt | 2560 × 1400 |
+| 3 | Cellar | Loose Shells | Refills (shell wisps) | Diagonal ↗ with a wisp-only gap over a spike pit | 2560 × 1600 |
+| 4 | Library | Quiet Please | Slime jelly pads | Wide room → ↑ ← | 3200 × 1400 |
+| 5 | Library | Rotten Shelves | Crumbling shelves | Switchback | 2560 × 1800 |
+| 6 | Library | Gargoyle Gallery | Gargoyles (turrets) | Corridor-heavy lightning bolt | 3840 × 1400 |
+| 7 | Library | Mind the Doors | Mimic doors (mouths) | Shaft + halls, gates as floors | 1920 × 2200 |
+| 8 | Tower | It's Boiling | Cauldron flood (chase) | Tower spiral | 2560 × 2400 |
+| 9 | Tower | Everything Hates You | Mixed gauntlet | Lightning bolt, long | 3840 × 2400 |
+| 10 | Tower | Morwen | Finale: the orb room, then the witch | Spiral, flood over the last third, flood stops at the orb room | 2560 × 3000 |
 
-Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sections, a brazier between each, then the orb room.
+Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sections with a brazier between each, then the exit hole. Floor 10 ends in the orb room instead.
 
 ---
 
 ## 5. What has to change in code
 
-Items 1, 2, 3 and 5 are **done** (wide levels work now; see `levels/level_01_wake_up.tscn`). The rest is in progress.
+**Done:**
 
-1. **Done. `level.gd`:** add `@export var bounds: Rect2` (the level's playable area). Default to the old 1280-wide shaft so existing levels still load.
-2. **Done. `main.gd` / camera:** follow x as well as y, use smoothing and look-ahead, set the camera `limit_*` from `level.bounds`.
-3. **Done. Out-of-bounds death:** replace the fixed `x < -24 / x > 1304` and `y > 740` checks with "outside `bounds` by more than 24 px", plus the existing 420 px below-checkpoint rule.
-4. **New `hazards/orb.gd`:** an `Area2D` with `hits_left = 3` and `spots: Array[Vector2]`. Listen to the player's `shot_fired`; if the orb is within range and inside the blast cone, crack it and move to the next spot. On 0, call the level-finish code that `is_finish` uses now.
-5. **Done. Flood:** it already spans the whole width; make it use `bounds` width instead of 1280.
-6. **Intro and ending cards:** three text screens before level 1, one after level 10. A `Label` on a black `ColorRect`, click to advance.
-7. **Done. LEVEL_DESIGN.md:** "World rules" now describes wide levels.
+1. `level.gd` has `bounds` (Rect2). Levels without it act like the old 1280 px shaft.
+2. The camera follows x and y with smoothing and look-ahead, and stops at `bounds`.
+3. Leaving the sides or bottom of `bounds` by more than 24 px kills.
+4. The flood spans the level's `bounds` width.
+5. LEVEL_DESIGN.md describes wide floors and the floor-stacking rules.
+
+**Next (code, not level work):**
+
+6. **Tower stacking.** Load all floors into one scene. Shift each floor so its `Entry` marker sits on the floor below's `Exit` marker. The camera's side limits follow the floor you're in; the flood, checkpoints, timer and deaths run for the whole tower.
+7. **Floor title banner.** When the player rises into a floor, show "FLOOR N · TITLE" big for ~2 s, plus the zone taunt if set. Switch music by zone.
+8. **Hex orb** (`hazards/orb.gd`, written, not wired in): 3 hits, hops between `spots`. On the third hit, start the ending.
+9. **Intro cards** (`story_cards.gd`, written, not wired in): the 3 setup screens before floor 1.
+10. **Ending:** Morwen's lines, the locked crosshair, one click, an instant black screen, an echoed blast, then "Thanks for playing".
+11. **Standalone floor testing:** when a single floor is loaded (keys 1-0), flying up through its `Exit` counts as clearing it.

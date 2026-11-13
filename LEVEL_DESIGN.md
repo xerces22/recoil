@@ -2,14 +2,15 @@
 
 This is the toolkit for building Recoil Launcher levels. It lists every mechanic, the numbers behind the movement, and the rules for keeping levels fair, fun and gradually harder. It's written so an AI (or a person) can mix and match mechanics into new levels.
 
-**Current goal:** build about 10 **wide** levels, playtest each one until the difficulty climbs smoothly. Castle art is being swapped in alongside.
+**Current goal:** build the **10 floors** of the tower, each one wide, and playtest each one until the difficulty climbs smoothly. Castle art is being swapped in alongside.
 
 > **Read this first: what we're working on right now.**
 >
-> - **Story:** read [STORY.md](STORY.md). The witch Morwen cursed a witch hunter, Sir Barrett, into his own shotgun. He climbs Hexmoor Castle: **Cellar (levels 1-3) -> Library (4-7) -> Tower (8-10)**.
-> - **Wide levels (done, use this now):** levels are no longer a 1280 px shaft. Set `bounds` on the level root and the camera follows on **both** axes. Paths go diagonally (up-right, up-left, switchbacks, corridors), not only straight up. See "World rules" and "Sideways reach" below, and `levels/level_01_wake_up.tscn` for a working example.
-> - **Hex orb goal (coming):** each level will end with an orb you blast 3 times instead of the finish platform. Until it lands, end levels with an `is_finish` checkpoint and leave room for an orb room (see 3.11).
-> - **Intro/ending cards and Morwen taunts (coming).**
+> - **Story:** read [STORY.md](STORY.md). The witch Morwen cursed a witch hunter, Sir Barrett, into his own shotgun. He climbs Hexmoor Castle: **Cellar (floors 1-3) -> Library (4-7) -> Tower (8-10)**.
+> - **One continuous tower.** Each "level" is a **floor**: its own `.tscn` file, built separately. The game stacks the floors on top of each other, so the whole game is one unbroken climb. You leave a floor through a **hole in its ceiling** and enter the next through a **hole in its ground**. Each floor shows its own title when you enter it, so the player feels the change. **Follow the floor rules in section 2 exactly**, or the floors won't line up.
+> - **Wide floors (done, use this now):** set `bounds` on the root and the camera follows on **both** axes. Paths go diagonally (up-right, up-left, switchbacks, corridors), not only straight up. See "World rules" and "Sideways reach" below, and `levels/level_01_wake_up.tscn` for a working example.
+> - **One hex orb, at the top of floor 10 only.** Break it (3 blasts) and a cutscene starts: the witch talks, you shoot her once, black screen, echoed shot, the end. Floors 1-9 have no orb; they end at their exit hole.
+> - **Coming (code, not level work):** stacking the floors into the tower, the floor title banner, the orb, the intro and the ending. Build floors now; they'll slot in.
 
 ---
 
@@ -79,12 +80,33 @@ Mix these. Each one is a section between checkpoints. STORY.md section 3 has ske
 
 ---
 
-## 2. Level files
+## 2. Level files (floors)
 
-Each level is one scene in `levels/`, e.g. `levels/level_08_name.tscn`.
+Each floor is one scene in `levels/`, e.g. `levels/level_08_name.tscn`.
+
+### Floor rules: how floors connect into one tower
+
+The game stacks floor N+1 on top of floor N. It shifts floor N+1 sideways and up so its `Entry` marker sits exactly on floor N's `Exit` marker. Floors can be different widths; only the holes have to line up, and the game does that for you.
+
+- **Exit hole (every floor except 10):** the top of the floor is a stone ceiling, 32 px thick, along the top edge of `bounds`, with **one gap exactly 192 px wide**. Add a `Marker2D` named exactly **`Exit`** at the centre of the gap, at the **top** of the ceiling (that's `bounds.position.y`).
+- **Entry hole (every floor except 1):** the ground at the bottom of the floor is a stone slab, 32 px thick, with its top at y = 560 (so it runs y 560 to 592). It has **one gap exactly 192 px wide**. Add a `Marker2D` named exactly **`Entry`** at the centre of the gap, at the **bottom** of the slab (y = 592). Floor 1 has no entry hole; its ground is solid.
+- **`Start`** sits on the ground slab **beside** the entry hole (not over it), 14 px above the slab top (y = 546). It's where the player spawns when the floor is loaded on its own, and the first respawn point on that floor.
+- **Make the exit reachable:** put a wide, safe ledge (ideally a checkpoint) under the exit hole, no more than **330 px** below the bottom of the ceiling, so two straight-up shots carry the player through.
+- **Arrival is safe:** the player comes up through the entry hole with little speed left. Put the ground slab or a wide platform right beside the hole, and **no hazards within ~250 px** of it.
+- **Below the entry hole there is nothing** when the floor is played on its own: falling back down it is a death. In the tower it drops you into the floor below, which is fine.
+- **Until the tower code lands:** put an `is_finish` checkpoint on the ledge under the exit hole, so a floor can be cleared when tested on its own (keys 1-0). It gets removed later.
+- **Floor 10** has no exit hole. It ends in the orb room (see 3.11).
+
+```
+   floor N+1   |========== ground slab ==========|  ____  |=====|
+                                                  Entry (gap 192)
+   floor N     |======= ceiling ======|  ____  |=================|
+                                        Exit (gap 192)
+                                     [ ledge under the exit ]
+```
 
 - **Root node:** `Node2D` with the script `res://hazards/level.gd`. Set `title` (shown top-left) and `hint` (one sentence teaching the level's new idea).
-- **Wide levels:** set `bounds` on the root (see World rules). Optional: `taunt` (Morwen's line, first level of each zone) and `is_final` (level 10 only). These two do nothing yet.
+- **Wide floors:** set `bounds` on the root (see World rules). The `title` is shown big when the player enters the floor. Optional: `taunt` (Morwen's line, first floor of each zone) and `is_final` (floor 10 only). These two do nothing yet.
 - **`Start`:** a `Marker2D` child named exactly `Start`, where the player spawns. Put it 14 px above the ground top, e.g. `(640, 546)`.
 - **Register it:** add the path to `LEVELS` in `main.gd`. Keys 1 to 9 load levels 1 to 9 and key 0 loads level 10.
 - All mechanics are direct children of the root. Positions of rectangles are their **centre**.
@@ -291,13 +313,14 @@ Each entry gives its node type and script, what it does, how to use it, and whic
   - Spikes lining a refill shaft.
 - **Watch out:** air-slow only happens while charging the second shell. After a full refill your next shot is a "first" shot, so it isn't slowed. Space refill chains about 190 px apart for `amount = 1` and about 380 px for `amount = 2`.
 
-### 3.11 Hex orb (coming)
+### 3.11 Hex orb (coming, floor 10 only)
 `Node2D` + `res://hazards/orb.gd`. Not in the build yet.
 
-- The level goal. Blast it **3 times**: point the cursor at it and fire while it's within ~200 px and inside a ~35 deg cone. Walls block the blast. You fly away from it on every hit, so you climb back for the next one.
-- After each hit it hops to the next entry in `spots`. The third hit shatters it and loads the next level.
+- **There is only one orb, at the top of floor 10.** It's the end of the game. Floors 1-9 never have one.
+- Blast it **3 times**: point the cursor at it and fire while it's within ~200 px and inside a ~35 deg cone. Walls block the blast. You fly away from it on every hit, so you get back for the next one.
+- After each hit it hops to the next entry in `spots`. The third hit shatters it and starts the ending cutscene (see STORY.md).
 - **Settings:** `hits` (3), `spots` (positions for hits 2 and 3).
-- **Build the orb room now:** a wide, safe floor (normal ground) at the end of the level, with open space ~150 to 350 px above it. For now put the `is_finish` checkpoint there. Spot 1 easy from the floor, spot 2 needs a hop, spot 3 a real mid-air shot.
+- **Build the orb room now (floor 10):** a wide, safe floor (normal ground) at the top, with open space ~150 to 350 px above it, and a ceiling. For now put the `is_finish` checkpoint there. Spot 1 easy from the floor, spot 2 needs a hop, spot 3 a real mid-air shot.
 
 ---
 
@@ -322,9 +345,9 @@ Every level has **3 sections** with a checkpoint between each:
 
 The current `level_1` to `level_7` files are **sandboxes** for testing each mechanic, not final levels. A suggested final order:
 
-| # | Zone | Title | New idea | Combines with | Shape | Size (w x climb) |
+| Floor | Zone | Title | New idea | Combines with | Shape | Size (w x climb) |
 |---|---|---|---|---|---|---|
-| 1 | Cellar | Wake Up, You're a Gun | Basics: charge, two shells, spikes | - | Diagonal up-right | 1920 x 1200 |
+| 1 | Cellar | Wake Up, You're a Gun | Basics: charge, two shells, spikes | - | Diagonal up-right | 1920 x 1600 |
 | 2 | Cellar | The Chain Lift | Moving platforms and lifts | spikes | Lightning bolt (up-right, left, up-right) | 2560 x 1400 |
 | 3 | Cellar | Loose Shells | Shell refills | moving platforms | Diagonal with a refill-only gap | 2560 x 1600 |
 | 4 | Library | Quiet Please | Bouncy pads and walls | refills | Wide room (across, up, back) | 3200 x 1400 |
@@ -333,9 +356,9 @@ The current `level_1` to `level_7` files are **sandboxes** for testing each mech
 | 7 | Library | Mind the Doors | Mouth gates | turrets (light) | Shaft + halls | 1920 x 2200 |
 | 8 | Tower | It's Boiling | Flood (full-level chase) | refills, bounce | Spiral (up-right, up-left) | 2560 x 2400 |
 | 9 | Tower | Everything Hates You | Mixed gauntlet | everything except flood | Long lightning bolt | 3840 x 2400 |
-| 10 | Tower | Morwen | Finale, heart orb | everything, flood over the last third | Spiral | 2560 x 3000 |
+| 10 | Tower | Morwen | Finale: orb room, then the witch | everything, flood over the last third | Spiral | 2560 x 3000 |
 
-Level 1 exists as a first draft (`level_01_wake_up.tscn`). In-world names for each mechanic (gargoyles, mimic doors, slime, cauldron) are in STORY.md.
+Floor 1 exists as a first draft (`level_01_wake_up.tscn`), including its exit hole and `Exit` marker. Floor 2 needs an `Entry` hole; the game lines it up with floor 1's exit. In-world names for each mechanic (gargoyles, mimic doors, slime, cauldron) are in STORY.md.
 
 ### Playtest targets
 
@@ -357,6 +380,8 @@ If one section causes more than half of a level's deaths, it's too hard for its 
 - [ ] No softlocks: there's always a way to continue, or a quick death that respawns.
 - [ ] Checkpoints are wide, safe, and no more than ~700 px of climbing (or ~1200 px of sideways travel) apart.
 - [ ] `bounds` is set, the side edges have walls, and the top has a ceiling.
+- [ ] Exit hole (192 px gap, `Exit` marker on top of the ceiling) unless it's floor 10. Entry hole (192 px gap, `Entry` marker under the ground slab) unless it's floor 1.
+- [ ] A safe ledge under the exit (no more than 330 px below it) and a safe landing beside the entry, with no hazards within ~250 px.
 - [ ] The `hint` explains the new idea in one sentence.
 - [ ] Sizes and positions are on the 16 px grid where possible.
 
