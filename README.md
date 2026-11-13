@@ -1,6 +1,6 @@
 # Recoil Launcher
 
-Mouse-only recoil climber made for 17 GameJam. Aim with the mouse and left-click to launch away from the cursor. Land to refill both shots.
+Mouse-only recoil climber made for 17 GameJam. Hold left-click to charge and release to launch away from the cursor. Each shot sets your velocity from your aim and charge. Charging the second shot in midair slows your movement so you can aim. Land to refill both shots.
 
 ## Play on Windows
 

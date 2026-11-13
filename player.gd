@@ -8,9 +8,8 @@ const RECOIL_SPEED := 580.0
 const MIN_CHARGED_RECOIL := 380.0
 const FULL_CHARGE_TIME := 0.40
 const AIR_CHARGE_TIME_SCALE := 0.35
-const MAX_RISE_SPEED := 620.0
-const FALL_MOMENTUM_DAMPING := 0.5
 const RESPAWN_Y := 740.0
+const DEBUG_FLIGHT_SPEED := 850.0
 
 @onready var respawn_position := position
 var shots := MAX_SHOTS
@@ -18,9 +17,24 @@ var pending_shot := Vector2.ZERO
 var pending_power := RECOIL_SPEED
 var charging := false
 var charge_seconds := 0.0
+var debug_flying := false
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if OS.is_debug_build() and event is InputEventKey and event.keycode == KEY_F7:
+		if event.pressed and not event.echo:
+			debug_flying = not debug_flying
+			velocity = Vector2.ZERO
+			charging = false
+			charge_seconds = 0.0
+			pending_shot = Vector2.ZERO
+			debug_event.emit("Debug flight on" if debug_flying else "Debug flight off")
+		get_viewport().set_input_as_handled()
+		return
+
+	if debug_flying:
+		return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed:
 			if shots > 0 and pending_shot == Vector2.ZERO and not charging:
@@ -51,20 +65,22 @@ func _notification(what: int) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	if debug_flying:
+		var cursor_offset := get_global_mouse_position() - global_position
+		velocity = (cursor_offset / delta).limit_length(DEBUG_FLIGHT_SPEED)
+		move_and_slide()
+		queue_redraw()
+		return
+
 	if charging:
 		charge_seconds = minf(charge_seconds + delta, FULL_CHARGE_TIME)
 
 	if pending_shot != Vector2.ZERO:
 		var before := velocity
-		if shots == 1 and velocity.y > 0.0 and pending_shot.y < 0.0:
-			velocity.y *= 1.0 + pending_shot.y * FALL_MOMENTUM_DAMPING
-		var recovery := before.y - velocity.y
-		velocity += pending_shot * pending_power
-		var capped := velocity.y < -MAX_RISE_SPEED
-		velocity.y = maxf(velocity.y, -MAX_RISE_SPEED)
-		debug_event.emit("Shot %d power=%.0f aim=%s  velocity %s -> %s  recovery=%.1f  cap=%s" % [
+		velocity = pending_shot * pending_power
+		debug_event.emit("Shot %d power=%.0f aim=%s  velocity %s -> %s" % [
 			MAX_SHOTS - shots + 1, pending_power, pending_shot.snapped(Vector2(0.01, 0.01)),
-			before.round(), velocity.round(), recovery, "yes" if capped else "no",
+			before.round(), velocity.round(),
 		])
 		pending_shot = Vector2.ZERO
 		shots -= 1
@@ -103,6 +119,7 @@ func respawn(reason := "reset") -> void:
 	pending_shot = Vector2.ZERO
 	charging = false
 	charge_seconds = 0.0
+	debug_flying = false
 
 
 func _draw() -> void:
@@ -116,7 +133,7 @@ func _draw() -> void:
 		draw_rect(Rect2(-25, -36, 50 * charge_fraction(), 7), Color.BLACK)
 		draw_rect(Rect2(-25, -36, 50, 7), Color.BLACK, false, 1.0)
 
-	if shots == 0:
+	if shots == 0 or debug_flying:
 		return
 
 	var direction := -get_local_mouse_position().normalized()

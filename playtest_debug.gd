@@ -32,8 +32,8 @@ func _ready() -> void:
 				break
 
 	player.debug_event.connect(_record_event)
-	_record_event("Run started  kick=%.0f  upward cap=%.0f  fall damping=%.0f%%" % [
-		RecoilPlayer.RECOIL_SPEED, RecoilPlayer.MAX_RISE_SPEED, RecoilPlayer.FALL_MOMENTUM_DAMPING * 100.0,
+	_record_event("Run started  recoil sets velocity  power=%.0f-%.0f px/s" % [
+		RecoilPlayer.MIN_CHARGED_RECOIL, RecoilPlayer.RECOIL_SPEED,
 	])
 
 
@@ -46,7 +46,9 @@ func _process(delta: float) -> void:
 		stats += "  |  charge %.0f%%" % (player.charge_fraction() * 100.0)
 	if player.is_air_charging():
 		stats += "  |  slow aim"
-	text = "Playtest  |  %s\n%s\n%s" % [log_location, stats, "\n".join(recent_events)]
+	if player.debug_flying:
+		stats += "  |  flying"
+	text = "Playtest  |  F7 flight  |  %s\n%s\n%s" % [log_location, stats, "\n".join(recent_events)]
 	sample_elapsed += delta
 	if sample_elapsed >= SAMPLE_INTERVAL:
 		sample_elapsed = fmod(sample_elapsed, SAMPLE_INTERVAL)
