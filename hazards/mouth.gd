@@ -79,8 +79,8 @@ func _draw() -> void:
 	var shut := closure()
 	var shake := randf_range(-2.0, 2.0) if is_warning() else 0.0
 	var reach := LIP + (half.x - LIP) * shut
-	var jaw := Color(0.45, 0.15, 0.55)
-	var teeth := Color.RED if is_warning() else Color.WHITE
+	var jaw_tint := Color(1.0, 0.75, 1.1)
+	var teeth_tint := Color(1.6, 0.5, 0.4) if is_warning() else Color.WHITE
 
 	if Engine.is_editor_hint():
 		draw_rect(Rect2(-half, gap), Color(0.45, 0.15, 0.55, 0.2))
@@ -89,13 +89,8 @@ func _draw() -> void:
 		var outer: float = side * half.x
 		var inner: float = outer - side * reach
 		var left := minf(outer, inner)
-		draw_rect(Rect2(left + shake, -half.y, absf(outer - inner), gap.y), jaw)
-		var count := 3
-		for index in range(count):
-			var y0 := -half.y + gap.y * index / count
-			var y1 := y0 + gap.y / count
-			draw_colored_polygon(PackedVector2Array([
-				Vector2(inner + shake, y0),
-				Vector2(inner - side * 9.0 + shake, (y0 + y1) / 2.0),
-				Vector2(inner + shake, y1),
-			]), teeth)
+		Art.stone(self, Rect2(left + shake, -half.y, absf(outer - inner), gap.y), jaw_tint)
+		# Spike strip turned sideways so the teeth point into the gap.
+		draw_set_transform(Vector2(inner + shake, -half.y if side < 0.0 else half.y), -side * PI / 2.0)
+		Art.spike_row(self, gap.y, 10.0, teeth_tint)
+		draw_set_transform(Vector2.ZERO)

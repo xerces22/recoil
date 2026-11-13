@@ -27,15 +27,14 @@ func _process(delta: float) -> void:
 		set_process(false)
 
 
-func fill_color() -> Color:
-	return Color(0.15, 0.45, 0.95).lerp(Color.WHITE, _pulse * 0.7)
+func plank_texture() -> Texture2D:
+	return Art.PLANK_BLUE
+
+
+func show_brackets() -> bool:
+	return false
 
 
 func _draw() -> void:
-	super()
-	var half := size / 2.0
-	var stripe := Color(1, 1, 1, 0.45)
-	if size.x >= size.y:
-		draw_line(Vector2(-half.x + 4, -half.y + 3), Vector2(half.x - 4, -half.y + 3), stripe, 2.0)
-	else:
-		draw_line(Vector2(-half.x + 3, -half.y + 4), Vector2(-half.x + 3, half.y - 4), stripe, 2.0)
+	var glow := Color(0.75, 0.95, 1.6).lerp(Color(2.2, 2.2, 2.2), _pulse * 0.6)
+	draw_body(Rect2(-size / 2.0, size), glow)

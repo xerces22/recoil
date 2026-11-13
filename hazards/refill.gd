@@ -63,7 +63,7 @@ func reset() -> void:
 func _draw() -> void:
 	var start := Vector2.ZERO if Engine.is_editor_hint() else _origin - position
 	if travel != Vector2.ZERO:
-		draw_dashed_line(start, start + travel, Color(0, 0, 0, 0.25), 2.0, 8.0)
+		draw_dashed_line(start, start + travel, Color(1, 1, 1, 0.18), 2.0, 8.0)
 	var gold := Color(0.95, 0.7, 0.1)
 	if not available:
 		draw_arc(Vector2.ZERO, RADIUS, 0, TAU, 24, Color(gold, 0.35), 1.5)

@@ -62,8 +62,8 @@ func _teeth() -> Array[PackedVector2Array]:
 
 
 func _draw() -> void:
-	for points in _teeth():
-		draw_colored_polygon(points, Color.BLACK)
+	# One pixel-art spike per collision tooth, so what you see is exactly what kills you.
+	Art.spike_row(self, width, height)
 
 
 func _on_body_entered(body: Node2D) -> void:

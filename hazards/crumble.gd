@@ -41,12 +41,20 @@ func fill_color() -> Color:
 	return brown
 
 
+func plank_texture() -> Texture2D:
+	return Art.PLANK_DARK
+
+
+func show_brackets() -> bool:
+	return false
+
+
 func _draw() -> void:
 	var shake := Vector2(randf_range(-2, 2), 0) if _state == State.SHAKING else Vector2.ZERO
 	var rect := Rect2(-size / 2.0 + shake, size)
-	draw_rect(rect, fill_color())
+	draw_body(rect, Color(1, 1, 1, 0.15) if _state == State.GONE else Color.WHITE)
 	if _state != State.GONE:
-		var crack := Color(0, 0, 0, 0.5)
+		var crack := Color(0.05, 0.02, 0.05, 0.8)
 		for x in range(1, 4):
 			var px := rect.position.x + rect.size.x * x / 4.0
 			draw_line(Vector2(px, rect.position.y), Vector2(px + 5, rect.end.y), crack, 1.5)

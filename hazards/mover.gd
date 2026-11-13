@@ -58,8 +58,8 @@ func on_player_landed(_player: Node) -> void:
 
 func _draw() -> void:
 	var start := Vector2.ZERO if Engine.is_editor_hint() else _origin - position
-	draw_dashed_line(start, start + travel, Color(0, 0, 0, 0.25), 2.0, 8.0)
-	draw_rect(Rect2(-size / 2.0, size), Color(0.35, 0.35, 0.38))
+	draw_dashed_line(start, start + travel, Color(1, 1, 1, 0.18), 2.0, 8.0)
+	Art.plank(self, Art.PLANK_GREY, Rect2(-size / 2.0, size))
 	if wait_for_player:
 		draw_rect(Rect2(-size.x / 2.0 + 4, -3, size.x - 8, 6),
 			Color(1, 0.8, 0.2) if not _running else Color(0.2, 0.9, 0.3))

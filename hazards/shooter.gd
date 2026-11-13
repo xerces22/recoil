@@ -68,9 +68,12 @@ func _fire() -> void:
 func _draw() -> void:
 	var warning := not Engine.is_editor_hint() and interval - _clock <= WARN_TIME
 	var local_aim := Vector2.RIGHT if Engine.is_editor_hint() else _aim.rotated(-global_rotation)
-	draw_rect(Rect2(-12, -12, 24, 24), Color(0.5, 0.08, 0.08))
-	draw_line(Vector2.ZERO, local_aim * BARREL, Color.RED if warning else Color(0.2, 0.2, 0.2), 7.0)
-	if aimed:
-		draw_circle(Vector2.ZERO, 5.0, Color(1, 0.85, 0.2))
+	# Stone cannon housing with an iron barrel that glows red before it fires.
+	var barrel := Color(1.0, 0.25, 0.1) if warning else Color(0.22, 0.2, 0.26)
+	draw_line(Vector2.ZERO, local_aim * BARREL, Color(0.08, 0.05, 0.1), 11.0)
+	draw_line(Vector2.ZERO, local_aim * BARREL, barrel, 7.0)
+	Art.stone(self, Rect2(-14, -14, 28, 28))
+	draw_circle(Vector2.ZERO, 6.0, Color(0.08, 0.05, 0.1))
+	draw_circle(Vector2.ZERO, 4.0, Color(1, 0.85, 0.2) if aimed else Color(0.85, 0.2, 0.1))
 	if Engine.is_editor_hint() and aimed:
 		draw_arc(Vector2.ZERO, reach, 0, TAU, 64, Color(1, 0, 0, 0.15), 2.0)

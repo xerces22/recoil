@@ -32,5 +32,6 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _draw() -> void:
-	draw_line(Vector2.ZERO, -direction * 16.0, Color(1, 0.2, 0.1, 0.4), 6.0)
-	draw_circle(Vector2.ZERO, RADIUS, Color(0.9, 0.1, 0.05))
+	draw_line(Vector2.ZERO, -direction * 18.0, Color(1, 0.45, 0.1, 0.45), 8.0)
+	draw_circle(Vector2.ZERO, RADIUS + 2.0, Color(0.95, 0.25, 0.05))
+	draw_circle(Vector2.ZERO, RADIUS - 2.0, Color(1, 0.85, 0.35))
