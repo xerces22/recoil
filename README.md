@@ -10,6 +10,8 @@ Mouse-only recoil climber made for 17 GameJam. Aim with the mouse and left-click
 
 Open `project.godot` in Godot 4.7.2 and press F5. Push changes to `main` to publish a new Windows playtest build.
 
+Godot editor runs show live recoil stats and recent events. Each run writes a timestamped log in `playtest_logs/` in the project folder. If the project folder is read-only, the log goes to Godot's user data folder. Release builds hide the overlay and skip logging.
+
 ## Final draft
 
 - Start first-time players with a short tutorial that shows the recoil arrow and teaches both shots. At the end, let them choose whether to keep or hide the arrow. Save the choice and let them change it later in settings.

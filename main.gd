@@ -63,13 +63,16 @@ func _process(_delta: float) -> void:
 	if player.is_on_floor():
 		var feet := player.position + Vector2(0, 13)
 		if FINISH.has_point(feet):
-			instructions.text = "Course clear."
+			if instructions.text != "Course clear.":
+				instructions.text = "Course clear."
+				player.debug_event.emit("Course clear at %s" % player.position.round())
 		else:
 			for index in range(active_checkpoint + 1, CHECKPOINTS.size()):
 				var platform := CHECKPOINTS[index]
 				if platform.has_point(feet):
 					active_checkpoint = index
 					player.respawn_position = Vector2(platform.get_center().x, platform.position.y - 14)
+					player.debug_event.emit("Checkpoint %d at %s" % [index + 1, player.position.round()])
 					instructions.text = "Checkpoint set. Save your second shot for the turn."
 					queue_redraw()
 					break
@@ -141,4 +144,4 @@ func add_spike_row(row: Rect2) -> void:
 
 func _on_spike_entered(body: Node2D) -> void:
 	if body == player:
-		player.respawn.call_deferred()
+		player.respawn.call_deferred("spikes")

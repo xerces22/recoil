@@ -1,9 +1,11 @@
 extends CharacterBody2D
 
+signal debug_event(message: String)
+
 const MAX_SHOTS := 2
 const GRAVITY := 880.0
 const RECOIL_SPEED := 580.0
-const MAX_RISE_SPEED := 730.0
+const MAX_RISE_SPEED := 620.0
 const FALL_MOMENTUM_DAMPING := 0.5
 const RESPAWN_Y := 740.0
 
@@ -21,27 +23,41 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if pending_shot != Vector2.ZERO:
+		var before := velocity
 		if shots == 1 and velocity.y > 0.0 and pending_shot.y < 0.0:
 			velocity.y *= 1.0 + pending_shot.y * FALL_MOMENTUM_DAMPING
+		var recovery := before.y - velocity.y
 		velocity += pending_shot * RECOIL_SPEED
+		var capped := velocity.y < -MAX_RISE_SPEED
 		velocity.y = maxf(velocity.y, -MAX_RISE_SPEED)
+		debug_event.emit("Shot %d aim=%s  velocity %s -> %s  recovery=%.1f  cap=%s" % [
+			MAX_SHOTS - shots + 1, pending_shot.snapped(Vector2(0.01, 0.01)),
+			before.round(), velocity.round(), recovery, "yes" if capped else "no",
+		])
 		pending_shot = Vector2.ZERO
 		shots -= 1
 
 	velocity.y += GRAVITY * delta
+	var was_grounded := is_on_floor()
+	var was_on_ceiling := is_on_ceiling()
 	move_and_slide()
+	if is_on_ceiling() and not was_on_ceiling:
+		debug_event.emit("Hit ceiling at %s" % position.round())
 	if is_on_floor():
+		if not was_grounded:
+			debug_event.emit("Landed at %s  ammo refilled" % position.round())
 		shots = MAX_SHOTS
 		velocity.x = 0.0
 
 	var fall_limit := minf(RESPAWN_Y, respawn_position.y + 420.0)
 	if position.y > fall_limit or position.x < -24.0 or position.x > 1304.0:
-		respawn()
+		respawn("out of bounds")
 
 	queue_redraw()
 
 
-func respawn() -> void:
+func respawn(reason := "reset") -> void:
+	debug_event.emit("Respawn (%s) %s -> %s" % [reason, position.round(), respawn_position.round()])
 	position = respawn_position
 	velocity = Vector2.ZERO
 	shots = MAX_SHOTS
