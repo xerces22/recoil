@@ -1,0 +1,54 @@
+== floor 9: levels/level_09_everything_hates_you.tscn
+== levels/level_09_everything_hates_you.tscn  (Everything Hates You)
+   start: SlabRight   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                    SlabRight -> P01_Crumble              1 shell   --        2 shells    86 ways
+                  P01_Crumble -> P03_Slider@start         1 shell   --        2 shells    38 ways
+             P03_Slider@start -> P03_Slider@end           ride the platform
+               P03_Slider@end -> Gargoyle1Mount           1 shell    1 ways   2 shells    35 ways
+               Gargoyle1Mount -> P06_Wisp                 1 shell   --        2 shells     7 ways
+                     P06_Wisp -> P07_Wisp                 1 shell   53 ways   2 shells    --    
+                     P07_Wisp -> P08_Wisp                 1 shell   27 ways   2 shells    --    
+                     P08_Wisp -> P09_Wisp                 1 shell   19 ways   2 shells    --    
+                     P09_Wisp -> P10_Wisp                 1 shell   59 ways   2 shells    --    
+                     P10_Wisp -> P11_Checkpoint           1 shell   57 ways   2 shells    --    
+               P11_Checkpoint -> GateEFloorEnd            1 shell   --        2 shells    13 ways
+                GateEFloorEnd -> P13_Wisp                 1 shell   --        2 shells    60 ways
+                     P13_Wisp -> P14_ExitLedge            1 shell   31 ways   2 shells    --    
+                P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   INTENDED PATH:
+                    SlabRight -> P01_Crumble              1 shell   --        2 shells    86 ways
+                  P01_Crumble -> P02_Crumble              1 shell   18 ways   2 shells  1451 ways
+                  P02_Crumble -> P03_Slider               1 shell   12 ways   2 shells  1140 ways
+                   P03_Slider -> P04_Crumble              1 shell   29 ways   2 shells  1382 ways
+                  P04_Crumble -> P05_Checkpoint           1 shell    1 ways   2 shells    76 ways
+               P05_Checkpoint -> P06_Wisp                 1 shell   --        2 shells    77 ways
+                     P06_Wisp -> P07_Wisp                 1 shell   53 ways   2 shells    --    
+                     P07_Wisp -> P08_Wisp                 1 shell   27 ways   2 shells    --    
+                     P08_Wisp -> P09_Wisp                 1 shell   19 ways   2 shells    --    
+                     P09_Wisp -> P10_Wisp                 1 shell   59 ways   2 shells    --    
+                     P10_Wisp -> P11_Checkpoint           1 shell   57 ways   2 shells    --    
+               P11_Checkpoint -> P12_Ledge                !! NOT POSSIBLE
+                    P12_Ledge -> P13_Wisp                 1 shell    2 ways   2 shells   403 ways
+                     P13_Wisp -> P14_ExitLedge            1 shell   31 ways   2 shells    --    
+                P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   plans for 15 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_09.json
+   dead ends: none
+   never landed on: ['Roof', 'Tunnel01', 'Tunnel03', 'Tunnel05', 'Tunnel07', 'Tunnel09', 'Tunnel11', 'Tunnel13', 'Tunnel15', 'Tunnel17', 'Tunnel19', 'Tunnel21', 'Tunnel23', 'Tunnel25', 'Tunnel27', 'Tunnel29', 'Tunnel31', 'Tunnel33', 'Tunnel35', 'Tunnel37', 'Tunnel39', 'Tunnel41', 'Tunnel43']
+REPLAY levels/level_09_everything_hates_you.tscn
+  ok                  SlabRight -> P01_Crumble           7 / 24 plans work in the real game
+  ok                P01_Crumble -> P02_Crumble           6 / 24 plans work in the real game
+  ok                P02_Crumble -> P03_Slider           13 / 24 plans work in the real game
+  ok                 P03_Slider -> P04_Crumble           8 / 24 plans work in the real game
+  ok                P04_Crumble -> P05_Checkpoint       14 / 24 plans work in the real game
+  ok             P05_Checkpoint -> P06_Wisp             10 / 24 plans work in the real game
+  ok                   P06_Wisp -> P07_Wisp              8 /  8 plans work in the real game
+  ok                   P07_Wisp -> P08_Wisp              8 /  8 plans work in the real game
+  ok                   P08_Wisp -> P09_Wisp              8 /  8 plans work in the real game
+  ok                   P09_Wisp -> P10_Wisp              8 /  8 plans work in the real game
+  ok                   P10_Wisp -> P11_Checkpoint        6 /  8 plans work in the real game
+  FAIL           P11_Checkpoint -> P12_Ledge             0 /  0 plans work in the real game
+  ok                  P12_Ledge -> P13_Wisp             13 / 24 plans work in the real game
+  ok                   P13_Wisp -> P14_ExitLedge         8 /  8 plans work in the real game
+  ok              P14_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: 1 hops FAILED

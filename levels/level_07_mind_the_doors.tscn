@@ -1,0 +1,201 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/mouth.gd" id="mouth"]
+
+[node name="MindTheDoors" type="Node2D"]
+editor_description = "Floor 7. New: mimic doors. A: one gate, one slow door. B: a gate with two doors out of step. C: a sideways door in a corridor going left over spikes, then two gates 100 px apart. See LEVEL_LOG.md."
+script = ExtResource("level")
+title = "Mind the Doors"
+hint = "Mimic doors snap shut on a beat. Watch them shake, then go. If one bites you, it eats your shells."
+bounds = Rect2(0, -962, 2560, 1682)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(16, -121)
+script = ExtResource("block")
+size = Vector2(32, 1682)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(2544, -121)
+script = ExtResource("block")
+size = Vector2(32, 1682)
+
+[node name="Entry" type="Marker2D" parent="."]
+position = Vector2(1280, 592)
+
+[node name="SlabLeft" type="StaticBody2D" parent="."]
+position = Vector2(608, 576)
+script = ExtResource("block")
+size = Vector2(1152, 32)
+
+[node name="SlabRight" type="StaticBody2D" parent="."]
+position = Vector2(1952, 576)
+script = ExtResource("block")
+size = Vector2(1152, 32)
+
+[node name="Exit" type="Marker2D" parent="."]
+position = Vector2(760, -962)
+
+[node name="CeilingLeft" type="StaticBody2D" parent="."]
+position = Vector2(348, -946)
+script = ExtResource("block")
+size = Vector2(632, 32)
+
+[node name="CeilingRight" type="StaticBody2D" parent="."]
+position = Vector2(1692, -946)
+script = ExtResource("block")
+size = Vector2(1672, 32)
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(1060, 546)
+
+[node name="GateAFloor0" type="StaticBody2D" parent="."]
+position = Vector2(328.5, 410)
+script = ExtResource("block")
+size = Vector2(593, 20)
+
+[node name="GateAMouth0" type="Node2D" parent="."]
+position = Vector2(700, 410)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.8
+warn_time = 0.6
+shut_time = 0.6
+
+[node name="P01_GateA" type="StaticBody2D" parent="."]
+position = Vector2(1651.5, 410)
+script = ExtResource("block")
+size = Vector2(1753, 20)
+
+[node name="GateBFloor0" type="StaticBody2D" parent="."]
+position = Vector2(628.5, 240)
+script = ExtResource("block")
+size = Vector2(1193, 20)
+
+[node name="GateBMouth0" type="Node2D" parent="."]
+position = Vector2(1300, 240)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.3
+warn_time = 0.45
+shut_time = 0.6
+phase = 0.5
+
+[node name="GateBFloor1" type="StaticBody2D" parent="."]
+position = Vector2(1650, 240)
+script = ExtResource("block")
+size = Vector2(550, 20)
+
+[node name="GateBMouth1" type="Node2D" parent="."]
+position = Vector2(2000, 240)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.3
+warn_time = 0.45
+shut_time = 0.6
+
+[node name="GateBFloorEnd" type="StaticBody2D" parent="."]
+position = Vector2(2301.5, 240)
+script = ExtResource("block")
+size = Vector2(453, 20)
+
+[node name="P02_Checkpoint" type="StaticBody2D" parent="."]
+position = Vector2(1650, 222)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="P03_CorridorRight" type="StaticBody2D" parent="."]
+position = Vector2(1200, 76)
+script = ExtResource("block")
+size = Vector2(400, 32)
+
+[node name="PitFloor" type="StaticBody2D" parent="."]
+position = Vector2(900, 136)
+script = ExtResource("block")
+size = Vector2(200, 32)
+
+[node name="DoorPit" type="Area2D" parent="."]
+position = Vector2(800, 120)
+script = ExtResource("spikes")
+width = 200
+height = 26
+
+[node name="P04_CorridorLeft" type="StaticBody2D" parent="."]
+position = Vector2(616, 76)
+script = ExtResource("block")
+size = Vector2(368, 32)
+
+[node name="CorridorEnd" type="StaticBody2D" parent="."]
+position = Vector2(416, -40)
+script = ExtResource("block")
+size = Vector2(32, 264)
+
+[node name="CorridorRoof" type="StaticBody2D" parent="."]
+position = Vector2(996, -156)
+script = ExtResource("block")
+size = Vector2(808, 32)
+
+[node name="CorridorRoofSpikes" type="Area2D" parent="."]
+position = Vector2(592, -172)
+script = ExtResource("spikes")
+width = 808
+height = 26
+
+[node name="SideDoor" type="Node2D" parent="."]
+position = Vector2(900, -40)
+rotation = 1.5708
+script = ExtResource("mouth")
+gap = Vector2(190, 36)
+open_time = 1.4
+warn_time = 0.5
+shut_time = 0.6
+
+[node name="P05_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(260, -242)
+script = ExtResource("block")
+size = Vector2(176, 16)
+
+[node name="GateCFloor0" type="StaticBody2D" parent="."]
+position = Vector2(143.5, -390)
+script = ExtResource("block")
+size = Vector2(223, 20)
+
+[node name="GateCMouth0" type="Node2D" parent="."]
+position = Vector2(330, -390)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.2
+warn_time = 0.4
+shut_time = 0.5
+
+[node name="GateCFloorEnd" type="StaticBody2D" parent="."]
+position = Vector2(752.5, -390)
+script = ExtResource("block")
+size = Vector2(695, 20)
+
+[node name="GateDFloor0" type="StaticBody2D" parent="."]
+position = Vector2(218.5, -490)
+script = ExtResource("block")
+size = Vector2(373, 20)
+
+[node name="GateDMouth0" type="Node2D" parent="."]
+position = Vector2(480, -490)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.2
+warn_time = 0.4
+shut_time = 0.5
+phase = 0.3
+
+[node name="P06_GateD" type="StaticBody2D" parent="."]
+position = Vector2(827.5, -490)
+script = ExtResource("block")
+size = Vector2(545, 20)
+
+[node name="P07_ExitLedge" type="StaticBody2D" parent="."]
+position = Vector2(760, -682)
+script = ExtResource("block")
+size = Vector2(224, 16)

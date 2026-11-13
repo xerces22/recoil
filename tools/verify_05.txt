@@ -1,0 +1,51 @@
+== floor 5: levels/level_05_rotten_shelves.tscn
+== levels/level_05_rotten_shelves.tscn  (Rotten Shelves)
+   start: SlabRight   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                    SlabRight -> SlabLeft                 1 shell   19 ways   2 shells  1893 ways
+                     SlabLeft -> P03_Crumble              1 shell   --        2 shells     2 ways
+                  P03_Crumble -> P04_Checkpoint           1 shell    5 ways   2 shells   734 ways
+               P04_Checkpoint -> P05_Crumble              1 shell   --        2 shells   191 ways
+                  P05_Crumble -> P07_Crumble              1 shell   --        2 shells     9 ways
+                  P07_Crumble -> P09_Crumble              1 shell   --        2 shells    95 ways
+                  P09_Crumble -> P10_Lift@start           1 shell   15 ways   2 shells  1271 ways
+               P10_Lift@start -> P10_Lift@end             ride the platform
+                 P10_Lift@end -> P13_Crumble              1 shell   --        2 shells    10 ways
+                  P13_Crumble -> P14_ExitLedge            1 shell    3 ways   2 shells   684 ways
+                P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   INTENDED PATH:
+                    SlabRight -> P01_Crumble              1 shell   --        2 shells   225 ways
+                  P01_Crumble -> P02_Crumble              1 shell    5 ways   2 shells   663 ways
+                  P02_Crumble -> P03_Crumble              1 shell    5 ways   2 shells   663 ways
+                  P03_Crumble -> P04_Checkpoint           1 shell    5 ways   2 shells   734 ways
+               P04_Checkpoint -> P05_Crumble              1 shell   --        2 shells   191 ways
+                  P05_Crumble -> P06_Crumble              1 shell    1 ways   2 shells   335 ways
+                  P06_Crumble -> P07_Crumble              1 shell   --        2 shells   167 ways
+                  P07_Crumble -> P08_Crumble              1 shell    8 ways   2 shells   825 ways
+                  P08_Crumble -> P09_Crumble              1 shell   12 ways   2 shells  1287 ways
+                  P09_Crumble -> P10_Lift                 1 shell   15 ways   2 shells  1271 ways
+                     P10_Lift -> P11_Checkpoint           1 shell   18 ways   2 shells  1442 ways
+               P11_Checkpoint -> P12_Crumble              1 shell    2 ways   2 shells   375 ways
+                  P12_Crumble -> P13_Crumble              1 shell    2 ways   2 shells   360 ways
+                  P13_Crumble -> P14_ExitLedge            1 shell    3 ways   2 shells   684 ways
+                P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   plans for 15 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_05.json
+   dead ends: none
+   never landed on: ['Blocker', 'Divider']
+REPLAY levels/level_05_rotten_shelves.tscn
+  ok                  SlabRight -> P01_Crumble          11 / 24 plans work in the real game
+  ok                P01_Crumble -> P02_Crumble          10 / 24 plans work in the real game
+  ok                P02_Crumble -> P03_Crumble          10 / 24 plans work in the real game
+  ok                P03_Crumble -> P04_Checkpoint       22 / 24 plans work in the real game
+  ok             P04_Checkpoint -> P05_Crumble           9 / 24 plans work in the real game
+  ok                P05_Crumble -> P06_Crumble           8 / 24 plans work in the real game
+  ok                P06_Crumble -> P07_Crumble          10 / 24 plans work in the real game
+  ok                P07_Crumble -> P08_Crumble           8 / 24 plans work in the real game
+  ok                P08_Crumble -> P09_Crumble           7 / 24 plans work in the real game
+  ok                P09_Crumble -> P10_Lift             21 / 24 plans work in the real game
+  ok                   P10_Lift -> P11_Checkpoint       16 / 24 plans work in the real game
+  ok             P11_Checkpoint -> P12_Crumble           9 / 24 plans work in the real game
+  ok                P12_Crumble -> P13_Crumble           9 / 24 plans work in the real game
+  ok                P13_Crumble -> P14_ExitLedge        15 / 24 plans work in the real game
+  ok              P14_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: OK

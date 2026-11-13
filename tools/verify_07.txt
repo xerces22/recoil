@@ -1,0 +1,28 @@
+== floor 7: levels/level_07_mind_the_doors.tscn
+== levels/level_07_mind_the_doors.tscn  (Mind the Doors)
+   start: SlabLeft   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                     SlabLeft -> GateAFloorEnd            1 shell   --        2 shells     1 ways
+                GateAFloorEnd -> GateBFloor1              1 shell   --        2 shells     6 ways
+                  GateBFloor1 -> CorridorFloor            1 shell   --        2 shells     9 ways
+                CorridorFloor -> GateCFloorEnd            1 shell   --        2 shells     1 ways
+                GateCFloorEnd -> P05_ExitLedge            1 shell   --        2 shells     4 ways
+                P05_ExitLedge -> EXIT                     1 shell   --        2 shells   202 ways
+   INTENDED PATH:
+                     SlabLeft -> P01_Checkpoint           !! NOT POSSIBLE
+               P01_Checkpoint -> P02_Ledge                !! NOT POSSIBLE
+                    P02_Ledge -> P03_Checkpoint           !! NOT POSSIBLE
+               P03_Checkpoint -> P04_Ledge                !! NOT POSSIBLE
+                    P04_Ledge -> P05_ExitLedge            !! NOT POSSIBLE
+                P05_ExitLedge -> EXIT                     1 shell   --        2 shells   202 ways
+   plans for 6 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_07.json
+   dead ends: none
+   never landed on: ['CorridorRoof', 'P03_Checkpoint', 'P04_Ledge']
+REPLAY levels/level_07_mind_the_doors.tscn
+  FAIL                 SlabLeft -> P01_Checkpoint        0 /  0 plans work in the real game
+  FAIL           P01_Checkpoint -> P02_Ledge             0 /  0 plans work in the real game
+  FAIL                P02_Ledge -> P03_Checkpoint        0 /  0 plans work in the real game
+  FAIL           P03_Checkpoint -> P04_Ledge             0 /  0 plans work in the real game
+  FAIL                P04_Ledge -> P05_ExitLedge         0 /  0 plans work in the real game
+  ok              P05_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: 5 hops FAILED

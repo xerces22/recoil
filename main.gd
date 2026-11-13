@@ -8,6 +8,15 @@ const RecoilPlayer = preload("res://player.gd")
 ## of the floor below. Add new floors here, in order.
 const FLOORS: Array[String] = [
 	"res://levels/level_01_wake_up.tscn",
+	"res://levels/level_02_chimney.tscn",
+	"res://levels/level_03_chain_lift.tscn",
+	"res://levels/level_04_quiet_please.tscn",
+	"res://levels/level_05_rotten_shelves.tscn",
+	"res://levels/level_06_gargoyle_gallery.tscn",
+	"res://levels/level_07_mind_the_doors.tscn",
+	"res://levels/level_08_its_boiling.tscn",
+	"res://levels/level_09_everything_hates_you.tscn",
+	"res://levels/level_10_morwen.tscn",
 ]
 
 ## Old one-mechanic test levels. Not part of the tower. Reachable with the number keys
@@ -264,12 +273,11 @@ func _process(delta: float) -> void:
 	if not cleared:
 		elapsed += delta
 
-	if player.is_on_floor():
-		var feet := player.global_position + Vector2(0, 13)
-		for checkpoint in checkpoints:
-			if checkpoint.world_rect().has_point(feet):
-				_reach(checkpoint)
-				break
+	# Standing on a checkpoint with the body or resting the barrel on it both count.
+	for ground in player.standing_on:
+		if ground is Checkpoint:
+			_reach(ground)
+			break
 
 	# Testing one floor on its own: flying up through its exit hole clears it.
 	if not tower_mode and not cleared:

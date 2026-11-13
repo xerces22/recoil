@@ -1,0 +1,186 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/bouncy.gd" id="bouncy"]
+[ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/mouth.gd" id="mouth"]
+[ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
+[ext_resource type="Script" path="res://hazards/orb.gd" id="orb"]
+
+[node name="Morwen" type="Node2D"]
+editor_description = "Floor 10 (finale). A: a gargoyle, a crumble, a lift. B: a two-door gate, a full wisp. C: the flood from the second checkpoint up, pads and wisps, into the orb room. No exit hole. See LEVEL_LOG.md."
+script = ExtResource("level")
+title = "Morwen"
+hint = "The orb is at the top. Blast it three times."
+is_final = true
+bounds = Rect2(0, -1900, 2560, 2620)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(16, -590)
+script = ExtResource("block")
+size = Vector2(32, 2620)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(2544, -590)
+script = ExtResource("block")
+size = Vector2(32, 2620)
+
+[node name="Entry" type="Marker2D" parent="."]
+position = Vector2(1280, 592)
+
+[node name="SlabLeft" type="StaticBody2D" parent="."]
+position = Vector2(608, 576)
+script = ExtResource("block")
+size = Vector2(1152, 32)
+
+[node name="SlabRight" type="StaticBody2D" parent="."]
+position = Vector2(1952, 576)
+script = ExtResource("block")
+size = Vector2(1152, 32)
+
+[node name="Ceiling" type="StaticBody2D" parent="."]
+position = Vector2(1280, -1884)
+script = ExtResource("block")
+size = Vector2(2496, 32)
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(1080, 546)
+
+[node name="P01_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(1500, 418)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="Gargoyle1Mount" type="StaticBody2D" parent="."]
+position = Vector2(2390, 300)
+script = ExtResource("block")
+size = Vector2(24, 56)
+
+[node name="Gargoyle1" type="Node2D" parent="."]
+position = Vector2(2380, 300)
+rotation = 3.1416
+script = ExtResource("shooter")
+interval = 1.6
+bullet_speed = 280
+
+[node name="P02_Crumble" type="StaticBody2D" parent="."]
+position = Vector2(1800, 298)
+script = ExtResource("crumble")
+size = Vector2(144, 16)
+delay = 0.4
+regrow = 2.5
+
+[node name="P03_Lift" type="AnimatableBody2D" parent="."]
+position = Vector2(2100, 188)
+script = ExtResource("mover")
+size = Vector2(144, 16)
+travel = Vector2(0, -260)
+period = 3.5
+
+[node name="P04_Checkpoint" type="StaticBody2D" parent="."]
+position = Vector2(1840, -132)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="GateFFloor0" type="StaticBody2D" parent="."]
+position = Vector2(431, -290)
+script = ExtResource("block")
+size = Vector2(798, 20)
+
+[node name="GateFMouth0" type="Node2D" parent="."]
+position = Vector2(900, -290)
+script = ExtResource("mouth")
+gap = Vector2(140, 36)
+open_time = 1.1
+warn_time = 0.4
+shut_time = 0.5
+phase = 0.5
+
+[node name="GateFFloor1" type="StaticBody2D" parent="."]
+position = Vector2(1200, -290)
+script = ExtResource("block")
+size = Vector2(460, 20)
+
+[node name="GateFMouth1" type="Node2D" parent="."]
+position = Vector2(1500, -290)
+script = ExtResource("mouth")
+gap = Vector2(140, 36)
+open_time = 1.1
+warn_time = 0.4
+shut_time = 0.5
+
+[node name="GateFFloorEnd" type="StaticBody2D" parent="."]
+position = Vector2(2049, -290)
+script = ExtResource("block")
+size = Vector2(958, 20)
+
+[node name="P05_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(1300, -452)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="P06_Wisp" type="Node2D" parent="."]
+position = Vector2(950, -600)
+script = ExtResource("refill")
+
+[node name="P07_Checkpoint" type="StaticBody2D" parent="."]
+position = Vector2(600, -692)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="Flood" type="Node2D" parent="."]
+script = ExtResource("rising")
+trigger_y = -730
+speed = 55
+acceleration = 3
+start_gap = 340
+max_gap = 420
+checkpoint_gap = 300
+
+[node name="P08_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(900, -852)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="BoilPad" type="StaticBody2D" parent="."]
+position = Vector2(1200, -754)
+script = ExtResource("bouncy")
+size = Vector2(160, 12)
+
+[node name="P09_Wisp" type="Node2D" parent="."]
+position = Vector2(1500, -1000)
+script = ExtResource("refill")
+amount = 1
+
+[node name="P10_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(1800, -1072)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="P11_Crumble" type="StaticBody2D" parent="."]
+position = Vector2(2100, -1212)
+script = ExtResource("crumble")
+size = Vector2(144, 16)
+delay = 0.35
+regrow = 2.5
+
+[node name="P12_Ledge" type="StaticBody2D" parent="."]
+position = Vector2(1800, -1372)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="P13_OrbRoom" type="StaticBody2D" parent="."]
+position = Vector2(1260, -1512)
+script = ExtResource("checkpoint")
+size = Vector2(480, 16)
+is_finish = true
+
+[node name="HexOrb" type="Node2D" parent="."]
+position = Vector2(1260, -1680)
+script = ExtResource("orb")
+spots = "Array[Vector2]([Vector2(1060, -1760), Vector2(1460, -1800)])"
