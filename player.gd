@@ -3,6 +3,7 @@ extends CharacterBody2D
 const MAX_SHOTS := 2
 const GRAVITY := 880.0
 const RECOIL_SPEED := 580.0
+const MAX_RISE_SPEED := 730.0
 const FALL_MOMENTUM_DAMPING := 0.5
 const RESPAWN_Y := 740.0
 
@@ -23,6 +24,7 @@ func _physics_process(delta: float) -> void:
 		if shots == 1 and velocity.y > 0.0 and pending_shot.y < 0.0:
 			velocity.y *= 1.0 + pending_shot.y * FALL_MOMENTUM_DAMPING
 		velocity += pending_shot * RECOIL_SPEED
+		velocity.y = maxf(velocity.y, -MAX_RISE_SPEED)
 		pending_shot = Vector2.ZERO
 		shots -= 1
 
