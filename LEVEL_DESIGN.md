@@ -6,6 +6,7 @@ This is the toolkit for building Recoil Launcher levels. It lists every mechanic
 
 > **Read this first: what we're working on right now.**
 >
+> - **How to think when designing a floor:** read [LEVEL_DESIGN_PROCESS.md](LEVEL_DESIGN_PROCESS.md) before placing anything. It's the thought process behind the existing levels: the move list, miss costs, how spikes shape the path, and the difficulty plan for floors 1-10. This file has the numbers; that one has the method.
 > - **Story:** read [STORY.md](STORY.md). The witch Morwen cursed a witch hunter, Sir Barrett, into his own shotgun. He climbs Hexmoor Castle: **Cellar (floors 1-3) -> Library (4-7) -> Tower (8-10)**.
 > - **One continuous tower.** Each "level" is a **floor**: its own `.tscn` file, built separately. The game stacks the floors on top of each other, so the whole game is one unbroken climb. You leave a floor through a **hole in its ceiling** and enter the next through a **hole in its ground**. Each floor shows its own title when you enter it, so the player feels the change. **Follow the floor rules in section 2 exactly**, or the floors won't line up.
 > - **Wide floors (done, use this now):** set `bounds` on the root and the camera follows on **both** axes. Paths go diagonally (up-right, up-left, switchbacks, corridors), not only straight up. See "World rules" and "Sideways reach" below, and `levels/level_01_wake_up.tscn` for a working example.
