@@ -13,6 +13,8 @@ const STONE := preload("res://assets/sprites/tilesets/grey_stone_tileset.png")
 const SPIKES_UP := preload("res://assets/sprites/hazards/spikes_up.png")
 const WALL := preload("res://assets/sprites/tilesets/bg_wall_purple_2.png")
 const SHOTGUN := preload("res://assets/sprites/player/shotgun_main.png")
+const STETSON := preload("res://assets/sprites/player/stetson.png")
+const STETSON_OFFSET := Vector2(4, -13)
 const LANTERN_DARK := preload("res://assets/sprites/checkpoints/lantern_green_1.png")
 const LANTERN_LIT: Array[Texture2D] = [
 	preload("res://assets/sprites/checkpoints/lantern_lit_1.png"),

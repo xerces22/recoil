@@ -12,6 +12,8 @@ const SHAFT := Rect2(0, -20000, 1280, 20720)
 @export var taunt := ""
 ## Clearing this level plays the ending instead of loading the next one.
 @export var is_final := false
+## Optional backdrop tint for this part of the tower.
+@export var backdrop_tint := Color(0.45, 0.4, 0.52)
 ## Playable area. The camera stops at these edges. Leaving the sides or the bottom
 ## by more than 24 px kills. Up is negative y, so `position.y` is the top.
 @export var bounds := SHAFT:

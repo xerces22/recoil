@@ -6,35 +6,51 @@
 [ext_resource type="Script" uid="uid://jmnw2e86r43k" path="res://backdrop.gd" id="4"]
 [ext_resource type="FontFile" uid="uid://cfrpx1n2pi3ia" path="res://assets/fonts/PressStart2P-Regular.ttf" id="5"]
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_world"]
+viewport_path = NodePath("WorldSurface/World")
+
 [sub_resource type="CircleShape2D" id="CircleShape2D_player"]
 radius = 12.0
 
 [node name="Prototype" type="Node2D" unique_id=508974563]
 script = ExtResource("1")
 
-[node name="Backdrop" type="Node2D" parent="." unique_id=1545678854]
+[node name="WorldSurface" type="TextureRect" parent="." unique_id=736886995]
+texture_filter = 1
+mouse_filter = 2
+texture = SubResource("ViewportTexture_world")
+expand_mode = 1
+
+[node name="World" type="SubViewport" parent="WorldSurface" unique_id=901884406]
+gui_disable_input = true
+size = Vector2i(1280, 720)
+size_2d_override = Vector2i(1280, 720)
+size_2d_override_stretch = true
+render_target_update_mode = 4
+
+[node name="Backdrop" type="Node2D" parent="WorldSurface/World" unique_id=1545678854]
 script = ExtResource("4")
 
-[node name="Music" type="AudioStreamPlayer" parent="." unique_id=198189037]
-volume_db = -80.0
+[node name="Level" type="Node2D" parent="WorldSurface/World" unique_id=1758762476]
 
-[node name="Level" type="Node2D" parent="." unique_id=1758762476]
-
-[node name="Player" type="CharacterBody2D" parent="." unique_id=907851201]
+[node name="Player" type="CharacterBody2D" parent="WorldSurface/World" unique_id=907851201]
 position = Vector2(570, 546)
 script = ExtResource("2")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=141848710]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WorldSurface/World/Player" unique_id=141848710]
 shape = SubResource("CircleShape2D_player")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=482986662]
+[node name="Camera2D" type="Camera2D" parent="WorldSurface/World" unique_id=482986662]
 position = Vector2(640, 360)
+
+[node name="Music" type="AudioStreamPlayer" parent="." unique_id=198189037]
+volume_db = -14.0
 
 [node name="HUD" type="CanvasLayer" parent="." unique_id=857643835]
 layer = 20
 
 [node name="Title" type="Label" parent="HUD" unique_id=827906658]
-offset_left = 24.0
+offset_left = 164.0
 offset_top = 16.0
 theme_override_colors/font_color = Color(0.96, 0.92, 0.84, 1)
 theme_override_colors/font_outline_color = Color(0.08, 0.04, 0.1, 1)
@@ -44,7 +60,7 @@ theme_override_font_sizes/font_size = 16
 text = "Level"
 
 [node name="Instructions" type="Label" parent="HUD" unique_id=1702345515]
-offset_left = 24.0
+offset_left = 164.0
 offset_top = 48.0
 offset_right = 640.0
 theme_override_colors/font_color = Color(0.96, 0.92, 0.84, 1)
@@ -91,4 +107,4 @@ theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 13
 horizontal_alignment = 2
 script = ExtResource("3")
-player_path = NodePath("../../Player")
+player_path = NodePath("../../WorldSurface/World/Player")
