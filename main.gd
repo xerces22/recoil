@@ -256,6 +256,8 @@ func _play_music(floor_number: int) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _boss != null:
+		return
 	player.handle_game_input(event)
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
@@ -500,6 +502,28 @@ func _clear() -> void:
 		player.position.round(), _format_time(elapsed), deaths])
 	for flood in floods:
 		flood.stop()
+	# Top of the tower: the witch fight.
+	if tower_mode and level != null and level.is_final:
+		_start_boss.call_deferred()
+
+
+var _boss: BossFight
+
+
+## Final fight on its own screen. When it ends, back to the title menu.
+func _start_boss() -> void:
+	if _boss != null:
+		return
+	player.cancel_shot()
+	$HUD.hide()
+	_boss = BossFight.new()
+	_boss.game = self
+	add_child(_boss)
+	_boss.finished.connect(func() -> void:
+		get_node("Settings")._quit_run()
+		await get_tree().create_timer(0.4).timeout
+		_boss.queue_free()
+		_boss = null)
 
 
 ## Follows the player on both axes, leading a little in the flight direction.
