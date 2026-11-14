@@ -86,7 +86,7 @@ func _process(delta: float) -> void:
 func _input(event: InputEvent) -> void:
 	if not visible:
 		return
-	var pressed := (event is InputEventMouseButton and event.pressed) \
+	var pressed: bool = (event is InputEventMouseButton and event.pressed) \
 		or (event is InputEventKey and event.pressed and not event.echo)
 	get_viewport().set_input_as_handled()
 	if not pressed:

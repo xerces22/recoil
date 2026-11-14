@@ -1,30 +1,65 @@
 extends CanvasLayer
+## Title, pause, floor select, credits and settings.
+## Title: dark side panel on the left (logo, options, Exit at the bottom), the live castle
+## zoomed in on the hatted shotgun on the right, with drifting motes and a slow colour wash.
 
 const Preferences = preload("res://game_preferences.gd")
 const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
+const LOGO := preload("res://assets/sprites/logo/logo_color.png")
 const CREAM := Color("#f6e8cb")
 const GOLD := Color("#ffd583")
 const LILAC := Color("#bdb0c7")
-const PANEL_SIZE := Vector2(708, 574)
-const LOGO := preload("res://assets/sprites/logo/logo_color.png")
+const ACCENT := Color("#57e08f")
+const INK := Color("#140c1b")
+const EDGE := Color("#3a2b48")
+const PANEL_SIZE := Vector2(708, 560)
+## Width of the dark side panel the menu options sit on.
+const SIDE_W := 440.0
+
+const SFX_HOVER := preload("res://assets/sfx/impactWood_light_001.ogg")
+const SFX_NEW := preload("res://assets/sfx/shotgun_reload.wav")
+const SFX_CONTINUE := preload("res://assets/sfx/impactMetal_heavy_000.ogg")
+const SFX_SETTINGS := preload("res://assets/sfx/impactPlank_medium_000.ogg")
+const SFX_CREDITS := preload("res://assets/sfx/impactWood_heavy_000.ogg")
+const SFX_EXIT := preload("res://assets/sfx/impactSoft_heavy_000.ogg")
+const SFX_BACK := preload("res://assets/sfx/impactWood_light_002.ogg")
+const SFX_FLOOR := preload("res://assets/sfx/checkpoint_fire.ogg")
+
+const CREDITS := [
+	["A game by", "nullMuath and xerces"],
+	["Art", "Crumpaloo (Whimsy Hallow), Quintino Pixels, Leozlk (Shotguns Only)"],
+	["Hat", "Stetson Cowboy Hat by Jordan Irwin (AntumDeluge), CC BY 4.0"],
+	["Music", "HydroGene, Pro Sensory (Alex McCulloch), Sudocolon"],
+	["Sound", "Ben Jaszczak et al., SpringySpringo, AntumDeluge, SketchMan3, Ogrebane, rubberduck, Kenney"],
+	["Font", "Press Start 2P by CodeMan38"],
+	["", "Thanks for playing!"],
+]
 
 signal start_requested
 signal restart_requested
 signal quit_requested
 
-enum Screen { TITLE, PLAY, PAUSE, SETTINGS }
+enum Screen { TITLE, PLAY, PAUSE, SETTINGS, CREDITS, FLOORS }
 
 var preferences: Preferences
 var player
+## main.gd: floor titles, saved progress and the title camera.
+var game
 var _screen := Screen.TITLE
+var _base := Screen.TITLE
 var _settings_return := Screen.TITLE
 var _pause_button: Button
-var _menu_overlay: ColorRect
+var _menu_overlay: Control
 var _menu_heading: Label
 var _title_actions: VBoxContainer
 var _pause_actions: VBoxContainer
-var _shotgun_preview: Control
+var _floor_actions: VBoxContainer
 var _logo: TextureRect
+var _credits: Control
+var _particles: Node2D
+var _tint: ColorRect
+var _sfx: AudioStreamPlayer
+var _time := 0.0
 var _overlay: ColorRect
 var _panel: Control
 var _tabs: Array[Button] = []
@@ -56,20 +91,18 @@ func _ready() -> void:
 
 	_overlay = ColorRect.new()
 	_overlay.name = "SettingsOverlay"
-	_overlay.color = Color("#110b18d9")
+	_overlay.color = Color(0, 0, 0, 0)
 	_overlay.theme = theme
 	_overlay.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_overlay)
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_overlay.hide()
 
-	var center := CenterContainer.new()
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_overlay.add_child(center)
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var center := _right_center(_overlay)
 	_panel = Control.new()
 	_panel.custom_minimum_size = PANEL_SIZE
+	_panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	_panel.draw.connect(_draw_frame.bind(_panel))
 	center.add_child(_panel)
 
@@ -79,11 +112,9 @@ func _ready() -> void:
 	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	layout.offset_left = 42
 	layout.offset_right = -42
-	layout.offset_top = 36
+	layout.offset_top = 34
 	layout.offset_bottom = -30
-	var heading := _label("Settings", 22)
-	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	layout.add_child(heading)
+	layout.add_child(_label("Settings", 20, ACCENT))
 
 	var tabs := HBoxContainer.new()
 	tabs.add_theme_constant_override("separation", 8)
@@ -95,7 +126,9 @@ func _ready() -> void:
 		var tab := _button(title)
 		tab.toggle_mode = true
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tab.pressed.connect(_select_tab.bind(_tabs.size()))
+		tab.pressed.connect(func() -> void:
+			_play(SFX_HOVER, 1.1, -10.0)
+			_select_tab(_tabs.find(tab)))
 		_tabs.append(tab)
 		tabs.add_child(tab)
 		var page := VBoxContainer.new()
@@ -178,14 +211,25 @@ func _ready() -> void:
 	gap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	footer.add_child(gap)
 	var back := _button("Back")
-	back.pressed.connect(close)
+	back.pressed.connect(func() -> void:
+		_play(SFX_BACK, 1.0, -8.0)
+		close())
 	footer.add_child(back)
+
+	_build_credits(theme)
 	_select_tab(0)
 	_refresh()
 	_show_screen(Screen.TITLE)
 
 
+# ---------------------------------------------------------------- side menu
+
 func _build_run_menu(theme: Theme) -> void:
+	_sfx = AudioStreamPlayer.new()
+	_sfx.bus = &"SFX"
+	_sfx.max_polyphony = 6
+	add_child(_sfx)
+
 	_pause_button = _button("Pause")
 	_pause_button.name = "PauseButton"
 	_pause_button.theme = theme
@@ -195,78 +239,211 @@ func _build_run_menu(theme: Theme) -> void:
 	_pause_button.pressed.connect(_show_screen.bind(Screen.PAUSE))
 	add_child(_pause_button)
 
-	_menu_overlay = ColorRect.new()
-	_menu_overlay.color = Color("#110b18d9")
+	# Slow colour wash over the castle so the room keeps shifting.
+	_tint = ColorRect.new()
+	_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_tint)
+	_tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+
+	_particles = Node2D.new()
+	add_child(_particles)
+	_add_motes(ACCENT, 38, Vector2(2, 4), 7.0)
+	_add_motes(Color("#ff9a3c"), 14, Vector2(2, 3), 5.0)
+	_add_motes(Color("#c9a6ff"), 18, Vector2(1, 2), 9.0)
+
+	_menu_overlay = Control.new()
 	_menu_overlay.theme = theme
-	_menu_overlay.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_menu_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_menu_overlay)
 	_menu_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var center := CenterContainer.new()
-	_menu_overlay.add_child(center)
-	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var frame := Control.new()
-	frame.custom_minimum_size = Vector2(520, 432)
-	frame.draw.connect(_draw_frame.bind(frame))
-	center.add_child(frame)
-	var layout := VBoxContainer.new()
-	frame.add_child(layout)
-	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	layout.offset_left = 54
-	layout.offset_right = -54
-	layout.offset_top = 36
-	layout.offset_bottom = -32
-	layout.add_theme_constant_override("separation", 14)
-	_menu_heading = _label("", 22)
-	_menu_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	layout.add_child(_menu_heading)
+	var side := Control.new()
+	side.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	side.draw.connect(_draw_side.bind(side))
+	_menu_overlay.add_child(side)
+	side.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
+	side.offset_right = SIDE_W + 180.0
+	side.resized.connect(side.queue_redraw)
+
 	_logo = TextureRect.new()
 	_logo.texture = LOGO
 	_logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	_logo.custom_minimum_size.y = 230
+	_logo.position = Vector2(44, 26)
+	_logo.size = Vector2(300, 236)
+	_logo.pivot_offset = _logo.size / 2.0
 	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	layout.add_child(_logo)
-	_shotgun_preview = Control.new()
-	_shotgun_preview.custom_minimum_size.y = 120
-	_shotgun_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_shotgun_preview.draw.connect(_draw_shotgun_preview)
-	_shotgun_preview.resized.connect(_shotgun_preview.queue_redraw)
-	layout.add_child(_shotgun_preview)
-	_title_actions = VBoxContainer.new()
-	_pause_actions = VBoxContainer.new()
-	for actions in [_title_actions, _pause_actions]:
-		actions.add_theme_constant_override("separation", 10)
-		actions.size_flags_vertical = Control.SIZE_EXPAND_FILL
-		actions.alignment = BoxContainer.ALIGNMENT_CENTER
-		layout.add_child(actions)
-	_add_action(_title_actions, "Play", _start)
-	_add_action(_title_actions, "Settings", open)
-	_add_action(_pause_actions, "Resume", _show_screen.bind(Screen.PLAY))
-	_add_action(_pause_actions, "Restart Level", _restart)
-	_add_action(_pause_actions, "Settings", open)
-	_add_action(_pause_actions, "Quit to Main Menu", _quit_run)
+	side.add_child(_logo)
+
+	_menu_heading = _label("Paused", 28, ACCENT)
+	_menu_heading.position = Vector2(62, 150)
+	side.add_child(_menu_heading)
+
+	_title_actions = _action_list(side, 290)
+	_pause_actions = _action_list(side, 290)
+	_floor_actions = _action_list(side, 268)
+	_floor_actions.add_theme_constant_override("separation", 0)
+
+	_add_action(_title_actions, "New Game", SFX_NEW, _new_game)
+	_add_action(_title_actions, "Continue", SFX_CONTINUE, _show_screen.bind(Screen.FLOORS))
+	_add_action(_title_actions, "Settings", SFX_SETTINGS, open)
+	_add_action(_title_actions, "Credits", SFX_CREDITS, _toggle_credits)
+	if not OS.has_feature("web"):
+		_title_actions.add_child(_spacer(96))
+		_add_action(_title_actions, "Exit", SFX_EXIT, _exit_game)
+
+	_add_action(_pause_actions, "Resume", SFX_CONTINUE, _show_screen.bind(Screen.PLAY))
+	_add_action(_pause_actions, "Restart Floor", SFX_NEW, _restart)
+	_add_action(_pause_actions, "Settings", SFX_SETTINGS, open)
+	_pause_actions.add_child(_spacer(150))
+	_add_action(_pause_actions, "Quit to Menu", SFX_EXIT, _quit_run)
 
 
-func _draw_shotgun_preview() -> void:
-	const SCALE := 4
-	var origin := ((_shotgun_preview.size - Art.SHOTGUN.get_size() * SCALE) / 2
-		- Vector2(0, Art.STETSON_OFFSET.y * SCALE / 2)).round()
-	_shotgun_preview.draw_texture_rect(Art.SHOTGUN,
-		Rect2(origin, Art.SHOTGUN.get_size() * SCALE), false)
-	_shotgun_preview.draw_texture_rect(Art.STETSON,
-		Rect2(origin + Art.STETSON_OFFSET * SCALE, Art.STETSON.get_size() * SCALE), false)
+func _spacer(height: float) -> Control:
+	var gap := Control.new()
+	gap.custom_minimum_size.y = height
+	gap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return gap
 
 
-func _add_action(parent: VBoxContainer, title: String, action: Callable) -> void:
-	var button := _button(title)
-	button.pressed.connect(action)
-	parent.add_child(button)
+func _action_list(side: Control, top: float) -> VBoxContainer:
+	var list := VBoxContainer.new()
+	list.add_theme_constant_override("separation", 6)
+	list.position = Vector2(36, top)
+	list.custom_minimum_size.x = SIDE_W - 60.0
+	list.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	side.add_child(list)
+	return list
 
 
-func _start() -> void:
-	start_requested.emit()
+func _add_action(parent: VBoxContainer, title: String, sound: AudioStream, action: Callable,
+		size_px := 20) -> MenuItem:
+	var item := MenuItem.new(title, size_px, sound)
+	item.hover_sound = SFX_HOVER
+	item.play_sound = _play
+	item.activated.connect(action)
+	parent.add_child(item)
+	return item
+
+
+func _add_motes(colour: Color, amount: int, size_range: Vector2, life: float) -> void:
+	var motes := CPUParticles2D.new()
+	motes.amount = amount
+	motes.lifetime = life
+	motes.preprocess = life
+	motes.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	motes.emission_rect_extents = Vector2(700, 20)
+	motes.position = Vector2(640, 760)
+	motes.direction = Vector2(0, -1)
+	motes.spread = 20.0
+	motes.gravity = Vector2(0, -4)
+	motes.initial_velocity_min = 25.0
+	motes.initial_velocity_max = 70.0
+	motes.angular_velocity_min = -40.0
+	motes.angular_velocity_max = 40.0
+	motes.scale_amount_min = size_range.x
+	motes.scale_amount_max = size_range.y
+	var ramp := Gradient.new()
+	ramp.set_color(0, Color(colour, 0.0))
+	ramp.set_color(1, Color(colour, 0.0))
+	ramp.add_point(0.2, Color(colour, 0.75))
+	ramp.add_point(0.75, Color(colour, 0.5))
+	motes.color_ramp = ramp
+	_particles.add_child(motes)
+
+
+func _play(stream: AudioStream, pitch := 1.0, volume_db := -6.0) -> void:
+	_sfx.stream = stream
+	_sfx.pitch_scale = pitch
+	_sfx.volume_db = volume_db
+	_sfx.play()
+
+
+func _draw_side(side: Control) -> void:
+	var h := side.size.y
+	side.draw_rect(Rect2(0, 0, SIDE_W, h), Color(INK, 0.97))
+	# Soft fade from the panel into the castle.
+	var fade := 180.0
+	side.draw_polygon(PackedVector2Array([Vector2(SIDE_W, 0), Vector2(SIDE_W + fade, 0),
+		Vector2(SIDE_W + fade, h), Vector2(SIDE_W, h)]),
+		PackedColorArray([Color(INK, 0.97), Color(INK, 0.0), Color(INK, 0.0), Color(INK, 0.97)]))
+	side.draw_rect(Rect2(36, h - 34, 120, 2), Color(ACCENT, 0.35))
+	side.draw_string(FONT, Vector2(36, h - 16), "v1.0  jam build", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.6))
+
+
+## A full-screen holder that centres its child in the area right of the side panel.
+func _right_center(parent: Control) -> CenterContainer:
+	var center := CenterContainer.new()
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(center)
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.offset_left = SIDE_W - 30.0
+	return center
+
+
+func _build_credits(theme: Theme) -> void:
+	_credits = Control.new()
+	_credits.theme = theme
+	_credits.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_credits)
+	_credits.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var panel := Control.new()
+	panel.custom_minimum_size = Vector2(640, 520)
+	panel.draw.connect(_draw_frame.bind(panel))
+	_right_center(_credits).add_child(panel)
+	var layout := VBoxContainer.new()
+	layout.add_theme_constant_override("separation", 14)
+	panel.add_child(layout)
+	layout.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layout.offset_left = 42
+	layout.offset_right = -42
+	layout.offset_top = 34
+	layout.offset_bottom = -30
+	layout.add_child(_label("Credits", 20, ACCENT))
+	for line: Array in CREDITS:
+		var row := VBoxContainer.new()
+		row.add_theme_constant_override("separation", 5)
+		if line[0] != "":
+			row.add_child(_label(line[0], 9, LILAC))
+		var body := _label(line[1], 11, GOLD if line[0] == "" else CREAM)
+		body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		row.add_child(body)
+		layout.add_child(row)
+	_credits.hide()
+
+
+func _toggle_credits() -> void:
+	_show_screen(_base if _screen == Screen.CREDITS else Screen.CREDITS)
+
+
+func _rebuild_floors() -> void:
+	for child in _floor_actions.get_children():
+		_floor_actions.remove_child(child)
+		child.queue_free()
+	var titles: Array[String] = game.floor_titles()
+	var reached: int = game.reached_floor()
+	for i in titles.size():
+		var open_floor := i <= reached
+		var label := "%2d  %s" % [i + 1, titles[i].to_upper() if open_floor else "?"]
+		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 12)
+		item.set_locked(not open_floor)
+	_floor_actions.add_child(_spacer(14))
+	_add_action(_floor_actions, "Back", SFX_BACK, _show_screen.bind(Screen.TITLE), 16)
+
+
+func _new_game() -> void:
 	_show_screen(Screen.PLAY)
+	start_requested.emit()
+
+
+func _continue_from(index: int) -> void:
+	_show_screen(Screen.PLAY)
+	game.continue_from(index)
+
+
+func _exit_game() -> void:
+	await get_tree().create_timer(0.25).timeout
+	get_tree().quit()
 
 
 func _restart() -> void:
@@ -281,30 +458,42 @@ func _quit_run() -> void:
 
 func _show_screen(screen: Screen) -> void:
 	player.cancel_shot()
+	if screen in [Screen.TITLE, Screen.PAUSE, Screen.PLAY]:
+		_base = screen
 	_screen = screen
+	var on_title := _base == Screen.TITLE
 	get_tree().paused = screen != Screen.PLAY
 	_pause_button.visible = screen == Screen.PLAY
-	_menu_overlay.visible = screen in [Screen.TITLE, Screen.PAUSE]
+	_menu_overlay.visible = screen != Screen.PLAY
 	_overlay.visible = screen == Screen.SETTINGS
-	_title_actions.visible = screen == Screen.TITLE
-	_pause_actions.visible = screen == Screen.PAUSE
-	# Title shows the logo (it already has the hatted shotgun). Pause shows the heading.
-	_logo.visible = screen == Screen.TITLE
-	_menu_heading.visible = screen != Screen.TITLE
-	_shotgun_preview.visible = false
+	_credits.visible = screen == Screen.CREDITS
+	_particles.visible = on_title
+	_tint.visible = on_title
+	_logo.visible = on_title
+	_menu_heading.visible = _base == Screen.PAUSE
+	_title_actions.visible = on_title and screen != Screen.FLOORS
+	_pause_actions.visible = _base == Screen.PAUSE
+	_floor_actions.visible = screen == Screen.FLOORS
+	if game != null:
+		game.set_title_view(on_title)
 	match screen:
 		Screen.TITLE:
-			_menu_heading.text = "Cursed Shotgun"
-			_title_actions.get_child(0).grab_focus()
+			_title_actions.get_child(0).button.grab_focus.call_deferred()
 		Screen.PAUSE:
-			_menu_heading.text = "Paused"
-			_pause_actions.get_child(0).grab_focus()
+			_pause_actions.get_child(0).button.grab_focus.call_deferred()
+		Screen.FLOORS:
+			_rebuild_floors()
+			var last: int = game.reached_floor()
+			_floor_actions.get_child(last).button.grab_focus.call_deferred()
 		Screen.SETTINGS:
 			_tabs[_active_tab].grab_focus()
 
 
 func open() -> void:
-	_settings_return = _screen
+	if _screen == Screen.SETTINGS:
+		close()
+		return
+	_settings_return = _base
 	_refresh()
 	_show_screen(Screen.SETTINGS)
 
@@ -326,6 +515,9 @@ func _input(event: InputEvent) -> void:
 			_end_listening()
 		elif _overlay.visible:
 			close()
+		elif _screen in [Screen.CREDITS, Screen.FLOORS]:
+			_play(SFX_BACK, 1.0, -8.0)
+			_show_screen(_base)
 		elif _screen == Screen.PLAY:
 			_show_screen(Screen.PAUSE)
 		elif _screen == Screen.PAUSE:
@@ -342,7 +534,17 @@ func _input(event: InputEvent) -> void:
 		_controls_hint.text = "Use a mouse button. The scroll wheel is unavailable."
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	_time += delta
+	if _tint.visible:
+		# Colour drifts between castle purple and curse green, very faintly.
+		var t := (sin(_time * 0.25) + 1.0) / 2.0
+		_tint.color = Color("#2a0f3a").lerp(Color("#0d3a22"), t)
+		_tint.color.a = 0.16 + sin(_time * 0.6) * 0.03
+		_logo.scale = Vector2.ONE * (1.0 + sin(_time * 1.3) * 0.012)
+		_logo.rotation = sin(_time * 0.7) * 0.012
+		if game != null:
+			game.update_title_view(delta)
 	if not _overlay.visible or _active_tab != 1:
 		return
 	_fps_readout.text = "Current FPS  %d" % Engine.get_frames_per_second()
@@ -356,6 +558,8 @@ func _process(_delta: float) -> void:
 		_web_request_time = 0
 		_update_display_hint()
 
+
+# ---------------------------------------------------------------- settings logic
 
 func _toggle_display() -> void:
 	preferences.set_fullscreen(not preferences.is_fullscreen())
@@ -446,9 +650,9 @@ func _add_volume(title: String, bus: String) -> void:
 	slider.name = bus + "Volume"
 	slider.max_value = 100
 	slider.step = 1
-	slider.custom_minimum_size = Vector2(242, 38)
+	slider.custom_minimum_size = Vector2(242, 30)
 	slider.scrollable = false
-	var readout := _label("", 11, GOLD)
+	var readout := _label("", 11, ACCENT)
 	readout.custom_minimum_size.x = 52
 	readout.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_sliders[bus] = slider
@@ -465,7 +669,7 @@ func _add_row(page: VBoxContainer, title: String, control: Control) -> HBoxConta
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 12)
 	page.add_child(row)
-	var label := _label(title, 12)
+	var label := _label(title, 11)
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(label)
@@ -485,71 +689,83 @@ func _label(value: String, font_size: int, tint := CREAM) -> Label:
 func _button(value: String) -> Button:
 	var button := Button.new()
 	button.text = value
-	button.custom_minimum_size.y = 44
+	button.custom_minimum_size.y = 40
 	button.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	button.mouse_entered.connect(func() -> void:
+		if not button.disabled:
+			_play(SFX_HOVER, randf_range(1.3, 1.5), -18.0))
 	return button
 
 
 func _graphics_button() -> Button:
 	var button := _button("")
-	button.custom_minimum_size = Vector2(210, 34)
+	button.custom_minimum_size = Vector2(210, 32)
 	return button
 
 
+# ---------------------------------------------------------------- look
+
 func _draw_frame(panel: Control) -> void:
 	var frame := Rect2(Vector2.ZERO, panel.size)
-	panel.draw_rect(Rect2(Vector2(8, 10), frame.size), Color("#0b0711"))
-	Art.stone(panel, frame, Color("#aaa0b5"))
-	var inset := frame.grow(-22)
-	panel.draw_rect(inset, Color("#1c1325"))
-	panel.draw_rect(inset.grow(2), Color("#b0804d"), false, 2)
-	Art.plank(panel, Art.PLANK_WOOD, Rect2(22, 58, frame.size.x - 44, 8), Color("#ad8258"))
-	for corner in [Vector2(5, 5), Vector2(frame.size.x - 21, 5),
-			Vector2(5, frame.size.y - 21), frame.size - Vector2(21, 21)]:
-		panel.draw_texture_rect_region(Art.PLANK_GREY, Rect2(corner, Vector2(16, 16)), Rect2(0, 0, 8, 8))
+	panel.draw_rect(Rect2(Vector2(10, 12), frame.size), Color(0, 0, 0, 0.45))
+	panel.draw_rect(frame, Color(INK, 0.96))
+	panel.draw_rect(frame, EDGE, false, 2.0)
+	panel.draw_rect(Rect2(Vector2(2, 2), Vector2(frame.size.x - 4, 3)), ACCENT)
+	# Little pixel studs in the corners.
+	for corner in [Vector2(8, 12), Vector2(frame.size.x - 12, 12),
+			Vector2(8, frame.size.y - 12), frame.size - Vector2(12, 12)]:
+		panel.draw_rect(Rect2(corner, Vector2(4, 4)), EDGE.lightened(0.25))
 
 
 func _castle_theme() -> Theme:
 	var theme := Theme.new()
 	theme.default_font = FONT
 	theme.default_font_size = 11
-	theme.set_stylebox("normal", "Button", _plate(Art.PLANK_DARK, Color("#9c828e")))
-	theme.set_stylebox("hover", "Button", _plate(Art.PLANK_WOOD, Color("#c59b71")))
-	theme.set_stylebox("pressed", "Button", _plate(Art.PLANK_WOOD, Color("#ffd39d")))
-	theme.set_stylebox("hover_pressed", "Button", _plate(Art.PLANK_WOOD, Color("#ffdfaf")))
+	theme.set_stylebox("normal", "Button", _box(Color("#1d1427"), EDGE))
+	theme.set_stylebox("hover", "Button", _box(Color("#261a33"), ACCENT.darkened(0.25)))
+	theme.set_stylebox("pressed", "Button", _box(Color("#173323"), ACCENT))
+	theme.set_stylebox("hover_pressed", "Button", _box(Color("#1c3d2a"), ACCENT))
+	theme.set_stylebox("disabled", "Button", _box(Color("#140d1a"), Color("#2a2033")))
 	var focus := StyleBoxFlat.new()
 	focus.draw_center = false
-	focus.border_color = GOLD
+	focus.border_color = ACCENT
 	focus.set_border_width_all(2)
 	theme.set_stylebox("focus", "Button", focus)
-	for state in ["font_color", "font_hover_color", "font_pressed_color", "font_focus_color"]:
-		theme.set_color(state, "Button", CREAM if state == "font_color" else Color.WHITE)
-	theme.set_stylebox("slider", "HSlider", _track(Art.PLANK_DARK, Color("#8e747c")))
-	theme.set_stylebox("grabber_area", "HSlider", _track(Art.PLANK_WOOD, Color("#e1b66f")))
-	theme.set_stylebox("grabber_area_highlight", "HSlider", _track(Art.PLANK_WOOD, GOLD))
-	for state in ["grabber", "grabber_highlight"]:
-		var cap := AtlasTexture.new()
-		cap.atlas = Art.PLANK_GREY
-		cap.region = Rect2(0 if state == "grabber" else 8, 0, 8, 8)
-		theme.set_icon(state, "HSlider", cap)
+	theme.set_color("font_color", "Button", CREAM)
+	for state in ["font_hover_color", "font_focus_color"]:
+		theme.set_color(state, "Button", Color.WHITE)
+	for state in ["font_pressed_color", "font_hover_pressed_color"]:
+		theme.set_color(state, "Button", ACCENT.lightened(0.3))
+	theme.set_color("font_disabled_color", "Button", Color("#6d6178"))
+	var track := _box(Color("#0e0913"), EDGE)
+	track.set_content_margin_all(4)
+	theme.set_stylebox("slider", "HSlider", track)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = ACCENT.darkened(0.3)
+	fill.set_content_margin_all(4)
+	theme.set_stylebox("grabber_area", "HSlider", fill)
+	var fill_hi := fill.duplicate() as StyleBoxFlat
+	fill_hi.bg_color = ACCENT
+	theme.set_stylebox("grabber_area_highlight", "HSlider", fill_hi)
+	theme.set_icon("grabber", "HSlider", _square(14, CREAM))
+	theme.set_icon("grabber_highlight", "HSlider", _square(14, Color.WHITE))
 	return theme
 
 
-func _plate(texture: Texture2D, tint: Color) -> StyleBoxTexture:
-	var style := StyleBoxTexture.new()
-	style.texture = texture
-	style.modulate_color = tint
-	style.texture_margin_left = 8
-	style.texture_margin_right = 8
-	style.content_margin_left = 18
-	style.content_margin_right = 18
+func _box(fill: Color, border: Color) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = fill
+	style.border_color = border
+	style.set_border_width_all(2)
+	style.content_margin_left = 16
+	style.content_margin_right = 16
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
 	return style
 
 
-func _track(texture: Texture2D, tint: Color) -> StyleBoxTexture:
-	var style := _plate(texture, tint)
-	style.content_margin_left = 0
-	style.content_margin_right = 0
-	style.content_margin_top = 5
-	style.content_margin_bottom = 5
-	return style
+func _square(px: int, colour: Color) -> ImageTexture:
+	var image := Image.create(px, px, false, Image.FORMAT_RGBA8)
+	image.fill(colour)
+	image.fill_rect(Rect2i(0, px - 3, px, 3), colour.darkened(0.35))
+	return ImageTexture.create_from_image(image)
