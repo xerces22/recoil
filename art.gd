@@ -110,3 +110,111 @@ static func spike_row(ci: CanvasItem, width: float, height: float, modulate := C
 static func stand(ci: CanvasItem, tex: Texture2D, bottom_center: Vector2, scale := PX, modulate := Color.WHITE) -> void:
 	var size := tex.get_size() * scale
 	ci.draw_texture_rect(tex, Rect2(bottom_center - Vector2(size.x / 2.0, size.y), size), false, modulate)
+
+
+## Hex orb, one texture per crack stage (0 = whole, 5 = about to break). Recoloured from
+## MSavioti's CC0 "Crystal Orbs 32x32"; cracks and curse swirl drawn for this game.
+const ORB: Array[Texture2D] = [
+	preload("res://assets/sprites/boss/orb_0.png"),
+	preload("res://assets/sprites/boss/orb_1.png"),
+	preload("res://assets/sprites/boss/orb_2.png"),
+	preload("res://assets/sprites/boss/orb_3.png"),
+	preload("res://assets/sprites/boss/orb_4.png"),
+	preload("res://assets/sprites/boss/orb_5.png"),
+]
+## Bottom half left behind when the orb shatters.
+const ORB_SHELL := preload("res://assets/sprites/boss/orb_shell.png")
+const ORB_GLOW := Color("b46cff")
+
+
+## Draws the hex orb centred on `center` with a soft glow. `flash` > 0 whitens it for a hit.
+static func draw_orb(ci: CanvasItem, center: Vector2, cracks: int, scale := PX, flash := 0.0) -> void:
+	var tex := ORB[clampi(cracks, 0, ORB.size() - 1)]
+	var size := tex.get_size() * scale
+	var r := size.x / 2.0
+	ci.draw_circle(center, r + 14.0, Color(ORB_GLOW, 0.14))
+	ci.draw_circle(center, r + 6.0, Color(ORB_GLOW, 0.22))
+	var tint := Color.WHITE.lerp(Color(4, 4, 4), clampf(flash * 4.0, 0.0, 1.0))
+	ci.draw_texture_rect(tex, Rect2(center - size / 2.0, size), false, tint)
+
+
+## Swirling purple portal: ragged rim, then darker rings pulled to one side like a tunnel.
+static func draw_portal(ci: CanvasItem, center: Vector2, radius: float, spin: float) -> void:
+	if radius < 1.0:
+		return
+	var rim := PackedVector2Array()
+	for i in 36:
+		var a := TAU * i / 36.0
+		var r := radius * (1.0 + 0.13 * sin(a * 5.0 + spin * 9.0) + 0.07 * sin(a * 11.0 - spin * 13.0))
+		rim.append(center + Vector2.from_angle(a) * r)
+	ci.draw_colored_polygon(rim, Color(0.36, 0.2, 0.5))
+	var tunnel := Vector2(radius * 0.16, -radius * 0.04)
+	ci.draw_circle(center + tunnel * 0.5, radius * 0.8, Color(0.25, 0.12, 0.34))
+	ci.draw_circle(center + tunnel, radius * 0.62, Color(0.12, 0.05, 0.17))
+	ci.draw_circle(center + tunnel * 1.4, radius * 0.44, Color(0.04, 0.01, 0.06))
+	for ring in 3:
+		var r2 := radius * (0.3 + 0.17 * ring)
+		var start := spin * (6.0 - ring) + ring * 1.7
+		ci.draw_arc(center + tunnel * (1.4 - ring * 0.4), r2, start, start + 2.4, 12,
+			Color(0.45, 0.25, 0.6, 0.8), 2.0)
+	ci.draw_circle(center, radius * 1.25, Color(0.6, 0.35, 0.9, 0.08))
+
+
+## Clean and shiny: an expanding ring, sparkles, and a bright glow on the fixed gun.
+static func draw_shine(ci: CanvasItem, center: Vector2, f: float, scale := 1.0) -> void:
+	var fade := 1.0 - f
+	ci.draw_circle(center, (22.0 + 18.0 * f) * scale, Color(1.0, 0.95, 0.7, 0.18 * fade))
+	ci.draw_arc(center, (14.0 + 40.0 * f) * scale, 0, TAU, 32, Color(1.0, 0.95, 0.75, 0.8 * fade), 2.0 * scale)
+	for i in 6:
+		var a := TAU * i / 6.0 + f * 1.5
+		var p := center + Vector2.from_angle(a) * (16.0 + 26.0 * f) * scale
+		var s := (4.0 * fade + 1.0) * scale
+		var w := 1.5 * scale
+		ci.draw_rect(Rect2(p - Vector2(w / 3.0, s), Vector2(w, s * 2.0)), Color(1, 1, 0.85, fade))
+		ci.draw_rect(Rect2(p - Vector2(s, w / 3.0), Vector2(s * 2.0, w)), Color(1, 1, 0.85, fade))
+
+
+## Pixel-art ">" chevron pointing along `direction`, rasterised on a `px` grid so it stays crisp
+## at any angle. Same look as the player's aim chevron, any size and colour.
+static func draw_chevron(ci: CanvasItem, centre: Vector2, direction: Vector2, px: float,
+		fill_col := Color(1, 1, 1, 0.92), edge_col := Color(0.08, 0.04, 0.1, 0.85)) -> void:
+	var depth := 5.0 * px
+	var span := 5.5 * px
+	var thick := 0.9 * px
+	var outline := 1.9 * px
+	var side := direction.orthogonal()
+	centre = (centre / px).round() * px
+	var tip := centre + direction * depth * 0.5
+	var back := centre - direction * depth * 0.5
+	var arm_a := back + side * span
+	var arm_b := back - side * span
+	var reach := int(ceil((span + outline) / px))
+	var size := Vector2(px, px)
+	var fill: Array[Vector2] = []
+	for gx in range(-reach, reach + 1):
+		for gy in range(-reach, reach + 1):
+			var cell := centre + Vector2(gx, gy) * px
+			var mid := cell + size * 0.5
+			var dist := minf(mid.distance_to(Geometry2D.get_closest_point_to_segment(mid, tip, arm_a)),
+				mid.distance_to(Geometry2D.get_closest_point_to_segment(mid, tip, arm_b)))
+			if dist <= thick:
+				fill.append(cell)
+			elif dist <= outline:
+				ci.draw_rect(Rect2(cell, size), edge_col)
+	for cell in fill:
+		ci.draw_rect(Rect2(cell, size), fill_col)
+
+
+## A shotgun shell (red hull, brass base) like the ammo pips, `px` screen px per art pixel,
+## pointing along `rot` (base at the back). 6 x 11 art pixels. `parent` is the canvas transform
+## to draw inside (restored afterwards).
+static func draw_shell(ci: CanvasItem, center: Vector2, rot: float, px: float,
+		parent := Transform2D.IDENTITY) -> void:
+	ci.draw_set_transform_matrix(parent * Transform2D(rot + PI / 2.0, Vector2(px, px), 0.0, center))
+	var o := Vector2(-3, -5.5)
+	ci.draw_rect(Rect2(o - Vector2(1, 1), Vector2(8, 13)), Color(0.09, 0.05, 0.12))
+	ci.draw_rect(Rect2(o, Vector2(6, 7)), Color(0.82, 0.16, 0.12))
+	ci.draw_rect(Rect2(o, Vector2(2, 7)), Color(1.0, 0.45, 0.35))
+	ci.draw_rect(Rect2(o + Vector2(0, 7), Vector2(6, 4)), Color(0.9, 0.7, 0.25))
+	ci.draw_rect(Rect2(o + Vector2(0, 9), Vector2(6, 1)), Color(0.65, 0.45, 0.15))
+	ci.draw_set_transform_matrix(parent)

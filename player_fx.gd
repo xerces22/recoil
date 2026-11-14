@@ -90,6 +90,7 @@ func _make_sound(stream: AudioStream, volume_db: float) -> AudioStreamPlayer:
 	var sound := AudioStreamPlayer.new()
 	sound.stream = stream
 	sound.volume_db = volume_db
+	sound.bus = &"SFX"
 	add_child(sound)
 	return sound
 
@@ -298,39 +299,13 @@ func _ramp(span: Vector2) -> float:
 	return smoothstep(span.x, span.y, _t)
 
 
-## Swirling purple portal: ragged rim, then darker rings pulled to one side like a tunnel.
+## The portal and shine are shared with the boss fight; they live in Art.
 func _draw_portal(center: Vector2, radius: float, spin: float) -> void:
-	if radius < 1.0:
-		return
-	var rim := PackedVector2Array()
-	for i in 36:
-		var a := TAU * i / 36.0
-		var r := radius * (1.0 + 0.13 * sin(a * 5.0 + spin * 9.0) + 0.07 * sin(a * 11.0 - spin * 13.0))
-		rim.append(center + Vector2.from_angle(a) * r)
-	draw_colored_polygon(rim, Color(0.36, 0.2, 0.5))
-	var tunnel := Vector2(radius * 0.16, -radius * 0.04)
-	draw_circle(center + tunnel * 0.5, radius * 0.8, Color(0.25, 0.12, 0.34))
-	draw_circle(center + tunnel, radius * 0.62, Color(0.12, 0.05, 0.17))
-	draw_circle(center + tunnel * 1.4, radius * 0.44, Color(0.04, 0.01, 0.06))
-	for ring in 3:
-		var r2 := radius * (0.3 + 0.17 * ring)
-		var start := spin * (6.0 - ring) + ring * 1.7
-		draw_arc(center + tunnel * (1.4 - ring * 0.4), r2, start, start + 2.4, 12,
-			Color(0.45, 0.25, 0.6, 0.8), 2.0)
-	draw_circle(center, radius * 1.25, Color(0.6, 0.35, 0.9, 0.08))
+	Art.draw_portal(self, center, radius, spin)
 
 
-## Clean and shiny: an expanding ring, sparkles, and a bright glow on the fixed gun.
 func _draw_shine(center: Vector2, f: float) -> void:
-	var fade := 1.0 - f
-	draw_circle(center, 22.0 + 18.0 * f, Color(1.0, 0.95, 0.7, 0.18 * fade))
-	draw_arc(center, 14.0 + 40.0 * f, 0, TAU, 32, Color(1.0, 0.95, 0.75, 0.8 * fade), 2.0)
-	for i in 6:
-		var a := TAU * i / 6.0 + f * 1.5
-		var p := center + Vector2.from_angle(a) * (16.0 + 26.0 * f)
-		var s := 4.0 * fade + 1.0
-		draw_rect(Rect2(p - Vector2(0.5, s), Vector2(1.5, s * 2.0)), Color(1, 1, 0.85, fade))
-		draw_rect(Rect2(p - Vector2(s, 0.5), Vector2(s * 2.0, 1.5)), Color(1, 1, 0.85, fade))
+	Art.draw_shine(self, center, f)
 
 
 ## How bright the gun glows right after respawning (1 = just thrown out, 0 = normal).

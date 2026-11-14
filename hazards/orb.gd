@@ -7,7 +7,7 @@ extends Node2D
 signal hit(hits_left: int)
 signal shattered
 
-const RADIUS := 22.0
+const RADIUS := 28.0
 ## A shot hits if the orb is this close and inside the cone.
 const RANGE := 220.0
 ## Half-angle of the blast cone, in degrees.
@@ -30,6 +30,7 @@ var _flash := 0.0
 var _time := 0.0
 var _shards: Array[Dictionary] = []
 var _broken := false
+var _shell_t := 0.0
 
 
 func _ready() -> void:
@@ -47,6 +48,8 @@ func _process(delta: float) -> void:
 		return
 	_time += delta
 	_flash = maxf(0.0, _flash - delta)
+	if _broken:
+		_shell_t += delta
 	for shard in _shards:
 		shard.v.y += 600.0 * delta
 		shard.p += shard.v * delta
@@ -114,26 +117,23 @@ func _draw() -> void:
 		var a := clampf(shard.life * 2.0, 0.0, 1.0)
 		draw_rect(Rect2(shard.p - Vector2(3, 3), Vector2(6, 6)), Color(0.75, 0.4, 1.0, a))
 	if _broken:
+		# The bottom half of the glass drops and fades.
+		var a := clampf(1.0 - _shell_t / 1.2, 0.0, 1.0)
+		if a > 0.0:
+			var size := Art.ORB_SHELL.get_size() * Art.PX
+			var at := Vector2(0, 300.0 * _shell_t * _shell_t) - size / 2.0
+			draw_texture_rect(Art.ORB_SHELL, Rect2(at, size), false, Color(1, 1, 1, a))
 		return
 	_draw_cone()
 	_draw_orb(hits - hits_left)
 
 
 func _draw_orb(cracks: int) -> void:
-	var pulse := 1.0 + 0.06 * sin(_time * 3.0)
-	var bob := Vector2(0, sin(_time * 2.0) * 4.0)
-	var r := RADIUS * pulse
-	draw_circle(bob, r + 14.0, Color(0.6, 0.2, 0.9, 0.18))
-	draw_circle(bob, r + 6.0, Color(0.6, 0.2, 0.9, 0.3))
-	draw_circle(bob, r, Color(1, 1, 1) if _flash > 0.0 else Color(0.45, 0.12, 0.7))
-	draw_circle(bob + Vector2(-6, -6), r * 0.45, Color(0.85, 0.6, 1.0, 0.8))
-	draw_circle(bob + Vector2(-8, -9), r * 0.15, Color(1, 1, 1, 0.9))
-	# One crack per hit taken.
-	var crack := Color(0.1, 0.02, 0.15)
-	if cracks >= 1:
-		draw_polyline(PackedVector2Array([bob + Vector2(-4, -r), bob + Vector2(2, -8), bob + Vector2(-3, 0), bob + Vector2(5, 9)]), crack, 2.0)
-	if cracks >= 2:
-		draw_polyline(PackedVector2Array([bob + Vector2(r, 2), bob + Vector2(8, 4), bob + Vector2(3, -3), bob + Vector2(-9, 6), bob + Vector2(-r + 2, 10)]), crack, 2.0)
+	var bob := Vector2(0, roundf(sin(_time * 2.0) * 2.0) * Art.PX)
+	var r := Art.ORB[0].get_width() * Art.PX / 2.0
+	# Spread the hits over the crack stages: 3 hits -> stages 0, 2, 4.
+	var stage := int(float(cracks) / hits * Art.ORB.size())
+	Art.draw_orb(self, bob, stage, Art.PX, _flash)
 	# Hits-left pips above the orb.
 	for i in hits:
 		var at := bob + Vector2((i - (hits - 1) / 2.0) * 14.0, -r - 18.0)

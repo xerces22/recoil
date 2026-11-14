@@ -54,11 +54,19 @@ var _screen := Screen.TITLE
 var _base := Screen.TITLE
 var _settings_return := Screen.TITLE
 var _pause_button: Button
+## Set by main.gd once the witch is beaten: no pausing through the ending and end card.
+var pause_locked := false:
+	set(value):
+		pause_locked = value
+		if _pause_button != null:
+			_pause_button.visible = _screen == Screen.PLAY and not value
 var _menu_overlay: Control
 var _menu_heading: Label
 var _title_actions: VBoxContainer
 var _pause_actions: VBoxContainer
 var _floor_actions: VBoxContainer
+## Continue on the title; becomes Level Select once the witch is beaten.
+var _continue_item: MenuItem
 var _logo: TextureRect
 var _credits: Control
 var _particles: Node2D
@@ -312,7 +320,7 @@ func _build_run_menu(theme: Theme) -> void:
 	_floor_actions.add_theme_constant_override("separation", 0)
 
 	_add_action(_title_actions, "New Game", SFX_NEW, _new_game)
-	_add_action(_title_actions, "Continue", SFX_CONTINUE, _show_screen.bind(Screen.FLOORS))
+	_continue_item = _add_action(_title_actions, "Continue", SFX_CONTINUE, _show_screen.bind(Screen.FLOORS))
 	_add_action(_title_actions, "Settings", SFX_SETTINGS, open)
 	_add_action(_title_actions, "Credits", SFX_CREDITS, _toggle_credits)
 	if not OS.has_feature("web"):
@@ -410,7 +418,7 @@ func _draw_side(side: Control) -> void:
 	side.draw_rect(Rect2(40, 272, 60, 2), ACCENT)
 	side.draw_rect(Rect2(40, 662, SIDE_W - 80, 2), Color(PURPLE, 0.9))
 	side.draw_string(FONT, Vector2(40, 690), "Developed by luhcalmdevs", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.75))
-	side.draw_string(FONT, Vector2(40, 706), "v1.0  jam build", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.45))
+	side.draw_string(FONT, Vector2(40, 706), "v1.0", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.45))
 
 
 ## A full-screen holder that centres its child in the area right of the side panel.
@@ -469,8 +477,18 @@ func _rebuild_floors() -> void:
 		var label := "%2d  %s" % [i + 1, titles[i].to_upper() if open_floor else "?"]
 		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 12)
 		item.set_locked(not open_floor)
-	_floor_actions.add_child(_spacer(14))
+	# Beat her once and you can come back for a rematch any time.
+	var beaten: bool = game.boss_beaten()
+	if beaten:
+		_add_action(_floor_actions, "%2d  BOSS FIGHT" % (titles.size() + 1), SFX_FLOOR, _fight_boss, 12)
+	_floor_actions.add_child(_spacer(0 if beaten else 14))
 	_add_action(_floor_actions, "Back", SFX_BACK, _show_screen.bind(Screen.TITLE), 16)
+
+
+func _fight_boss() -> void:
+	_fade_through(func() -> void:
+		_show_screen(Screen.PLAY)
+		game.start_boss_from_menu())
 
 
 func _new_game() -> void:
@@ -578,7 +596,7 @@ func _show_screen(screen: Screen) -> void:
 	_screen = screen
 	var on_title := _base == Screen.TITLE
 	get_tree().paused = screen != Screen.PLAY
-	_pause_button.visible = screen == Screen.PLAY
+	_pause_button.visible = screen == Screen.PLAY and not pause_locked
 	_menu_overlay.visible = screen != Screen.PLAY
 	_overlay.visible = screen == Screen.SETTINGS
 	_credits.visible = screen == Screen.CREDITS
@@ -591,6 +609,9 @@ func _show_screen(screen: Screen) -> void:
 	_title_actions.visible = on_title and screen != Screen.FLOORS
 	_pause_actions.visible = _base == Screen.PAUSE
 	_floor_actions.visible = screen == Screen.FLOORS
+	if _continue_item != null and game != null and screen == Screen.TITLE:
+		_continue_item.text = "Level Select" if game.boss_beaten() else "Continue"
+		_continue_item.button.text = _continue_item.text
 	_apply_cursor()
 	if game != null:
 		# In-game HUD only while actually playing; menus get a clean screen.
@@ -653,7 +674,7 @@ func _input(event: InputEvent) -> void:
 		elif _screen in [Screen.CREDITS, Screen.FLOORS]:
 			_play(SFX_BACK, 1.0, -8.0)
 			_show_screen(_base)
-		elif _screen == Screen.PLAY:
+		elif _screen == Screen.PLAY and not pause_locked:
 			_show_screen(Screen.PAUSE)
 		elif _screen == Screen.PAUSE:
 			_show_screen(Screen.PLAY)
