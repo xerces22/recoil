@@ -1,10 +1,7 @@
 extends Control
-## Opening logo: the white Cursed Shotgun logo fades in on black with a shotgun blast,
-## holds, fades out, then loads the game (title screen). Any key or click skips.
+## Opening logo: the white Cursed Shotgun logo fades in on black, holds, fades out, then loads the game (title screen). Any key or click skips.
 
 const LOGO := preload("res://assets/sprites/logo/logo_mono.png")
-const BLAST := preload("res://assets/sfx/shotgun_blast_mossberg_1.wav")
-const Preferences = preload("res://game_preferences.gd")
 const NEXT_SCENE := "res://main.tscn"
 
 const FADE_IN := 0.5
@@ -16,9 +13,6 @@ var _leaving := false
 
 
 func _ready() -> void:
-	# Apply saved volumes so the blast respects the player's settings.
-	Preferences.new().load_saved()
-
 	var black := ColorRect.new()
 	black.color = Color.BLACK
 	add_child(black)
@@ -34,17 +28,10 @@ func _ready() -> void:
 	_logo.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_logo.pivot_offset = get_viewport_rect().size / 2.0
 
-	var blast := AudioStreamPlayer.new()
-	blast.stream = BLAST
-	blast.volume_db = -6.0
-	blast.bus = &"SFX"
-	add_child(blast)
-
-	# Logo punches in slightly oversized and settles, like it was just fired.
+	# Logo eases in slightly oversized and settles.
 	_logo.scale = Vector2.ONE * 1.08
 	var tween := create_tween()
 	tween.tween_interval(0.3)
-	tween.tween_callback(blast.play)
 	tween.tween_property(_logo, "modulate:a", 1.0, FADE_IN)
 	tween.parallel().tween_property(_logo, "scale", Vector2.ONE, FADE_IN) \
 		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
