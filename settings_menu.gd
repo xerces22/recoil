@@ -30,7 +30,7 @@ const SFX_BACK := preload("res://assets/sfx/impactWood_light_002.ogg")
 const SFX_FLOOR := preload("res://assets/sfx/checkpoint_fire.ogg")
 
 const CREDITS := [
-	["A game by", "nullMuath and xerces"],
+	["Developed by", "luhcalmdevs (nullMuath and xerces)"],
 	["Art", "Crumpaloo (Whimsy Hallow), Quintino Pixels, Leozlk (Shotguns Only)"],
 	["Hat", "Stetson Cowboy Hat by Jordan Irwin (AntumDeluge), CC BY 4.0"],
 	["Music", "HydroGene, Pro Sensory (Alex McCulloch), Sudocolon"],
@@ -63,7 +63,10 @@ var _logo: TextureRect
 var _credits: Control
 var _particles: Node2D
 var _void: Control
-var _best: Label
+var _tip_floor: Label
+var _tip_text: Label
+var _fader: ColorRect
+var _busy := false
 var _sfx: AudioStreamPlayer
 var _time := 0.0
 var _overlay: ColorRect
@@ -230,6 +233,7 @@ func _ready() -> void:
 	footer.add_child(back)
 
 	_build_credits(theme)
+	_build_fader()
 	_select_tab(0)
 	_refresh()
 	_show_screen(Screen.TITLE)
@@ -288,13 +292,19 @@ func _build_run_menu(theme: Theme) -> void:
 	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	side.add_child(_logo)
 
-	_best = _label("", 10, GOLD)
-	_best.position = Vector2(40, 636)
-	side.add_child(_best)
-
 	_menu_heading = _label("Paused", 28, ACCENT)
-	_menu_heading.position = Vector2(62, 150)
+	_menu_heading.position = Vector2(44, 52)
 	side.add_child(_menu_heading)
+	# Pause shows the current floor and its tip (the HUD no longer does).
+	_tip_floor = _label("", 11, GOLD)
+	_tip_floor.position = Vector2(44, 116)
+	side.add_child(_tip_floor)
+	_tip_text = _label("", 10, LILAC)
+	_tip_text.position = Vector2(44, 144)
+	_tip_text.size = Vector2(SIDE_W - 84, 110)
+	_tip_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_tip_text.add_theme_constant_override("line_spacing", 6)
+	side.add_child(_tip_text)
 
 	_title_actions = _action_list(side, 290)
 	_pause_actions = _action_list(side, 290)
@@ -399,7 +409,7 @@ func _draw_side(side: Control) -> void:
 	side.draw_rect(Rect2(40, 272, SIDE_W - 80, 2), Color(PURPLE, 0.9))
 	side.draw_rect(Rect2(40, 272, 60, 2), ACCENT)
 	side.draw_rect(Rect2(40, 662, SIDE_W - 80, 2), Color(PURPLE, 0.9))
-	side.draw_string(FONT, Vector2(40, 690), "A cursed knight. A climbing gun.", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.75))
+	side.draw_string(FONT, Vector2(40, 690), "Developed by luhcalmdevs", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.75))
 	side.draw_string(FONT, Vector2(40, 706), "v1.0  jam build", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.45))
 
 
@@ -464,28 +474,101 @@ func _rebuild_floors() -> void:
 
 
 func _new_game() -> void:
-	_show_screen(Screen.PLAY)
-	start_requested.emit()
+	_fade_through(func() -> void:
+		_show_screen(Screen.PLAY)
+		start_requested.emit())
 
 
 func _continue_from(index: int) -> void:
-	_show_screen(Screen.PLAY)
-	game.continue_from(index)
+	_fade_through(func() -> void:
+		_show_screen(Screen.PLAY)
+		game.continue_from(index))
 
 
 func _exit_game() -> void:
-	await get_tree().create_timer(0.25).timeout
-	get_tree().quit()
+	_fade_through(get_tree().quit, 0.5)
 
 
 func _restart() -> void:
-	restart_requested.emit()
-	_show_screen(Screen.PLAY)
+	_fade_through(func() -> void:
+		restart_requested.emit()
+		_show_screen(Screen.PLAY))
 
 
 func _quit_run() -> void:
-	quit_requested.emit()
-	_show_screen(Screen.TITLE)
+	_fade_through(func() -> void:
+		quit_requested.emit()
+		_show_screen(Screen.TITLE))
+
+
+# ---------------------------------------------------------------- transitions
+
+## Black fade over everything: fade out, run `action` while the screen is black, fade back in.
+## Input is blocked during the fade so a double click can't start two things.
+func _fade_through(action: Callable, out_time := 0.35) -> void:
+	if _busy:
+		return
+	_busy = true
+	_fader.mouse_filter = Control.MOUSE_FILTER_STOP
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(_fader, "color:a", 1.0, out_time).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(action)
+	tween.tween_interval(0.15)
+	tween.tween_property(_fader, "color:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(func() -> void:
+		_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_busy = false)
+
+
+func _build_fader() -> void:
+	var top := CanvasLayer.new()
+	top.layer = 100
+	top.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(top)
+	_fader = ColorRect.new()
+	_fader.color = Color(0, 0, 0, 1)
+	_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	top.add_child(_fader)
+	_fader.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# The game opens from the black intro: fade the title in.
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(_fader, "color:a", 0.0, 0.7).set_trans(Tween.TRANS_SINE)
+
+
+## Small entrance animations so screens slide in instead of popping.
+func _animate_in(screen: Screen) -> void:
+	var targets: Array[CanvasItem] = []
+	match screen:
+		Screen.TITLE:
+			targets = [_title_actions, _logo]
+		Screen.PAUSE:
+			targets = [_pause_actions, _menu_heading, _tip_floor, _tip_text]
+		Screen.FLOORS:
+			targets = [_floor_actions]
+		Screen.SETTINGS:
+			targets = [_overlay]
+		Screen.CREDITS:
+			targets = [_credits]
+	var delay := 0.0
+	for item in targets:
+		var control := item as Control
+		var rest_x: float = control.get_meta("rest_x", control.position.x)
+		control.set_meta("rest_x", rest_x)
+		control.modulate.a = 0.0
+		control.position.x = rest_x - 26.0
+		var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS).set_parallel()
+		tween.tween_property(control, "modulate:a", 1.0, 0.25).set_delay(delay)
+		tween.tween_property(control, "position:x", rest_x, 0.3).set_delay(delay) \
+			.set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+		delay += 0.05
+	# Floor list: each row drops in a beat after the one above.
+	if screen == Screen.FLOORS:
+		var i := 0
+		for row in _floor_actions.get_children():
+			(row as Control).modulate.a = 0.0
+			create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS) \
+				.tween_property(row, "modulate:a", 1.0, 0.2).set_delay(0.04 * i)
+			i += 1
 
 
 func _show_screen(screen: Screen) -> void:
@@ -501,7 +584,8 @@ func _show_screen(screen: Screen) -> void:
 	_credits.visible = screen == Screen.CREDITS
 	_particles.visible = on_title
 	_void.visible = on_title
-	_best.visible = on_title
+	_tip_floor.visible = _base == Screen.PAUSE
+	_tip_text.visible = _base == Screen.PAUSE
 	_logo.visible = on_title
 	_menu_heading.visible = _base == Screen.PAUSE
 	_title_actions.visible = on_title and screen != Screen.FLOORS
@@ -510,9 +594,15 @@ func _show_screen(screen: Screen) -> void:
 	_apply_cursor()
 	if game != null:
 		# In-game HUD only while actually playing; menus get a clean screen.
+		# Floor name and tips moved to the pause screen, so they stay off the HUD.
 		game.get_node("HUD").visible = screen == Screen.PLAY
-	if game != null and on_title:
-		_best.text = "Highest floor  %d/%d" % [game.reached_floor() + 1, game.FLOORS.size()]
+		game.title_label.visible = false
+		game.instructions.visible = false
+	if game != null and _base == Screen.PAUSE and game.level != null:
+		var number: int = game.floor_numbers[game.current] + 1
+		_tip_floor.text = "FLOOR %d  %s" % [number, String(game.level.title).to_upper()]
+		_tip_text.text = game.level.hint
+	_animate_in(screen)
 	match screen:
 		Screen.TITLE:
 			_title_actions.get_child(0).button.grab_focus.call_deferred()
