@@ -1,0 +1,47 @@
+== floor 10: levels/level_10_morwen.tscn
+== levels/level_10_morwen.tscn  (Morwen)
+   note: orb: the goal is standing in the orb room (hits are not simulated)
+   start: SlabLeft   goal: ['P13_OrbRoom']
+   CHEAPEST ROUTE:
+                     SlabLeft -> SlabRight                1 shell   19 ways   2 shells  1898 ways
+                    SlabRight -> Gargoyle1Mount           1 shell   --        2 shells    17 ways
+               Gargoyle1Mount -> P03_Lift@start           1 shell    5 ways   2 shells   714 ways
+               P03_Lift@start -> P03_Lift@end             ride the platform
+                 P03_Lift@end -> P05_GateF                1 shell   --        2 shells     3 ways
+                    P05_GateF -> P06_Wisp                 1 shell   --        2 shells    89 ways
+                     P06_Wisp -> P09_Wisp                 1 shell   --        2 shells    20 ways
+                     P09_Wisp -> P10_Ledge                1 shell   77 ways   2 shells    --    
+                    P10_Ledge -> P12_Ledge                1 shell   --        2 shells    12 ways
+                    P12_Ledge -> P13_OrbRoom              1 shell   --        2 shells   300 ways
+   INTENDED PATH:
+                     SlabLeft -> P01_Ledge                1 shell   --        2 shells   205 ways
+                    P01_Ledge -> P02_Crumble              1 shell    4 ways   2 shells   619 ways
+                  P02_Crumble -> P03_Lift                 1 shell    4 ways   2 shells   616 ways
+                     P03_Lift -> P04_Checkpoint           1 shell   16 ways   2 shells  1488 ways
+               P04_Checkpoint -> P05_GateF                1 shell    1 ways   2 shells   327 ways
+                    P05_GateF -> P06_Wisp                 1 shell   --        2 shells    89 ways
+                     P06_Wisp -> P07_Checkpoint           1 shell   26 ways   2 shells  1922 ways
+               P07_Checkpoint -> P08_Ledge                1 shell    1 ways   2 shells   385 ways
+                    P08_Ledge -> P09_Wisp                 1 shell    3 ways   2 shells   178 ways
+                     P09_Wisp -> P10_Ledge                1 shell   77 ways   2 shells    --    
+                    P10_Ledge -> P11_Crumble              1 shell    2 ways   2 shells   372 ways
+                  P11_Crumble -> P12_Ledge                1 shell   --        2 shells   190 ways
+                    P12_Ledge -> P13_OrbRoom              1 shell   --        2 shells   300 ways
+   plans for 13 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_10.json
+   dead ends: none
+   never landed on: ['Ceiling', 'WallLeft', 'WallRight']
+REPLAY levels/level_10_morwen.tscn
+  ok                   SlabLeft -> P01_Ledge             7 / 12 plans work in the real game
+  ok                  P01_Ledge -> P02_Crumble           8 / 24 plans work in the real game
+  ok                P02_Crumble -> P03_Lift             18 / 24 plans work in the real game
+  ok                   P03_Lift -> P04_Checkpoint       19 / 24 plans work in the real game
+  ok             P04_Checkpoint -> P05_GateF             9 / 24 plans work in the real game
+  ok                  P05_GateF -> P06_Wisp             16 / 24 plans work in the real game
+  ok                   P06_Wisp -> P07_Checkpoint       13 / 16 plans work in the real game
+  ok             P07_Checkpoint -> P08_Ledge            20 / 24 plans work in the real game
+  ok                  P08_Ledge -> P09_Wisp             15 / 24 plans work in the real game
+  ok                   P09_Wisp -> P10_Ledge             8 /  8 plans work in the real game
+  ok                  P10_Ledge -> P11_Crumble          10 / 24 plans work in the real game
+  ok                P11_Crumble -> P12_Ledge            23 / 24 plans work in the real game
+  ok                  P12_Ledge -> P13_OrbRoom          22 / 24 plans work in the real game
+RESULT: OK

@@ -1,0 +1,58 @@
+== floor 6: levels/level_06_gargoyle_gallery.tscn
+== levels/level_06_gargoyle_gallery.tscn  (Gargoyle Gallery)
+   start: SlabRight   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                    SlabRight -> P06_Ledge                1 shell   --        2 shells    80 ways
+                    P06_Ledge -> P08_Ledge                1 shell   --        2 shells    25 ways
+                    P08_Ledge -> P10_Slider@start         1 shell   --        2 shells    17 ways
+             P10_Slider@start -> P10_Slider@end           ride the platform
+               P10_Slider@end -> P12_Ledge                1 shell   --        2 shells    27 ways
+                    P12_Ledge -> P13_Ledge                1 shell   --        2 shells   178 ways
+                    P13_Ledge -> P14_Crumble              1 shell    5 ways   2 shells   820 ways
+                  P14_Crumble -> P16_Ledge                1 shell   --        2 shells    26 ways
+                    P16_Ledge -> P18_ExitLedge            1 shell   --        2 shells   103 ways
+                P18_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   INTENDED PATH:
+                    SlabRight -> P01_Island               1 shell   15 ways   2 shells  1248 ways
+                   P01_Island -> P02_Island               1 shell   10 ways   2 shells  1039 ways
+                   P02_Island -> P03_Island               1 shell   10 ways   2 shells  1039 ways
+                   P03_Island -> P04_Island               1 shell   10 ways   2 shells  1039 ways
+                   P04_Island -> P05_Checkpoint           1 shell    2 ways   2 shells   327 ways
+               P05_Checkpoint -> P06_Ledge                1 shell    1 ways   2 shells   235 ways
+                    P06_Ledge -> P07_Crumble              1 shell    2 ways   2 shells   451 ways
+                  P07_Crumble -> P08_Ledge                1 shell    3 ways   2 shells   616 ways
+                    P08_Ledge -> P09_Checkpoint           1 shell    3 ways   2 shells   647 ways
+               P09_Checkpoint -> P10_Slider               1 shell    8 ways   2 shells   893 ways
+                   P10_Slider -> P11_Checkpoint           1 shell   23 ways   2 shells  1627 ways
+               P11_Checkpoint -> P12_Ledge                1 shell   --        2 shells   145 ways
+                    P12_Ledge -> P13_Ledge                1 shell   --        2 shells   178 ways
+                    P13_Ledge -> P14_Crumble              1 shell    5 ways   2 shells   820 ways
+                  P14_Crumble -> P15_Crumble              1 shell    6 ways   2 shells   782 ways
+                  P15_Crumble -> P16_Ledge                1 shell    8 ways   2 shells  1103 ways
+                    P16_Ledge -> P17_Ledge                1 shell   17 ways   2 shells  1254 ways
+                    P17_Ledge -> P18_ExitLedge            1 shell    8 ways   2 shells   934 ways
+                P18_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   plans for 19 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_06.json
+   dead ends: none
+   never landed on: ['Blocker', 'Floor2', 'Roof1', 'Roof2']
+REPLAY levels/level_06_gargoyle_gallery.tscn
+  ok                  SlabRight -> P01_Island           13 / 16 plans work in the real game
+  ok                 P01_Island -> P02_Island           10 / 24 plans work in the real game
+  ok                 P02_Island -> P03_Island            5 / 24 plans work in the real game
+  ok                 P03_Island -> P04_Island            7 / 24 plans work in the real game
+  ok                 P04_Island -> P05_Checkpoint        6 / 24 plans work in the real game
+  ok             P05_Checkpoint -> P06_Ledge            22 / 24 plans work in the real game
+  ok                  P06_Ledge -> P07_Crumble           9 / 24 plans work in the real game
+  ok                P07_Crumble -> P08_Ledge            16 / 24 plans work in the real game
+  ok                  P08_Ledge -> P09_Checkpoint       14 / 24 plans work in the real game
+  ok             P09_Checkpoint -> P10_Slider           14 / 24 plans work in the real game
+  ok                 P10_Slider -> P11_Checkpoint       20 / 24 plans work in the real game
+  ok             P11_Checkpoint -> P12_Ledge            18 / 24 plans work in the real game
+  ok                  P12_Ledge -> P13_Ledge            22 / 24 plans work in the real game
+  ok                  P13_Ledge -> P14_Crumble           7 / 24 plans work in the real game
+  ok                P14_Crumble -> P15_Crumble           8 / 24 plans work in the real game
+  ok                P15_Crumble -> P16_Ledge            14 / 24 plans work in the real game
+  ok                  P16_Ledge -> P17_Ledge            17 / 24 plans work in the real game
+  ok                  P17_Ledge -> P18_ExitLedge        13 / 24 plans work in the real game
+  ok              P18_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: OK

@@ -101,28 +101,23 @@ warn_time = 0.4
 shut_time = 0.5
 phase = 0.5
 
-[node name="GateFFloor1" type="StaticBody2D" parent="."]
-position = Vector2(1200, -290)
+[node name="P05_GateF" type="StaticBody2D" parent="."]
+position = Vector2(1292.5, -290)
 script = ExtResource("block")
-size = Vector2(460, 20)
+size = Vector2(645, 20)
 
 [node name="GateFMouth1" type="Node2D" parent="."]
-position = Vector2(1500, -290)
+position = Vector2(1690, -290)
 script = ExtResource("mouth")
-gap = Vector2(140, 36)
+gap = Vector2(150, 36)
 open_time = 1.1
 warn_time = 0.4
 shut_time = 0.5
 
 [node name="GateFFloorEnd" type="StaticBody2D" parent="."]
-position = Vector2(2049, -290)
+position = Vector2(2146.5, -290)
 script = ExtResource("block")
-size = Vector2(958, 20)
-
-[node name="P05_Ledge" type="StaticBody2D" parent="."]
-position = Vector2(1300, -452)
-script = ExtResource("block")
-size = Vector2(160, 16)
+size = Vector2(763, 20)
 
 [node name="P06_Wisp" type="Node2D" parent="."]
 position = Vector2(950, -600)

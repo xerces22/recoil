@@ -12,9 +12,9 @@
                      P08_Wisp -> P09_Wisp                 1 shell   19 ways   2 shells    --    
                      P09_Wisp -> P10_Wisp                 1 shell   59 ways   2 shells    --    
                      P10_Wisp -> P11_Checkpoint           1 shell   57 ways   2 shells    --    
-               P11_Checkpoint -> GateEFloorEnd            1 shell   --        2 shells    13 ways
-                GateEFloorEnd -> P13_Wisp                 1 shell   --        2 shells    60 ways
-                     P13_Wisp -> P14_ExitLedge            1 shell   31 ways   2 shells    --    
+               P11_Checkpoint -> P12_GateE                1 shell    1 ways   2 shells   187 ways
+                    P12_GateE -> P13_Wisp                 1 shell   --        2 shells    54 ways
+                     P13_Wisp -> P14_ExitLedge            1 shell   20 ways   2 shells    --    
                 P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
    INTENDED PATH:
                     SlabRight -> P01_Crumble              1 shell   --        2 shells    86 ways
@@ -28,9 +28,9 @@
                      P08_Wisp -> P09_Wisp                 1 shell   19 ways   2 shells    --    
                      P09_Wisp -> P10_Wisp                 1 shell   59 ways   2 shells    --    
                      P10_Wisp -> P11_Checkpoint           1 shell   57 ways   2 shells    --    
-               P11_Checkpoint -> P12_Ledge                !! NOT POSSIBLE
-                    P12_Ledge -> P13_Wisp                 1 shell    2 ways   2 shells   403 ways
-                     P13_Wisp -> P14_ExitLedge            1 shell   31 ways   2 shells    --    
+               P11_Checkpoint -> P12_GateE                1 shell    1 ways   2 shells   187 ways
+                    P12_GateE -> P13_Wisp                 1 shell   --        2 shells    54 ways
+                     P13_Wisp -> P14_ExitLedge            1 shell   20 ways   2 shells    --    
                 P14_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
    plans for 15 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_09.json
    dead ends: none
@@ -47,8 +47,8 @@ REPLAY levels/level_09_everything_hates_you.tscn
   ok                   P08_Wisp -> P09_Wisp              8 /  8 plans work in the real game
   ok                   P09_Wisp -> P10_Wisp              8 /  8 plans work in the real game
   ok                   P10_Wisp -> P11_Checkpoint        6 /  8 plans work in the real game
-  FAIL           P11_Checkpoint -> P12_Ledge             0 /  0 plans work in the real game
-  ok                  P12_Ledge -> P13_Wisp             13 / 24 plans work in the real game
-  ok                   P13_Wisp -> P14_ExitLedge         8 /  8 plans work in the real game
+  ok             P11_Checkpoint -> P12_GateE             9 / 24 plans work in the real game
+  ok                  P12_GateE -> P13_Wisp              8 / 16 plans work in the real game
+  ok                   P13_Wisp -> P14_ExitLedge         7 /  8 plans work in the real game
   ok              P14_ExitLedge -> EXIT                 23 / 24 plans work in the real game
-RESULT: 1 hops FAILED
+RESULT: OK

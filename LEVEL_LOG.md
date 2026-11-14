@@ -4,10 +4,16 @@ Running log of the level-design work. **Read the "Where we are" section first** 
 
 ## Where we are
 
-- **Current step:** all 10 floors are built and registered in `main.gd`. Checks running in the background: floor 6 (re-check after a fix), 8, 9 and 10. Each writes to `tools/verify_NN.txt`.
-- **Next step:** read `tools/verify_06.txt`, `_08`, `_09` and `_10`, fix and re-check any failing floor, then run `tools/check_tower.gd` on the whole tower and log the final state.
-- **Open issue sent to the Art Session:** the barrel touching a slime pad always gives only `min_speed` (see step 9). Not fixed yet; player.gd is the Art Session's file.
-- **Not committed.** All work is local, in the `assets-test` checkout. Nothing is pushed.
+- **All 10 floors are built and verified.** Every floor passes the solver (a route exists, no dead ends) and the real-game replay (every intended jump works in the actual game with the barrel, the capsule body, spikes, wisps, movers, gargoyles, doors and the flood). The full tower check passes too: all 10 floors stack hole-to-hole, and every start is safe.
+- **Git:**
+  - The user committed "Playtest 1 snapshot" (`0cdb3f0`) on branch `playtest1` at 02:42 and pushed it.
+  - That snapshot has floors 8–10 **before** the fixes in steps 19–21, plus older verify files.
+  - The fixes since then are **uncommitted** in the working tree: floors 8–10, `tools/`, `main.gd` (the spike-arming fix) and the docs.
+- **Next steps (not level design):**
+  1. Commit the fixes on `playtest1` when the user says so.
+  2. Playtest by hand. Machines found every jump possible, but only a person can judge fun and difficulty.
+  3. Wire the hex orb and the ending (floor 10's orb room uses a finish platform for now).
+  4. The Art Session may fix barrel-on-slime bounces (step 9).
 
 ## How the floors are made
 
@@ -39,13 +45,13 @@ Running log of the level-design work. **Read the "Where we are" section first** 
 | 3 | Cellar | The Chain Lift | Moving platforms, lifts | Arrive far right, ride LEFT over a spike river, lift up, fast slider back RIGHT under a spiked crusher | **Done** (solver + replay pass) |
 | 4 | Library | Quiet Please | Slime pads and bounce walls | Across right on a pinball run of pads, up a shaft with slime walls, back LEFT on top | **Done** (solver + replay pass) |
 | 5 | Library | Rotten Shelves | Crumbling shelves | Switchback: LEFT over safe floor, RIGHT above a spiked divider into a lift, LEFT on fast crumbles | **Done** (solver + replay pass) |
-| 6 | Library | Gargoyle Gallery | Turrets | Lightning bolt of 3 corridors: RIGHT, LEFT on a long slider, RIGHT across the top (exam floor) | Built, re-check running |
+| 6 | Library | Gargoyle Gallery | Turrets | Lightning bolt of 3 corridors: RIGHT, LEFT on a long slider, RIGHT across the top (exam floor) | **Done** (solver + replay pass) |
 | 7 | Library | Mind the Doors | Mimic doors (mouths) | Door hops up through gates, a corridor LEFT with a sideways door, a double gate | **Done** (solver + replay pass) |
-| 8 | Tower | It's Boiling | Flood, whole floor | Spiral: RIGHT, LEFT, RIGHT with a wisp, slider, crumble and pad | Built, check running |
-| 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor LEFT over a pit, a second diagonal tunnel going up-RIGHT, gate and aimed gargoyle | Built, check running |
-| 10 | Tower | Morwen | Orb room | Gargoyle and lift, a two-door gate, then the flood up to the orb room | Built, check running |
+| 8 | Tower | It's Boiling | Flood, whole floor | Spiral: RIGHT, LEFT, RIGHT between spiked dividers, with a wisp, slider, crumble and pad | **Done** (solver + replay pass) |
+| 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor LEFT over a pit, a second diagonal tunnel going up-RIGHT, gate and aimed gargoyle | **Done** (solver + replay pass) |
+| 10 | Tower | Morwen | Orb room | Gargoyle and lift, a two-door gate, then the flood up to the orb room | **Done** (solver + replay pass) |
 
-Order change from STORY.md: wisps moved to floor 2 (the tunnel needs them) and movers to floor 3. Update STORY.md and LEVEL_DESIGN.md's tables when the floors are done.
+Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor 3. The floor tables in STORY.md and LEVEL_DESIGN.md are updated to match (step 23).
 
 ## Step log
 
@@ -230,3 +236,70 @@ Order change from STORY.md: wisps moved to floor 2 (the tunnel needs them) and m
   - C: the flood from just above P07 (`trigger_y` -730, speed 55, acceleration 3). P08, BoilPad, wisp P09, P10, crumble P11, P12.
   - **Orb room:** P13_OrbRoom, a 480-wide finish platform at top -1520. The HexOrb sits above it with hop spots. The orb isn't wired into main.gd yet, so the finish platform ends the run for now.
 - All three are registered in `main.gd`. The FLOORS list now has all 10.
+
+### 17. First checks of floors 8, 9 and 10, and fixes (re-checks running)
+- **Floor 8:** solver and replay pass (all 14 hops work in the real game), **but there was a big shortcut:** from wisp P03 in leg 1 you could fly straight up to P07 in leg 2, skipping the slider. Fixed with **spiked dividers** between the legs:
+  - Divider1: y -20, x 32–1960, open on the right where you turn.
+  - Divider2: y -520, x 640 to the right wall, open on the left.
+- **Floor 9:** everything works in the real game (the second tunnel's wisp hops are 8/8 each) **except** checkpoint P11 to P12: after the door you land on GateE's top, not on a separate ledge. Fixed: GateE's top right of the door is now the stop `P12_GateE`, and the extra ledge is gone.
+- **Floor 10:** the same gate problem at P04 to P05. Fixed: GateF's middle segment is now the stop `P05_GateF`, and the extra ledge is gone.
+- **Solver fix (cosmetic):** the intended path no longer lists the goal twice when the last `P##` stop is the finish (floor 10's orb room showed a fake "P13 to P13 NOT POSSIBLE").
+- **Lesson for gates:** after a door you land on the gate's top, so name that segment as the route stop with `gate(..., names={i: "P##_..."})`.
+
+### 18. Floor 6 re-check (done)
+- Checkpoint P05 to P06 went from 2/16 to **22/24** real plans after ending the corridor roof at x 2300. All 19 hops pass. **Floor 6 is DONE.**
+
+### 19. Second checks of floors 8, 9 and 10, and fixes (re-checks running)
+- **Floor 8:** the dividers removed the shortcut; the solver's route now follows all three legs. But **P11 to P12 FAILED in the real game (0/8)** and P10 to P11 was 2/8. That jump relied on the slime pad, which barrel touches make unreliable (step 9).
+  - Fix: P11 is now 192 wide at top -600. P12 moved to cx 1360, top -750, a plain two-shell hop. BoilPad sits below as a safety net only. The exit moved to x 1700, with exit ledge P13 under it at top -900.
+- **Floor 9:** everything else passes, but **checkpoint P11 to GateE FAILED in the real game (0/12):** the door at x 2700 was 330 px sideways from the checkpoint, too diagonal for a door hop. Fix: the door moved to x 2400, right above the checkpoint, and is now 150 wide.
+- **Floor 10:** **passes** (all 13 hops), but the door hop P04 to P05 was tight (2/19 real) for the same reason. Fix: GateF's second door moved from x 1500 to x 1690, next to checkpoint P04.
+- **Lesson for doors:** put the door almost straight above the spot you jump from. Diagonal door hops fail in the real game.
+
+### 20. Floors 8, 9 and 10 re-checks (done)
+- **Floor 8:** all 14 hops work in the real game. P11 to P12 went from 0/8 to **23/24**. The weakest left is the wisp hop P10 to P11 at 2/8, under flood pressure. **DONE.**
+- **Floor 9:** all 15 hops work. The door hop P11 to GateE went from 0/12 to **9/24**. **DONE.**
+- **Floor 10:** all 13 hops work. The door hop P04 to GateF went from 2/19 to **9/24**. **DONE.**
+
+### 21. Floor 1 real-game replay (done)
+- Floor 1 was made by hand earlier and only solver-checked. Replay: **all 13 hops work** in the real game (8 to 23 of 24 plans each). Plans are in `tools/plans_01.json`.
+
+### 22. Full tower check, and a spawn-death bug fixed in main.gd (done)
+- `tools/check_tower.gd` on all 10 floors: every floor loads, and floors 2–10 each sit exactly on the exit below.
+- **Bug found:** loading floor 3 with a number key killed the player on arrival ("Died (spikes)") though no spikes are near its start.
+  - Cause: when a floor loads, its spike areas register against the player's position **from the previous floor** for one physics step. Floors 1 and 2 start near (120, 540), which is inside floor 3's spike river.
+  - Things that didn't help: parking the player far away first, and freeing old spike shapes immediately in `spikes.gd` (reverted, that file is untouched).
+  - **Fix in `main.gd` `_build()`:** new spikes start with `monitoring` off and `_rearm_spikes()` turns them back on two physics frames later, once the player is at the new start.
+  - Normal play wasn't affected (the tower loads once, from a safe spot). It only hit the testing keys.
+- **Tower check after the fix: 20/20 PASS.**
+
+### 23. Docs updated (done)
+- STORY.md section 4 and LEVEL_DESIGN.md's floor table now list the 10 floors as built: titles, mechanics, shapes and sizes. LEVEL_DESIGN.md points to this log for how floors are generated and tested.
+
+## Summary: the 10 floors
+
+| Floor | File | Size | Sideways movement | Hardest jump in the real game |
+|---|---|---|---|---|
+| 1 | `level_01_wake_up.tscn` | 1920 × 1680 | Diagonal, pillar ditch | P10 to P11, 8/24 |
+| 2 | `level_02_chimney.tscn` | 2240 × 1840 | Wisps across a pit, **diagonal tunnel** up-left | slab to P01 wisp, 5/16 |
+| 3 | `level_03_chain_lift.tscn` | 2880 × 1992 | Slider left over a river, slider right under a crusher | P08 slider to P09, 9/24 |
+| 4 | `level_04_quiet_please.tscn` | 3200 × 1872 | Pinball run right, back left on top | pad to P01, 4/15 |
+| 5 | `level_05_rotten_shelves.tscn` | 2560 × 2172 | Switchback left, right, left | P08 to P09, 7/24 |
+| 6 | `level_06_gargoyle_gallery.tscn` | 3840 × 1732 | Three corridors right, left, right | P03 to P04 island, 6/24 |
+| 7 | `level_07_mind_the_doors.tscn` | 2560 × 1682 | Corridor left through a sideways door | double gate, 2/15 |
+| 8 | `level_08_its_boiling.tscn` | 2560 × 1892 | Spiral right, left, right (flood chase) | P10 wisp to P11, 2/8 |
+| 9 | `level_09_everything_hates_you.tscn` | 3840 × 2142 | Corridor left, **diagonal tunnel** up-right | P01 to P02 crumble, 6/24 |
+| 10 | `level_10_morwen.tscn` | 2560 × 2620 | Gate hops, a flood climb to the orb room | P01 to P02 crumble, 8/24 |
+
+"x/y" means x of the y working solver plans also worked in the real game. Low numbers mark the precise jumps: they're possible, but worth watching in playtests.
+
+### 24. Art Session changed the fall-kill rule (noted, no level changes needed)
+- **New rule in player.gd:** falling only kills once you're more than 40 px below `bounds.end.y` (the old rule killed 420 px below the checkpoint). In the full tower, `bounds` spans the whole tower, so long falls play out.
+- **Checked against the floors:** every pit meant to kill has spikes or a flood at the bottom already. Falls onto safe ground are now a setback instead of a teleport.
+- **New behaviour:** falling through a floor's entry hole drops you into the floor below, onto its exit ledge, which sits right under the hole. You can shoot straight back up. Your respawn point stays where it was.
+- **Watch in playtests:** big falls on floors 5 and 6 (long drops to earlier ledges) may feel harsh. If they do, add a safety ledge or spikes.
+
+### 25. Art Session fixed barrel-on-slime bounces (re-checked floor 4)
+- player.gd `_brace()` now reflects your speed when the barrel hits a pad first (`max(-into * strength, min_speed)`), like the body bounce. The issue from step 9 is closed.
+- Floor 4 re-check (`tools/verify_04.txt`): **all 10 hops still work in the real game.** The teaching pad jump is unchanged at 4/15 plans, so its other failures come from other parts of those routes (where the plans land and leave the pad), not the barrel.
+- Floor 4 keeps `min_speed` 700 on its teaching pad, so the pad always gives a big launch.

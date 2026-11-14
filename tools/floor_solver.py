@@ -437,7 +437,9 @@ def solve(path, verbose=False):
     numbered = sorted(set(numbered), key=lambda s: s[:3])
     if numbered:
         print("   INTENDED PATH:")
-        chain = [start] + [x for x in numbered if x != start] + (sorted(goals)[:1])
+        chain = [start] + [x for x in numbered if x != start]
+        if sorted(goals)[:1] and chain[-1] not in goals:
+            chain += sorted(goals)[:1]
 
         def best_edge(a, b):
             cands = [(k, v) for k, v in edges.items() if k[0].split("@")[0] == a and k[1].split("@")[0] == b]

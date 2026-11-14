@@ -500,27 +500,22 @@ script = ExtResource("checkpoint")
 size = Vector2(192, 16)
 
 [node name="GateEFloor0" type="StaticBody2D" parent="."]
-position = Vector2(2265, -630)
+position = Vector2(2112.5, -630)
 script = ExtResource("block")
-size = Vector2(730, 20)
+size = Vector2(425, 20)
 
 [node name="GateEMouth0" type="Node2D" parent="."]
-position = Vector2(2700, -630)
+position = Vector2(2400, -630)
 script = ExtResource("mouth")
-gap = Vector2(140, 36)
+gap = Vector2(150, 36)
 open_time = 1
 warn_time = 0.4
 shut_time = 0.5
 
-[node name="GateEFloorEnd" type="StaticBody2D" parent="."]
-position = Vector2(3289, -630)
+[node name="P12_GateE" type="StaticBody2D" parent="."]
+position = Vector2(3141.5, -630)
 script = ExtResource("block")
-size = Vector2(1038, 20)
-
-[node name="P12_Ledge" type="StaticBody2D" parent="."]
-position = Vector2(2960, -812)
-script = ExtResource("block")
-size = Vector2(144, 16)
+size = Vector2(1333, 20)
 
 [node name="Gargoyle2Mount" type="StaticBody2D" parent="."]
 position = Vector2(3570, -1000)

@@ -1,0 +1,49 @@
+== floor 8: levels/level_08_its_boiling.tscn
+== levels/level_08_its_boiling.tscn  (It's Boiling)
+   start: SlabRight   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                    SlabRight -> P03_Wisp                 1 shell   --        2 shells    22 ways
+                     P03_Wisp -> P04_Ledge                1 shell   49 ways   2 shells  3230 ways
+                    P04_Ledge -> P05_Checkpoint           1 shell   --        2 shells    25 ways
+               P05_Checkpoint -> P06_Slider@start         1 shell    2 ways   2 shells   376 ways
+             P06_Slider@start -> P06_Slider@end           ride the platform
+               P06_Slider@end -> P08_Crumble              1 shell   --        2 shells    24 ways
+                  P08_Crumble -> P10_Wisp                 1 shell   --        2 shells    22 ways
+                     P10_Wisp -> P11_Ledge                1 shell   26 ways   2 shells    --    
+                    P11_Ledge -> P12_Ledge                1 shell   --        2 shells   217 ways
+                    P12_Ledge -> P13_ExitLedge            1 shell    2 ways   2 shells   437 ways
+                P13_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   INTENDED PATH:
+                    SlabRight -> P01_Ledge                1 shell    1 ways   2 shells   233 ways
+                    P01_Ledge -> P02_Ledge                1 shell    4 ways   2 shells   633 ways
+                    P02_Ledge -> P03_Wisp                 1 shell    6 ways   2 shells   862 ways
+                     P03_Wisp -> P04_Ledge                1 shell   49 ways   2 shells  3230 ways
+                    P04_Ledge -> P05_Checkpoint           1 shell   --        2 shells    25 ways
+               P05_Checkpoint -> P06_Slider               1 shell    2 ways   2 shells   376 ways
+                   P06_Slider -> P07_Ledge                1 shell    9 ways   2 shells   931 ways
+                    P07_Ledge -> P08_Crumble              1 shell    4 ways   2 shells   625 ways
+                  P08_Crumble -> P09_Checkpoint           1 shell    4 ways   2 shells   534 ways
+               P09_Checkpoint -> P10_Wisp                 1 shell    2 ways   2 shells   294 ways
+                     P10_Wisp -> P11_Ledge                1 shell   26 ways   2 shells    --    
+                    P11_Ledge -> P12_Ledge                1 shell   --        2 shells   217 ways
+                    P12_Ledge -> P13_ExitLedge            1 shell    2 ways   2 shells   437 ways
+                P13_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   plans for 14 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_08.json
+   dead ends: none
+   never landed on: ['Divider1', 'Divider2']
+REPLAY levels/level_08_its_boiling.tscn
+  ok                  SlabRight -> P01_Ledge            13 / 17 plans work in the real game
+  ok                  P01_Ledge -> P02_Ledge            21 / 24 plans work in the real game
+  ok                  P02_Ledge -> P03_Wisp             11 / 24 plans work in the real game
+  ok                   P03_Wisp -> P04_Ledge            14 / 16 plans work in the real game
+  ok                  P04_Ledge -> P05_Checkpoint       14 / 24 plans work in the real game
+  ok             P05_Checkpoint -> P06_Slider           16 / 24 plans work in the real game
+  ok                 P06_Slider -> P07_Ledge            16 / 24 plans work in the real game
+  ok                  P07_Ledge -> P08_Crumble           7 / 24 plans work in the real game
+  ok                P08_Crumble -> P09_Checkpoint       16 / 24 plans work in the real game
+  ok             P09_Checkpoint -> P10_Wisp             10 / 24 plans work in the real game
+  ok                   P10_Wisp -> P11_Ledge             2 /  8 plans work in the real game
+  ok                  P11_Ledge -> P12_Ledge            23 / 24 plans work in the real game
+  ok                  P12_Ledge -> P13_ExitLedge        21 / 24 plans work in the real game
+  ok              P13_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: OK

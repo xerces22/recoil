@@ -151,7 +151,6 @@ func _build(paths: Array[String], numbers: Array[int]) -> void:
 	checkpoints.clear()
 	floods.clear()
 	refills.clear()
-
 	for path in paths:
 		var next: Level = load(path).instantiate()
 		if not floors.is_empty():
@@ -159,6 +158,12 @@ func _build(paths: Array[String], numbers: Array[int]) -> void:
 		level_root.add_child(next)
 		floors.append(next)
 		_collect(next)
+	# New spikes register against the player's position from the PREVIOUS floor for one physics
+	# step, so switching floors could kill you on arrival. Keep them off until you've moved in.
+	var new_spikes := level_root.find_children("*", "Spikes", true, false)
+	for spikes in new_spikes:
+		spikes.monitoring = false
+	_rearm_spikes.call_deferred(new_spikes)
 	# Lowest first, so "next checkpoint" means the next one up.
 	checkpoints.sort_custom(func(a: Checkpoint, b: Checkpoint) -> bool:
 		return a.global_position.y > b.global_position.y)
@@ -173,6 +178,14 @@ func _build(paths: Array[String], numbers: Array[int]) -> void:
 	look = Vector2.ZERO
 	_update_camera(0.0)
 	camera.reset_smoothing()
+
+
+func _rearm_spikes(list: Array[Node]) -> void:
+	await get_tree().physics_frame
+	await get_tree().physics_frame
+	for spikes in list:
+		if is_instance_valid(spikes):
+			spikes.monitoring = true
 
 
 ## Where to put `next` so its Entry hole sits on the Exit hole of `below`.

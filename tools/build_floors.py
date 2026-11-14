@@ -308,7 +308,7 @@ def floor_08():
               notes="Floor 8 (first Tower floor). New: the flood chases the whole floor. Spiral: leg 1 right "
                     "(ledges, a wisp), leg 2 left (slider, crumble), leg 3 right (wisp, slime pad). "
                     "See LEVEL_LOG.md.")
-    f.frame(entry_x=300, exit_x=1950, start_x=480)
+    f.frame(entry_x=300, exit_x=1700, start_x=480)
     f.flood(trigger_y=500, speed=48.0, acceleration=2.5, start_gap=360.0, max_gap=440.0)
 
     # Leg 1, RIGHT.
@@ -318,18 +318,27 @@ def floor_08():
     f.ledge("P04_Ledge", cx=1720, top=150, w=160)
     f.checkpoint("P05_Checkpoint", cx=2120, top=40)
 
+    # Spiked dividers between the legs, open at the end where the spiral turns, so you can't fly
+    # straight up from one leg into the next.
+    f.rect("Divider1", 32, -20, 1960, 12)
+    f.spikes_up("Divider1Spikes", 32, -20, 1928)
+
     # Leg 2, LEFT.
     f.mover("P06_Slider", cx=1820, top=-110, w=144, travel=(-560, 0), period=3.5)
     f.ledge("P07_Ledge", cx=1000, top=-200, w=160)
     f.crumble("P08_Crumble", cx=700, top=-320, w=144, delay=0.4)
     f.checkpoint("P09_Checkpoint", cx=380, top=-440)
 
+    f.rect("Divider2", 640, -520, W - 32, -488)
+    f.spikes_up("Divider2Spikes", 640, -520, W - 32 - 640)
+
     # Leg 3, RIGHT.
     f.ring("P10_Wisp", 720, -560, amount=1)
-    f.ledge("P11_Ledge", cx=1000, top=-620, w=160)
-    f.pad("BoilPad", cx=1320, top=-500, w=176)
-    f.ledge("P12_Ledge", cx=1660, top=-790, w=160)
-    f.ledge("P13_ExitLedge", cx=1950, top=-900, w=224)
+    f.ledge("P11_Ledge", cx=1000, top=-600, w=192)
+    # The pad is a safety net now, not a requirement (barrel touches make pads unreliable).
+    f.pad("BoilPad", cx=1180, top=-470, w=176)
+    f.ledge("P12_Ledge", cx=1360, top=-750, w=176)
+    f.ledge("P13_ExitLedge", cx=1700, top=-900, w=224)
     return f.write(out("level_08_its_boiling.tscn"))
 
 
@@ -387,8 +396,8 @@ def floor_09():
     f.checkpoint("P11_Checkpoint", cx=2300, top=-470)
 
     # Section C: a door gate, an aimed gargoyle, a wisp, the exit.
-    f.gate("GateE", -640, 1900, W - 32, [(2700, 140)], open_time=1.0, warn_time=0.4, shut_time=0.5)
-    f.ledge("P12_Ledge", cx=2960, top=-820, w=144)
+    f.gate("GateE", -640, 1900, W - 32, [(2400, 150)], names={1: "P12_GateE"},
+           open_time=1.0, warn_time=0.4, shut_time=0.5)
     f.turret("Gargoyle2", 3560, -1000, angle=3.14159, interval=1.6, speed=340, aimed=True)
     f.ring("P13_Wisp", 3260, -960, amount=1)
     f.ledge("P14_ExitLedge", cx=3050, top=-1150, w=224)
@@ -416,9 +425,8 @@ def floor_10():
     f.checkpoint("P04_Checkpoint", cx=1840, top=-140)
 
     # Section B: a gate with two doors, then a full wisp across to the left.
-    f.gate("GateF", -300, 32, W - 32, [(900, 140, {"phase": 0.5}), (1500, 140)],
+    f.gate("GateF", -300, 32, W - 32, [(900, 140, {"phase": 0.5}), (1690, 150)], names={1: "P05_GateF"},
            open_time=1.1, warn_time=0.4, shut_time=0.5)
-    f.ledge("P05_Ledge", cx=1300, top=-460, w=160)
     f.ring("P06_Wisp", 950, -600)
     f.checkpoint("P07_Checkpoint", cx=600, top=-700)
 

@@ -177,16 +177,16 @@ Same mechanic order as LEVEL_DESIGN.md. Each floor is a separate file; the game 
 
 | Floor | Zone | Title | New idea | Shape | Size (w × climb) |
 |---|---|---|---|---|---|
-| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗ | 1920 × 1536 |
-| 2 | Cellar | The Chain Lift | Movers and lifts | Lightning bolt | 2560 × 1400 |
-| 3 | Cellar | Loose Shells | Refills (shell wisps) | Diagonal ↗ with a wisp-only gap over a spike pit | 2560 × 1600 |
-| 4 | Library | Quiet Please | Slime jelly pads | Wide room → ↑ ← | 3200 × 1400 |
-| 5 | Library | Rotten Shelves | Crumbling shelves | Switchback | 2560 × 1800 |
-| 6 | Library | Gargoyle Gallery | Gargoyles (turrets) | Corridor-heavy lightning bolt | 3840 × 1400 |
-| 7 | Library | Mind the Doors | Mimic doors (mouths) | Shaft + halls, gates as floors | 1920 × 2200 |
-| 8 | Tower | It's Boiling | Cauldron flood (chase) | Tower spiral | 2560 × 2400 |
-| 9 | Tower | Everything Hates You | Mixed gauntlet | Lightning bolt, long | 3840 × 2400 |
-| 10 | Tower | Morwen | Finale: the orb room, then the witch | Spiral, flood over the last third, flood stops at the orb room | 2560 × 3000 |
+| 1 | Cellar | Wake Up, You're a Gun | Charge, two shells, spikes | Diagonal ↗, a pillar ditch run sideways | 1920 × 1680 |
+| 2 | Cellar | The Chimney | Shell wisps (refills) | Across a spike pit on wisps, then a diagonal tunnel ↖ with a spiked floor | 2240 × 1840 |
+| 3 | Cellar | The Chain Lift | Movers and lifts | Ride ← over a spike river, lift ↑, fast slider → under a spiked crusher | 2880 × 1992 |
+| 4 | Library | Quiet Please | Slime pads and bounce walls | Pinball run → over spikes, slime-walled shaft ↑, back ← on top | 3200 × 1872 |
+| 5 | Library | Rotten Shelves | Crumbling shelves | Switchback ← → ← over a spiked divider, crumbles into a lift | 2560 × 2172 |
+| 6 | Library | Gargoyle Gallery | Gargoyles (turrets) | Three corridors → ← → under gargoyle fire, long slider | 3840 × 1732 |
+| 7 | Library | Mind the Doors | Mimic doors (mouths) | Door hops ↑ through gates, a sideways door in a corridor ←, a double gate | 2560 × 1682 |
+| 8 | Tower | It's Boiling | The flood, whole floor | Spiral → ← → between spiked dividers | 2560 × 1892 |
+| 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor ← over a pit, second diagonal tunnel ↗, gate and aimed gargoyle | 3840 × 2142 |
+| 10 | Tower | Morwen | Finale: the orb room | Gargoyle, lift, two-door gate, then the flood up to the orb room | 2560 × 2620 |
 
 Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sections with a brazier between each, then the exit hole. Floor 10 ends in the orb room instead.
 

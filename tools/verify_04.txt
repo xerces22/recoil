@@ -1,0 +1,38 @@
+== floor 4: levels/level_04_quiet_please.tscn
+== levels/level_04_quiet_please.tscn  (Quiet Please)
+   start: SlabRight   goal: ['EXIT']
+   CHEAPEST ROUTE:
+                    SlabRight -> P01_Ledge                1 shell   --        2 shells    12 ways
+                    P01_Ledge -> P03_Checkpoint           1 shell   --        2 shells    44 ways
+               P03_Checkpoint -> P04_Ledge                1 shell    1 ways   2 shells   281 ways
+                    P04_Ledge -> P05_Ledge                1 shell   --        2 shells   253 ways
+                    P05_Ledge -> P07_Ledge                1 shell   --        2 shells    25 ways
+                    P07_Ledge -> P08_Ledge                1 shell    5 ways   2 shells   604 ways
+                    P08_Ledge -> P09_ExitLedge            1 shell   --        2 shells    86 ways
+                P09_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   INTENDED PATH:
+                    SlabRight -> P01_Ledge                1 shell   --        2 shells    12 ways
+                    P01_Ledge -> P02_Checkpoint           1 shell   --        2 shells   185 ways
+               P02_Checkpoint -> P03_Checkpoint           1 shell   --        2 shells    66 ways
+               P03_Checkpoint -> P04_Ledge                1 shell    1 ways   2 shells   281 ways
+                    P04_Ledge -> P05_Ledge                1 shell   --        2 shells   253 ways
+                    P05_Ledge -> P06_Checkpoint           1 shell   --        2 shells   206 ways
+               P06_Checkpoint -> P07_Ledge                1 shell    4 ways   2 shells   264 ways
+                    P07_Ledge -> P08_Ledge                1 shell    5 ways   2 shells   604 ways
+                    P08_Ledge -> P09_ExitLedge            1 shell   --        2 shells    86 ways
+                P09_ExitLedge -> EXIT                     1 shell   --        2 shells   137 ways
+   plans for 10 hops written to E:\Projects\GameJam\Recoil\recoil\tools\plans_04.json
+   dead ends: none
+   never landed on: ['BlockerTop', 'PinballFloor', 'PinballRoof']
+REPLAY levels/level_04_quiet_please.tscn
+  ok                  SlabRight -> P01_Ledge             4 / 15 plans work in the real game
+  ok                  P01_Ledge -> P02_Checkpoint       14 / 24 plans work in the real game
+  ok             P02_Checkpoint -> P03_Checkpoint       11 / 24 plans work in the real game
+  ok             P03_Checkpoint -> P04_Ledge             8 / 24 plans work in the real game
+  ok                  P04_Ledge -> P05_Ledge            19 / 24 plans work in the real game
+  ok                  P05_Ledge -> P06_Checkpoint       16 / 24 plans work in the real game
+  ok             P06_Checkpoint -> P07_Ledge            17 / 24 plans work in the real game
+  ok                  P07_Ledge -> P08_Ledge            10 / 24 plans work in the real game
+  ok                  P08_Ledge -> P09_ExitLedge         9 / 24 plans work in the real game
+  ok              P09_ExitLedge -> EXIT                 23 / 24 plans work in the real game
+RESULT: OK
