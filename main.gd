@@ -167,7 +167,7 @@ func continue_from(index: int) -> void:
 	_start_run()
 	if index <= 0:
 		return
-	player.respawn_position = (floors[index].get_node("Start") as Node2D).global_position
+	player.set_respawn_point((floors[index].get_node("Start") as Node2D).global_position)
 	player.respawn("continue from floor %d" % (index + 1))
 	_enter_floor(index, true)
 	look = Vector2.ZERO
@@ -241,7 +241,7 @@ func _restart_current_floor() -> void:
 	floors[index] = replacement
 	_rebuild_hazard_lists()
 	cleared = false
-	player.respawn_position = (replacement.get_node("Start") as Node2D).global_position
+	player.set_respawn_point((replacement.get_node("Start") as Node2D).global_position)
 	player.respawn("floor restarted")
 	_enter_floor(index)
 	look = Vector2.ZERO
@@ -334,7 +334,7 @@ func _build(paths: Array[String], numbers: Array[int]) -> void:
 	elapsed = 0.0
 	cleared = false
 	highest = 0
-	player.respawn_position = (floors[0].get_node("Start") as Node2D).global_position
+	player.set_respawn_point((floors[0].get_node("Start") as Node2D).global_position)
 	player.respawn("%s loaded" % ("tower" if tower_mode else "level %d" % (level_index + 1)))
 	_enter_floor(0, true)
 	look = Vector2.ZERO
@@ -464,6 +464,11 @@ func _process(delta: float) -> void:
 
 	# Standing on a checkpoint with the body or resting the barrel on it both count.
 	for ground in player.standing_on:
+		if is_instance_valid(ground) and ground.is_in_group("void_after_checkpoint"):
+			var start := floors[_floor_of(ground)].get_node("Start") as Node2D
+			if player.respawn_position.y < start.global_position.y:
+				player.die("void")
+				break
 		if ground is Checkpoint:
 			_reach(ground)
 			break
@@ -499,7 +504,7 @@ func _reach(checkpoint: Checkpoint) -> void:
 	if top - 14.0 >= player.respawn_position.y:
 		return
 	checkpoint.reached = true
-	player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
+	player.set_respawn_point(Vector2(checkpoint.global_position.x, top - 14.0), true)
 	player.debug_event.emit("Checkpoint at %s" % player.position.round())
 	for flood in floods:
 		flood.give_breathing_room(player.global_position.y)
@@ -621,7 +626,7 @@ func skip_to_next_checkpoint() -> void:
 		if not checkpoint.reached and not _is_goal(checkpoint):
 			var top := checkpoint.world_rect().position.y
 			checkpoint.reached = true
-			player.respawn_position = Vector2(checkpoint.global_position.x, top - 14.0)
+			player.set_respawn_point(Vector2(checkpoint.global_position.x, top - 14.0), true)
 			player.respawn("skipped to checkpoint")
 			for flood in floods:
 				flood.reset()

@@ -38,7 +38,7 @@ position = Vector2(1544, -944)
 script = ExtResource("block")
 size = Vector2(752, 32)
 
-[node name="Ground" type="StaticBody2D" parent="." unique_id=455209932]
+[node name="Ground" type="StaticBody2D" parent="." unique_id=455209932 groups=["void_after_checkpoint"]]
 position = Vector2(416, 576)
 script = ExtResource("block")
 size = Vector2(768, 32)

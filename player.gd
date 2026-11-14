@@ -14,6 +14,7 @@ const AIR_CHARGE_TIME_SCALE := 0.35
 ## though you keep the charge. Click again (new charge) for a fresh window.
 const AIR_SLOWMO_TIME := 1.5
 const DEBUG_FLIGHT_SPEED := 850.0
+const CHECKPOINT_FALL_DISTANCE := 320.0
 ## Share of current velocity kept when a turret bolt hits.
 const KNOCKBACK_KEEP := 0.25
 
@@ -33,6 +34,8 @@ const GUN_TURN_SPEED := 30.0
 const WIGGLE_BOUNCE := 0.9
 ## Fastest a wiggle can launch you (px/s), so shooting stays the main way up.
 const WIGGLE_MAX := 420.0
+## The minimum swing kick that counts as a hop off a moving platform.
+const LIFT_HOP_MIN_KICK := 140.0
 ## Floors and ledge tops (normal pointing up at least this much) grip the muzzle so you don't slide.
 ## Walls don't grip, so you slide down them instead of hanging off the barrel.
 const GRIP_NORMAL_Y := -0.5
@@ -42,6 +45,7 @@ const MUZZLE_GRIP := 2400.0
 @onready var respawn_position := position
 ## Playable area from the level. Set by main.gd on level load.
 var bounds := Level.SHAFT
+var _checkpoint_fall_limit := INF
 var shots := MAX_SHOTS
 var pending_shot := Vector2.ZERO
 var pending_power := RECOIL_SPEED
@@ -63,9 +67,9 @@ var _was_barrel_grounded := false
 var _slowmo_left := 0.0
 ## True once this charge's slow motion has started, so a refill (back to 2 shells) keeps it.
 var _slowmo_kept := false
-## Moving platform the muzzle rested on last frame, and where it was then.
-var _barrel_carrier: Node2D = null
-var _barrel_carrier_pos := Vector2.ZERO
+## Moving platform supporting the gun, including while it changes contact when aiming.
+var _lift: MovingPlatform
+var _lift_position := Vector2.ZERO
 ## What the body and/or the muzzle are standing on this frame (checkpoints read this).
 var standing_on: Array[Object] = []
 ## Gun angle at the start of this physics step, to tell a swing from a fall.
@@ -228,7 +232,8 @@ func _brace(delta: float) -> void:
 	var into := -velocity.dot(normal)
 	if into > 0.0:
 		velocity += normal * into
-	if normal.y <= GRIP_NORMAL_Y:
+	# A muzzle lifting off a moving platform should not drag along its top.
+	if normal.y <= GRIP_NORMAL_Y and not (into < 0.0 and hit.collider is MovingPlatform):
 		var along := velocity - normal * velocity.dot(normal)
 		velocity -= along - along.move_toward(Vector2.ZERO, MUZZLE_GRIP * delta)
 
@@ -236,26 +241,34 @@ func _brace(delta: float) -> void:
 ## After moving: if the muzzle ended up inside a surface (the gun swung into it, or you fell
 ## onto it), shove the body straight off that surface right away, and keep that speed.
 ## A slow swing just props you up; a fast flick bounces you.
-func _lever(delta: float) -> void:
+func _lever(delta: float, lift_velocity: Vector2, firing: bool) -> bool:
 	var hit := _barrel_hit()
 	if hit.is_empty() or hit.collider is Bouncy:
-		return
+		return false
 	var depth := GUN_REACH - global_position.distance_to(hit.position)
 	if depth <= 0.0:
-		return
+		return false
 	var normal: Vector2 = hit.normal
 	# How far the muzzle sits inside the surface, measured straight out of it.
 	var out := depth * maxf(0.0, -gun_dir().dot(normal))
 	if out <= 0.0:
-		return
+		return false
 	move_and_collide(normal * out)
 	# Only the barrel's own swing kicks. Falling onto the muzzle just stops you, no trampoline.
 	var swing := (gun_dir() - Vector2.from_angle(_prev_gun_angle)) * GUN_REACH
 	var swung_in := minf(out, maxf(0.0, -swing.dot(normal)))
 	var kick := minf(swung_in / delta * WIGGLE_BOUNCE, WIGGLE_MAX)
 	var away := velocity.dot(normal)
+	var lift := hit.collider as MovingPlatform
+	if lift != null and normal.y <= GRIP_NORMAL_Y:
+		# Smooth aiming props the gun up. A quick tap hops in the lift's frame of motion.
+		if lift == _lift and not firing and kick >= LIFT_HOP_MIN_KICK and kick > away:
+			velocity += normal * (kick - away) + lift_velocity
+			return true
+		return false
 	if kick > away:
 		velocity += normal * (kick - away)
+	return false
 
 
 
@@ -288,6 +301,9 @@ func _notification(what: int) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	var riding := is_instance_valid(_lift)
+	var firing := pending_shot != Vector2.ZERO
+	var carry_manually := riding and not firing and is_zero_approx(velocity.x) and velocity.y >= 0.0
 	_prev_gun_angle = gun_angle
 	_turn_gun(delta)
 	_sync_body_shape()
@@ -306,7 +322,19 @@ func _physics_process(delta: float) -> void:
 	if charging:
 		charge_seconds = minf(charge_seconds + delta, FULL_CHARGE_TIME)
 
-	if pending_shot != Vector2.ZERO:
+	var previous_leave := platform_on_leave
+	var previous_floor_layers := platform_floor_layers
+	var lift_velocity := Vector2.ZERO
+	# Carry a resting gun ourselves and leave the platform with the shot's own velocity.
+	var carry_lift := carry_manually or (riding and firing)
+	# A hop may still have a cached floor collision from the step that launched it.
+	if carry_lift or (not riding and _floor_collider() is MovingPlatform):
+		platform_on_leave = CharacterBody2D.PLATFORM_ON_LEAVE_DO_NOTHING
+		platform_floor_layers = 0
+	if carry_lift:
+		lift_velocity = _ride_lift() / delta
+
+	if firing:
 		var before_shot := velocity
 		velocity = pending_shot * pending_power
 		debug_event.emit("Shot %d power=%.0f aim=%s  velocity %s -> %s" % [
@@ -323,8 +351,6 @@ func _physics_process(delta: float) -> void:
 		shots -= 1
 		shot_fired.emit()
 
-	_ride_barrel_platform()
-
 	var slowmo := is_air_charging()
 	_slowmo_kept = slowmo
 	if slowmo:
@@ -338,14 +364,16 @@ func _physics_process(delta: float) -> void:
 	# Scale movement for this step and keep collision-adjusted momentum for release.
 	velocity *= time_scale
 	move_and_slide()
+	platform_on_leave = previous_leave
+	platform_floor_layers = previous_floor_layers
 	velocity /= time_scale
-	_lever(delta)
+	var hopped := _lever(delta, lift_velocity, firing)
 	_fx.check_impacts(before)
 	var bounced := _apply_bounce(before)
 	if is_on_ceiling() and not was_on_ceiling:
 		debug_event.emit("Hit ceiling at %s" % position.round())
-	var body_down := is_on_floor() and not bounced
-	var barrel_ground := _barrel_floor() if not bounced else null
+	var body_down := is_on_floor() and not bounced and not hopped
+	var barrel_ground := _barrel_floor() if not bounced and not hopped else null
 	var grounded := body_down or barrel_ground != null
 	standing_on.clear()
 	if body_down:
@@ -371,34 +399,40 @@ func _physics_process(delta: float) -> void:
 		if ground != null and ground.has_method("on_player_landed"):
 			ground.on_player_landed(self)
 	_was_barrel_grounded = barrel_ground != null
-	# Godot carries the body on a moving platform itself; the barrel is only a ray, so a
-	# platform under the muzzle is remembered here and carries you next frame.
-	_barrel_carrier = null
-	if barrel_ground is AnimatableBody2D and not (body_down and _floor_collider() == barrel_ground):
-		_barrel_carrier = barrel_ground
-		_barrel_carrier_pos = (barrel_ground as Node2D).global_position
+	# Keep riding during the brief gap between muzzle and body contact when aiming.
+	# A downward probe also drops support if the lift has actually moved out from under us.
+	var carrier: Object = _floor_collider() if body_down else barrel_ground
+	if carrier == null and riding and not bounced and not hopped and velocity.y >= 0.0 and is_zero_approx(velocity.x):
+		var query := PhysicsRayQueryParameters2D.create(global_position,
+			global_position + Vector2.DOWN * (GUN_REACH + 4.0), collision_mask, [get_rid()])
+		var support := get_world_2d().direct_space_state.intersect_ray(query)
+		if not support.is_empty() and is_instance_valid(_lift) and support.collider == _lift:
+			carrier = _lift
+	_lift = carrier as MovingPlatform
+	if _lift != null:
+		_lift_position = _lift.global_position
 
 	flash = maxf(0.0, flash - delta)
 	muzzle = maxf(0.0, muzzle - delta)
-	# Only falling out of the level counts as falling into the void. Long falls inside it play out,
-	# so you land on whatever is really below (floor, or spikes) instead of vanishing mid-air.
 	var fall_limit := bounds.end.y + 40.0
 	if position.y > fall_limit or position.x < bounds.position.x - 24.0 or position.x > bounds.end.x + 24.0:
 		die("out of bounds")
+	elif position.y > _checkpoint_fall_limit:
+		die("void")
 
 	queue_redraw()
 
 
-## Moves you with the moving platform your barrel rested on last frame, so standing on the
-## barrel rides the platform the same way lying on it does.
-func _ride_barrel_platform() -> void:
-	if _barrel_carrier == null or not is_instance_valid(_barrel_carrier):
-		_barrel_carrier = null
-		return
-	var shift := _barrel_carrier.global_position - _barrel_carrier_pos
-	_barrel_carrier_pos = _barrel_carrier.global_position
+## Carry the resting gun consistently whether the body or muzzle is supporting it.
+func _ride_lift() -> Vector2:
+	var shift := _lift.global_position - _lift_position
 	if shift != Vector2.ZERO:
+		# The lift has already moved. Ignore it only during carry so its leading edge
+		# cannot block the shift. Body and barrel collide with it as usual afterward.
+		add_collision_exception_with(_lift)
 		move_and_collide(shift)
+		remove_collision_exception_with(_lift)
+	return shift
 
 
 ## Reflects off blue surfaces. Returns true if a bounce happened this frame.
@@ -484,12 +518,19 @@ func respawn_after_death() -> void:
 	died.emit()
 
 
+func set_respawn_point(point: Vector2, is_checkpoint := false) -> void:
+	respawn_position = point
+	_checkpoint_fall_limit = point.y + CHECKPOINT_FALL_DISTANCE if is_checkpoint else INF
+
+
 func respawn(reason := "reset") -> void:
 	# A level load or checkpoint skip in the middle of dying cancels the animation.
 	if _fx != null and _fx.dying and not _respawning_from_death:
 		_fx.cancel()
 	debug_event.emit("Respawn (%s) %s -> %s" % [reason, position.round(), respawn_position.round()])
 	position = respawn_position
+	_lift = null
+	standing_on.clear()
 	velocity = Vector2.ZERO
 	shots = MAX_SHOTS
 	pending_shot = Vector2.ZERO
