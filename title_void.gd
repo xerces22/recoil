@@ -77,24 +77,27 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var w := size.x
 	var h := size.y
-	# Void: deep purple, a little lighter through the middle.
-	var top := Color("#0b0512")
-	var mid := Color("#2a1140")
+	# Void: near-black with just a hint of indigo, a little lighter through the middle.
+	var top := Color("#060509")
+	var mid := Color("#151123")
 	draw_polygon(PackedVector2Array([Vector2(0, 0), Vector2(w, 0), Vector2(w, h * 0.5), Vector2(0, h * 0.5)]),
 		PackedColorArray([top, top, mid, mid]))
 	draw_polygon(PackedVector2Array([Vector2(0, h * 0.5), Vector2(w, h * 0.5), Vector2(w, h), Vector2(0, h)]),
 		PackedColorArray([mid, mid, top, top]))
 
 	var centre := Vector2(left + (w - left) * 0.5, h * 0.5)
-	# Curse glow behind the gun, pulsing slowly between green and violet.
+	_draw_shaft(w, h, mid)
+
+	# Curse glow behind the gun, pulsing slowly between green and violet, kept faint.
 	var pulse := (sin(_time * 0.9) + 1.0) / 2.0
-	var glow := Color("#57e08f").lerp(Color("#b46cff"), pulse)
-	for ring in 6:
+	var glow := Color("#57e08f").lerp(Color("#8a5cc4"), pulse)
+	for ring in 5:
 		var r := 70.0 + ring * 34.0
-		draw_circle(centre, r, Color(glow, 0.045))
+		draw_circle(centre, r, Color(glow, 0.03))
+	_draw_sigil(centre)
 
 	for streak: Dictionary in _streaks:
-		draw_rect(Rect2(streak.pos.round(), Vector2(2, streak.length)), Color(0.85, 0.75, 1.0, streak.alpha))
+		draw_rect(Rect2(streak.pos.round(), Vector2(2, streak.length)), Color(0.85, 0.85, 0.95, streak.alpha * 0.7))
 
 	# Shells behind the gun first (the small, far ones), then the gun, then the near ones.
 	for shell: Dictionary in _shells:
@@ -113,6 +116,64 @@ func _draw() -> void:
 	for shell: Dictionary in _shells:
 		if shell.depth >= 0.85:
 			_draw_shell(shell)
+
+
+## Faint tower-shaft brickwork on both edges, scrolling up: we're falling down the tower.
+## Fades into the dark toward the middle so it stays in the background.
+func _draw_shaft(w: float, h: float, bg: Color) -> void:
+	const BRICK := Vector2(44, 22)
+	const DEPTH := 150.0
+	var scroll := fmod(_time * 160.0, BRICK.y * 2.0)
+	var stone := Color("#1b1626")
+	var mortar := Color("#0d0a14")
+	for side: float in [left, w - DEPTH]:
+		draw_rect(Rect2(side, 0, DEPTH, h), mortar)
+		var rows := int(h / BRICK.y) + 3
+		for row in rows:
+			var y := row * BRICK.y - scroll
+			var shift := BRICK.x * 0.5 if row % 2 == 0 else 0.0
+			var x := side - shift
+			while x < side + DEPTH:
+				var r := Rect2(Vector2(maxf(x, side) + 1.0, y + 1.0),
+					Vector2(minf(x + BRICK.x, side + DEPTH) - maxf(x, side) - 2.0, BRICK.y - 2.0))
+				if r.size.x > 0.0:
+					draw_rect(r, stone)
+				x += BRICK.x
+		# Fade the wall into the void, using the void's own colour at each height (dark at the
+		# top and bottom, lighter in the middle) so there's no seam where the wall ends.
+		var inner: float = side + DEPTH if side == left else side
+		var outer: float = side if side == left else side + DEPTH
+		var dark := Color("#060509")
+		for half in 2:
+			var y0 := h * 0.5 * half
+			var y1 := y0 + h * 0.5
+			var c0 := dark if half == 0 else bg
+			var c1 := bg if half == 0 else dark
+			draw_polygon(PackedVector2Array([Vector2(outer, y0), Vector2(inner, y0), Vector2(inner, y1), Vector2(outer, y1)]),
+				PackedColorArray([Color(c0, 0.3), Color(c0, 1.0), Color(c1, 1.0), Color(c1, 0.3)]))
+
+
+## A slow-turning curse sigil behind the gun: two rune rings and a hexagram, very faint.
+func _draw_sigil(centre: Vector2) -> void:
+	var colour := Color("#57e08f", 0.10 + 0.04 * sin(_time * 1.1))
+	var spin := _time * 0.12
+	draw_arc(centre, 205.0, 0.0, TAU, 96, colour, 2.0)
+	draw_arc(centre, 172.0, 0.0, TAU, 96, Color(colour, colour.a * 0.7), 1.0)
+	# Rune ticks between the rings, turning one way.
+	for i in 24:
+		var a := spin + i * TAU / 24.0
+		var p := centre + Vector2.from_angle(a) * 188.0
+		var len := 6.0 if i % 3 == 0 else 3.0
+		draw_line(p - Vector2.from_angle(a) * len, p + Vector2.from_angle(a) * len, colour, 2.0)
+		if i % 6 == 0:
+			var d := Vector2.from_angle(a + PI / 4.0) * 5.0
+			draw_colored_polygon(PackedVector2Array([p + d, p + d.orthogonal(), p - d, p - d.orthogonal()]), colour)
+	# Hexagram, turning the other way.
+	for tri in 2:
+		var pts := PackedVector2Array()
+		for k in 4:
+			pts.append(centre + Vector2.from_angle(-spin * 1.5 + tri * PI / 3.0 + k * TAU / 3.0) * 165.0)
+		draw_polyline(pts, Color(colour, colour.a * 0.8), 1.5)
 
 
 ## A shotgun shell: red hull with a brass base, drawn in pixels.
