@@ -20,6 +20,7 @@ const DEFAULTS := {
 	"vsync": true, "frame_cap": 0, "resolution": Vector2i(1280, 720),
 	"background_detail": true,
 	"render_divisor": 1,
+	"cursor_visible": true,
 }
 
 var values: Dictionary = DEFAULTS.duplicate()
@@ -57,6 +58,12 @@ func set_volume(bus: String, percent: int) -> void:
 
 func set_aim_guide(enabled: bool) -> void:
 	values.aim_guide = enabled
+	gameplay_changed.emit()
+	_save()
+
+
+func set_cursor_visible(enabled: bool) -> void:
+	values.cursor_visible = enabled
 	gameplay_changed.emit()
 	_save()
 

@@ -18,6 +18,9 @@ const PANEL_SIZE := Vector2(708, 560)
 ## Width of the dark side panel the menu options sit on.
 const SIDE_W := 440.0
 
+const CURSOR_POINTER := preload("res://assets/sprites/ui/cursor_pointer.png")
+const CURSOR_CROSSHAIR := preload("res://assets/sprites/ui/cursor_crosshair.png")
+
 const SFX_HOVER := preload("res://assets/sfx/impactWood_light_001.ogg")
 const SFX_NEW := preload("res://assets/sfx/shotgun_reload.wav")
 const SFX_CONTINUE := preload("res://assets/sfx/impactMetal_heavy_000.ogg")
@@ -34,6 +37,7 @@ const CREDITS := [
 	["Music", "HydroGene, Pro Sensory (Alex McCulloch), Sudocolon"],
 	["Sound", "Ben Jaszczak et al., SpringySpringo, AntumDeluge, SketchMan3, Ogrebane, rubberduck, Kenney"],
 	["Font", "Press Start 2P by CodeMan38"],
+	["Cursors", "Original pixel art by the Cursed Shotgun team"],
 	["", "Thanks for playing!"],
 ]
 
@@ -79,6 +83,7 @@ var _resolution: Button
 var _background: Button
 var _render_quality: Button
 var _shoot: Button
+var _cursor: Button
 var _controls_hint: Label
 var _listening := false
 var _active_tab := 0
@@ -201,7 +206,13 @@ func _ready() -> void:
 	_shoot = _button("")
 	_shoot.pressed.connect(_listen_for_button)
 	_add_row(_pages[2], "Shoot", _shoot)
-	_pages[2].add_child(_label("That's the whole list.", 11, LILAC))
+	_cursor = _graphics_button()
+	_cursor.pressed.connect(func() -> void:
+		preferences.set_cursor_visible(not preferences.values.cursor_visible)
+		_refresh()
+	)
+	_add_row(_pages[2], "Cursor While Playing", _cursor)
+	_pages[2].add_child(_label("Hidden: aim by feel and the aim guide.", 9, LILAC))
 	_controls_hint = _label("", 10, GOLD)
 	_pages[2].add_child(_controls_hint)
 
@@ -497,6 +508,7 @@ func _show_screen(screen: Screen) -> void:
 	_title_actions.visible = on_title and screen != Screen.FLOORS
 	_pause_actions.visible = _base == Screen.PAUSE
 	_floor_actions.visible = screen == Screen.FLOORS
+	_apply_cursor()
 	if game != null:
 		# In-game HUD only while actually playing; menus get a clean screen.
 		game.get_node("HUD").visible = screen == Screen.PLAY
@@ -513,6 +525,19 @@ func _show_screen(screen: Screen) -> void:
 			_floor_actions.get_child(last).button.grab_focus.call_deferred()
 		Screen.SETTINGS:
 			_tabs[_active_tab].grab_focus()
+
+
+## Menus: pixel pointer. Playing: pixel crosshair, or no cursor if the player hid it.
+func _apply_cursor() -> void:
+	var playing := _screen == Screen.PLAY
+	if playing:
+		Input.set_custom_mouse_cursor(CURSOR_CROSSHAIR, Input.CURSOR_ARROW, Vector2(15, 15))
+		Input.set_custom_mouse_cursor(CURSOR_CROSSHAIR, Input.CURSOR_POINTING_HAND, Vector2(15, 15))
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if preferences.values.cursor_visible 			else Input.MOUSE_MODE_HIDDEN
+	else:
+		Input.set_custom_mouse_cursor(CURSOR_POINTER, Input.CURSOR_ARROW, Vector2(1, 1))
+		Input.set_custom_mouse_cursor(CURSOR_POINTER, Input.CURSOR_POINTING_HAND, Vector2(1, 1))
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func open() -> void:
@@ -644,6 +669,7 @@ func _refresh() -> void:
 		_readouts[bus].text = "%d%%" % value
 	_aim.text = "On" if preferences.values.aim_guide else "Off"
 	_shoot.text = Preferences.MOUSE_NAMES[preferences.values.shoot_button]
+	_cursor.text = "Crosshair" if preferences.values.cursor_visible else "Hidden"
 	if _display != null:
 		_display.text = _display_mode_text()
 		_display.disabled = _display.text == "Unavailable"
