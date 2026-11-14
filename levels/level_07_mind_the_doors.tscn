@@ -1,12 +1,12 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://chq58yolcwttk"]
 
-[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
-[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
-[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
-[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
-[ext_resource type="Script" path="res://hazards/mouth.gd" id="mouth"]
+[ext_resource type="Script" uid="uid://bo6hr602s6uqa" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" uid="uid://bfnfl5gj7o2rg" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" uid="uid://bmv58e4pjk54m" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" uid="uid://d6t2qfrcvicg" path="res://hazards/mouth.gd" id="mouth"]
+[ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
 
-[node name="MindTheDoors" type="Node2D"]
+[node name="MindTheDoors" type="Node2D" unique_id=409042885]
 editor_description = "Floor 7. New: mimic doors. A: one gate, one slow door. B: a gate with two doors out of step. C: a sideways door in a corridor going left over spikes, then two gates 100 px apart. See LEVEL_LOG.md."
 script = ExtResource("level")
 title = "Mind the Doors"
@@ -14,189 +14,166 @@ hint = "Mimic doors snap shut on a beat. Watch them shake, then go. If one bites
 taunt = "My doors are hungry. You look crunchy."
 bounds = Rect2(0, -962, 2560, 1682)
 
-[node name="WallLeft" type="StaticBody2D" parent="."]
+[node name="WallLeft" type="StaticBody2D" parent="." unique_id=841207021]
 position = Vector2(16, -121)
 script = ExtResource("block")
 size = Vector2(32, 1682)
 
-[node name="WallRight" type="StaticBody2D" parent="."]
+[node name="WallRight" type="StaticBody2D" parent="." unique_id=107788650]
 position = Vector2(2544, -121)
 script = ExtResource("block")
 size = Vector2(32, 1682)
 
-[node name="Entry" type="Marker2D" parent="."]
+[node name="Entry" type="Marker2D" parent="." unique_id=289965680]
 position = Vector2(1280, 592)
 
-[node name="SlabLeft" type="StaticBody2D" parent="."]
+[node name="SlabLeft" type="StaticBody2D" parent="." unique_id=440919183]
 position = Vector2(608, 576)
 script = ExtResource("block")
 size = Vector2(1152, 32)
 
-[node name="SlabRight" type="StaticBody2D" parent="."]
+[node name="SlabRight" type="StaticBody2D" parent="." unique_id=1135675865]
 position = Vector2(1952, 576)
 script = ExtResource("block")
 size = Vector2(1152, 32)
 
-[node name="Exit" type="Marker2D" parent="."]
+[node name="Exit" type="Marker2D" parent="." unique_id=163683133]
 position = Vector2(760, -962)
 
-[node name="CeilingLeft" type="StaticBody2D" parent="."]
+[node name="CeilingLeft" type="StaticBody2D" parent="." unique_id=1566633716]
 position = Vector2(348, -946)
 script = ExtResource("block")
 size = Vector2(632, 32)
 
-[node name="CeilingRight" type="StaticBody2D" parent="."]
+[node name="CeilingRight" type="StaticBody2D" parent="." unique_id=1233994539]
 position = Vector2(1692, -946)
 script = ExtResource("block")
 size = Vector2(1672, 32)
 
-[node name="Start" type="Marker2D" parent="."]
+[node name="Start" type="Marker2D" parent="." unique_id=1557701812]
 position = Vector2(1060, 546)
 
-[node name="GateAFloor0" type="StaticBody2D" parent="."]
+[node name="GateAFloor0" type="StaticBody2D" parent="." unique_id=1941699091]
 position = Vector2(328.5, 410)
 script = ExtResource("block")
 size = Vector2(593, 20)
 
-[node name="GateAMouth0" type="Node2D" parent="."]
+[node name="GateAMouth0" type="Node2D" parent="." unique_id=1999497036]
 position = Vector2(700, 410)
 script = ExtResource("mouth")
-gap = Vector2(150, 36)
 open_time = 1.8
 warn_time = 0.6
-shut_time = 0.6
 
-[node name="P01_GateA" type="StaticBody2D" parent="."]
+[node name="P01_GateA" type="StaticBody2D" parent="." unique_id=624396168]
 position = Vector2(1651.5, 410)
 script = ExtResource("block")
 size = Vector2(1753, 20)
 
-[node name="GateBFloor0" type="StaticBody2D" parent="."]
+[node name="GateBFloor0" type="StaticBody2D" parent="." unique_id=1295530649]
 position = Vector2(628.5, 240)
 script = ExtResource("block")
 size = Vector2(1193, 20)
 
-[node name="GateBMouth0" type="Node2D" parent="."]
+[node name="GateBMouth0" type="Node2D" parent="." unique_id=1375434824]
 position = Vector2(1300, 240)
 script = ExtResource("mouth")
-gap = Vector2(150, 36)
 open_time = 1.3
 warn_time = 0.45
-shut_time = 0.6
 phase = 0.5
 
-[node name="GateBFloor1" type="StaticBody2D" parent="."]
-position = Vector2(1650, 240)
+[node name="GateBFloor1" type="StaticBody2D" parent="." unique_id=1698982728]
+position = Vector2(1951, 240)
 script = ExtResource("block")
-size = Vector2(550, 20)
+size = Vector2(1154, 20)
 
-[node name="GateBMouth1" type="Node2D" parent="."]
-position = Vector2(2000, 240)
-script = ExtResource("mouth")
-gap = Vector2(150, 36)
-open_time = 1.3
-warn_time = 0.45
-shut_time = 0.6
-
-[node name="GateBFloorEnd" type="StaticBody2D" parent="."]
-position = Vector2(2301.5, 240)
-script = ExtResource("block")
-size = Vector2(453, 20)
-
-[node name="P02_Checkpoint" type="StaticBody2D" parent="."]
-position = Vector2(1650, 222)
+[node name="P02_Checkpoint" type="StaticBody2D" parent="." unique_id=2073840628]
+position = Vector2(1689, 63)
 script = ExtResource("checkpoint")
 size = Vector2(192, 16)
 
-[node name="P03_CorridorRight" type="StaticBody2D" parent="."]
+[node name="P03_CorridorRight" type="StaticBody2D" parent="." unique_id=1392344878]
 position = Vector2(1200, 76)
 script = ExtResource("block")
 size = Vector2(400, 32)
 
-[node name="PitFloor" type="StaticBody2D" parent="."]
+[node name="PitFloor" type="StaticBody2D" parent="." unique_id=1726937167]
 position = Vector2(900, 136)
 script = ExtResource("block")
 size = Vector2(200, 32)
 
-[node name="DoorPit" type="Area2D" parent="."]
+[node name="DoorPit" type="Area2D" parent="." unique_id=1570468673]
 position = Vector2(800, 120)
 script = ExtResource("spikes")
-width = 200
-height = 26
+width = 200.0
 
-[node name="P04_CorridorLeft" type="StaticBody2D" parent="."]
+[node name="P04_CorridorLeft" type="StaticBody2D" parent="." unique_id=1383015614]
 position = Vector2(616, 76)
 script = ExtResource("block")
 size = Vector2(368, 32)
 
-[node name="CorridorEnd" type="StaticBody2D" parent="."]
+[node name="CorridorEnd" type="StaticBody2D" parent="." unique_id=849964497]
 position = Vector2(416, -40)
 script = ExtResource("block")
 size = Vector2(32, 264)
 
-[node name="CorridorRoof" type="StaticBody2D" parent="."]
+[node name="CorridorRoof" type="StaticBody2D" parent="." unique_id=69886126]
 position = Vector2(996, -156)
 script = ExtResource("block")
 size = Vector2(808, 32)
 
-[node name="CorridorRoofSpikes" type="Area2D" parent="."]
+[node name="CorridorRoofSpikes" type="Area2D" parent="." unique_id=1827744461]
 position = Vector2(592, -172)
 script = ExtResource("spikes")
-width = 808
-height = 26
+width = 808.0
 
-[node name="SideDoor" type="Node2D" parent="."]
+[node name="SideDoor" type="Node2D" parent="." unique_id=1676287834]
 position = Vector2(900, -40)
 rotation = 1.5708
 script = ExtResource("mouth")
 gap = Vector2(190, 36)
 open_time = 1.4
-warn_time = 0.5
-shut_time = 0.6
 
-[node name="P05_Ledge" type="StaticBody2D" parent="."]
+[node name="P05_Ledge" type="StaticBody2D" parent="." unique_id=605041769]
 position = Vector2(260, -242)
 script = ExtResource("block")
 size = Vector2(176, 16)
 
-[node name="GateCFloor0" type="StaticBody2D" parent="."]
+[node name="GateCFloor0" type="StaticBody2D" parent="." unique_id=909437465]
 position = Vector2(143.5, -390)
 script = ExtResource("block")
 size = Vector2(223, 20)
 
-[node name="GateCMouth0" type="Node2D" parent="."]
+[node name="GateCMouth0" type="Node2D" parent="." unique_id=1560110478]
 position = Vector2(330, -390)
 script = ExtResource("mouth")
-gap = Vector2(150, 36)
 open_time = 1.2
 warn_time = 0.4
 shut_time = 0.5
 
-[node name="GateCFloorEnd" type="StaticBody2D" parent="."]
+[node name="GateCFloorEnd" type="StaticBody2D" parent="." unique_id=266761726]
 position = Vector2(752.5, -390)
 script = ExtResource("block")
 size = Vector2(695, 20)
 
-[node name="GateDFloor0" type="StaticBody2D" parent="."]
+[node name="GateDFloor0" type="StaticBody2D" parent="." unique_id=876822174]
 position = Vector2(218.5, -490)
 script = ExtResource("block")
 size = Vector2(373, 20)
 
-[node name="GateDMouth0" type="Node2D" parent="."]
+[node name="GateDMouth0" type="Node2D" parent="." unique_id=1198202612]
 position = Vector2(480, -490)
 script = ExtResource("mouth")
-gap = Vector2(150, 36)
 open_time = 1.2
 warn_time = 0.4
 shut_time = 0.5
 phase = 0.3
 
-[node name="P06_GateD" type="StaticBody2D" parent="."]
+[node name="P06_GateD" type="StaticBody2D" parent="." unique_id=1191540397]
 position = Vector2(827.5, -490)
 script = ExtResource("block")
 size = Vector2(545, 20)
 
-[node name="P07_ExitLedge" type="StaticBody2D" parent="."]
+[node name="P07_ExitLedge" type="StaticBody2D" parent="." unique_id=1396582876]
 position = Vector2(760, -682)
 script = ExtResource("block")
 size = Vector2(224, 16)

@@ -6,7 +6,6 @@ const RADIUS := 6.0
 var direction := Vector2.RIGHT
 var speed := 260.0
 var knockback := 420.0
-var life := 5.0
 
 
 func _ready() -> void:
@@ -20,12 +19,11 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	position += direction * speed * delta
-	life -= delta
-	if life <= 0.0:
-		queue_free()
 
 
 func _on_body_entered(body: Node2D) -> void:
+	if is_queued_for_deletion():
+		return
 	if body.is_in_group("player"):
 		body.knock(direction * knockback)
 	queue_free()

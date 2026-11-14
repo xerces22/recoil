@@ -8,13 +8,12 @@
 [ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
 [ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
 [ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
-[ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
 
 [node name="ItsBoiling" type="Node2D"]
-editor_description = "Floor 8 (first Tower floor). New: the flood chases the whole floor. Spiral: leg 1 right (ledges, a wisp), leg 2 left (slider, crumble), leg 3 right (wisp, slime pad). See LEVEL_LOG.md."
+editor_description = "Floor 8 (first Tower floor). Spiral: leg 1 right (ledges, a wisp), leg 2 left (slider, crumble), leg 3 right (wisp, slime pad). See LEVEL_LOG.md."
 script = ExtResource("level")
 title = "It's Boiling"
-hint = "The cauldron is boiling over. It rises as soon as you climb. Checkpoints push it back a little."
+hint = "Watch the wisps and crumbling platforms. The slime pad can bounce you higher."
 taunt = "You're not supposed to be up here."
 bounds = Rect2(0, -1172, 2560, 1892)
 
@@ -56,15 +55,6 @@ size = Vector2(732, 32)
 
 [node name="Start" type="Marker2D" parent="."]
 position = Vector2(480, 546)
-
-[node name="Flood" type="Node2D" parent="."]
-script = ExtResource("rising")
-trigger_y = 500
-speed = 48
-acceleration = 2.5
-start_gap = 360
-max_gap = 440
-checkpoint_gap = 300
 
 [node name="P01_Ledge" type="StaticBody2D" parent="."]
 position = Vector2(760, 428)
