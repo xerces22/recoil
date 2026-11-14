@@ -150,7 +150,7 @@ func _draw_cone() -> void:
 	var from := _player.global_position
 	if from.distance_to(global_position) > RANGE + 120.0:
 		return
-	var aim := (_player.get_global_mouse_position() - from).normalized()
+	var aim: Vector2 = (_player._world_mouse_position() - from).normalized()
 	if aim == Vector2.ZERO:
 		return
 	var on := in_blast(from, aim)

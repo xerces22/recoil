@@ -14,6 +14,12 @@ To build levels, read [LEVEL_DESIGN.md](LEVEL_DESIGN.md). It lists every mechani
 
 Godot editor runs show live recoil stats and recent events. Each run writes a timestamped log in `playtest_logs/` in the project folder. If the project folder is read-only, the log goes to Godot's user data folder. Release builds hide the overlay and skip logging.
 
+## Build for Web
+
+Install the matching Godot export templates. In **Project → Export**, choose **Web** and export to `index.html` in an empty folder. The preset disables threads, matching the browser-tested build. **Settings → Graphics → Render Quality** offers Native and 50% Scale, with Native as the default.
+
+For a local playtest, serve the export folder over HTTP. For itch.io, ZIP the contents of the export folder with `index.html` at the archive root.
+
 ## Final draft
 
 - Start first-time players with a short tutorial that shows the recoil arrow and teaches both shots. At the end, let them choose whether to keep or hide the arrow. Save the choice and let them change it later in settings.

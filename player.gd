@@ -91,6 +91,9 @@ var _body_shape: CollisionShape2D
 var _fx: PlayerFx
 var _death_reason := ""
 var _respawning_from_death := false
+var shoot_button := MOUSE_BUTTON_LEFT
+var show_aim_guide := true
+var aim_surface: Control
 
 
 func _ready() -> void:
@@ -117,11 +120,12 @@ func _ready() -> void:
 func _make_player(volume_db: float) -> AudioStreamPlayer:
 	var sound := AudioStreamPlayer.new()
 	sound.volume_db = volume_db
+	sound.bus = &"SFX"
 	add_child(sound)
 	return sound
 
 
-func _unhandled_input(event: InputEvent) -> void:
+func handle_game_input(event: InputEvent) -> void:
 	if OS.is_debug_build() and event is InputEventKey and event.keycode == KEY_F2:
 		if event.pressed and not event.echo:
 			debug_flying = not debug_flying
@@ -130,13 +134,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			charge_seconds = 0.0
 			pending_shot = Vector2.ZERO
 			debug_event.emit("Debug flight on" if debug_flying else "Debug flight off")
-		get_viewport().set_input_as_handled()
 		return
 
 	if debug_flying or _fx.dying:
 		return
 
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+	if event is InputEventMouseButton and event.button_index == shoot_button:
 		if event.pressed:
 			if shots > 0 and pending_shot == Vector2.ZERO and not charging:
 				charging = true
@@ -153,6 +156,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		pending_power = lerpf(MIN_CHARGED_RECOIL, RECOIL_SPEED, charge_fraction())
 
 
+func cancel_shot() -> void:
+	charging = false
+	charge_seconds = 0.0
+	pending_shot = Vector2.ZERO
+	if _fx != null:
+		_fx.charge_stopped()
+	queue_redraw()
+
+
 func gun_dir() -> Vector2:
 	return Vector2.from_angle(gun_angle)
 
@@ -166,10 +178,14 @@ func _sync_body_shape() -> void:
 
 
 func _turn_gun(delta: float) -> void:
-	var target := forced_aim if forced_aim != Vector2.ZERO else get_global_mouse_position()
+	var target := forced_aim if forced_aim != Vector2.ZERO else _world_mouse_position()
 	var aim := target - global_position
 	if aim.length_squared() >= 1.0:
 		gun_angle = rotate_toward(gun_angle, aim.angle(), GUN_TURN_SPEED * delta)
+
+
+func _world_mouse_position() -> Vector2:
+	return get_canvas_transform().affine_inverse() * aim_surface.get_local_mouse_position()
 
 
 ## Where the barrel touches something solid, or {} if it is clear.
@@ -291,7 +307,7 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 	if debug_flying:
-		var cursor_offset := get_global_mouse_position() - global_position
+		var cursor_offset := _world_mouse_position() - global_position
 		velocity = (cursor_offset / delta).limit_length(DEBUG_FLIGHT_SPEED)
 		move_and_slide()
 		queue_redraw()
@@ -505,7 +521,7 @@ func _draw() -> void:
 	if charging:
 		_draw_charge_blocks()
 
-	if shots == 0 or debug_flying:
+	if shots == 0 or debug_flying or not show_aim_guide:
 		return
 
 	# Launch direction: away from the cursor.
@@ -525,6 +541,7 @@ func _draw_gun(aim: Vector2) -> void:
 	var flip := -1.0 if aim.x < 0.0 else 1.0
 	draw_set_transform(_fx.tremble(), aim.angle(), Vector2(1, flip))
 	draw_texture(Art.SHOTGUN, -GUN_PIVOT, tint)
+	draw_texture(Art.STETSON, Art.STETSON_OFFSET - GUN_PIVOT, tint)
 	if muzzle > 0.0:
 		var tip := Vector2(Art.SHOTGUN.get_width() - GUN_PIVOT.x + 2.0, -2.0)
 		draw_circle(tip + Vector2(6, 0), 9.0, Color(1.0, 0.55, 0.15, 0.85))

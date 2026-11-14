@@ -153,6 +153,13 @@ var _look: Dictionary = LOOKS[Zone.CELLAR].duplicate()
 var _zone := Zone.CELLAR
 var _floor := 0
 var _time := 0.0
+## Set by main.gd per floor. Unused here: the zone looks above already tint each floor.
+var target_tint := Color(0.45, 0.4, 0.52)
+## Settings > background detail. Off hides the furniture layer and keeps the plain wall.
+var show_decor := true:
+	set(value):
+		show_decor = value
+		_decor_layer.visible = value
 var _center := Vector2.ZERO
 var _last_center := Vector2.ZERO
 var _view := Vector2(1280, 720)
@@ -162,6 +169,7 @@ var _flyer_timer := 3.0
 var _flash := 0.0
 var _flash_timer := 6.0
 var _rng := RandomNumberGenerator.new()
+
 
 
 func _ready() -> void:
@@ -205,7 +213,7 @@ func _process(delta: float) -> void:
 
 ## Zone and floor number at a world y. Asks main.gd which floor that is.
 func _zone_at(world_y: float) -> Vector2i:
-	var main := get_parent()
+	var main := owner if owner != null else get_parent()
 	if main == null or not ("floors" in main) or main.floors.is_empty():
 		return Vector2i(Zone.CELLAR, 0)
 	var index: int = main._floor_at(world_y)

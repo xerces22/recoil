@@ -3,6 +3,8 @@ extends Node2D
 ## Number keys load a single floor (or sandbox) on its own for testing. T rebuilds the tower.
 
 const RecoilPlayer = preload("res://player.gd")
+const Preferences = preload("res://game_preferences.gd")
+const SettingsMenu = preload("res://settings_menu.gd")
 
 ## The tower, bottom to top. Each floor's `Entry` hole is lined up with the `Exit` hole
 ## of the floor below. Add new floors here, in order.
@@ -22,6 +24,9 @@ const FLOORS: Array[String] = [
 ## Old one-mechanic test levels. Not part of the tower. Reachable with the number keys
 ## after the floors.
 const SANDBOXES: Array[String] = [
+	"res://levels/level_01_counterweight.tscn",
+	"res://levels/level_02_switchyard.tscn",
+	"res://levels/level_03_shellworks.tscn",
 	"res://levels/level_1_basics.tscn",
 	"res://levels/level_2_bounce.tscn",
 	"res://levels/level_3_moving.tscn",
@@ -49,12 +54,15 @@ const CAMERA_LIFT := 100.0
 const EXIT_CLEAR_MARGIN := 24.0
 
 @onready var music: AudioStreamPlayer = get_node_or_null("Music")
-@onready var player: RecoilPlayer = $Player
-@onready var camera: Camera2D = $Camera2D
+@onready var world_surface: TextureRect = $WorldSurface
+@onready var world_viewport: SubViewport = $WorldSurface/World
+@onready var backdrop = $WorldSurface/World/Backdrop
+@onready var player: RecoilPlayer = $WorldSurface/World/Player
+@onready var camera: Camera2D = $WorldSurface/World/Camera2D
 @onready var title_label: Label = $HUD/Title
 @onready var instructions: Label = $HUD/Instructions
 @onready var stats: Label = $HUD/Stats
-@onready var level_root: Node2D = $Level
+@onready var level_root: Node2D = $WorldSurface/World/Level
 
 ## Every level the number keys can load: the floors first, then the sandboxes.
 var levels: Array[String] = []
@@ -79,6 +87,7 @@ var cleared := false
 var look := Vector2.ZERO
 var banner: VBoxContainer
 var banner_tween: Tween
+var preferences := Preferences.new()
 
 
 func _ready() -> void:
@@ -89,6 +98,20 @@ func _ready() -> void:
 		music.name = "Music"
 		music.volume_db = -14.0
 		add_child(music)
+	music.bus = &"Music"
+	music.process_mode = Node.PROCESS_MODE_ALWAYS
+	preferences.load_saved()
+	preferences.gameplay_changed.connect(_apply_gameplay_settings)
+	player.aim_surface = world_surface
+	get_viewport().size_changed.connect(_update_render_quality)
+	_apply_gameplay_settings()
+	var settings := SettingsMenu.new()
+	settings.name = "Settings"
+	settings.preferences = preferences
+	settings.player = player
+	settings.start_requested.connect(_start_run)
+	settings.restart_requested.connect(_restart_current_floor)
+	settings.quit_requested.connect(_end_run)
 	player.died.connect(_on_player_died)
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 6.0
@@ -96,6 +119,65 @@ func _ready() -> void:
 	music.finished.connect(music.play)
 	_build_banner()
 	load_tower()
+	$HUD.hide()
+	add_child(settings)
+
+
+func _apply_gameplay_settings() -> void:
+	player.shoot_button = preferences.values.shoot_button
+	player.show_aim_guide = preferences.values.aim_guide
+	player.queue_redraw()
+	backdrop.show_decor = preferences.values.background_detail
+	_update_render_quality()
+
+
+func _update_render_quality() -> void:
+	var logical_size := Vector2i(get_viewport().get_visible_rect().size.round())
+	if logical_size.x < 4 or logical_size.y < 4:
+		return
+	var divisor: int = preferences.values.render_divisor
+	world_surface.size = Vector2(logical_size)
+	world_viewport.size_2d_override = logical_size
+	world_viewport.size = logical_size / divisor
+	_sync_world_camera.call_deferred()
+	backdrop.queue_redraw()
+
+
+func _sync_world_camera() -> void:
+	camera.force_update_scroll()
+
+
+func _start_run() -> void:
+	load_tower()
+	$HUD.show()
+
+
+func _end_run() -> void:
+	$HUD.hide()
+	# Reset the scene behind the title and discard the ended run.
+	load_tower()
+
+
+func _restart_current_floor() -> void:
+	if not tower_mode:
+		load_level(level_index)
+		return
+	var index := current
+	var old := floors[index]
+	var replacement: Level = load(FLOORS[index]).instantiate()
+	replacement.position = old.position
+	level_root.remove_child(old)
+	old.queue_free()
+	level_root.add_child(replacement)
+	floors[index] = replacement
+	_rebuild_hazard_lists()
+	cleared = false
+	player.respawn_position = (replacement.get_node("Start") as Node2D).global_position
+	player.respawn("floor restarted")
+	_enter_floor(index)
+	look = Vector2.ZERO
+	_update_camera(0.0)
+	camera.reset_smoothing()
 
 
 func _play_music(floor_number: int) -> void:
@@ -110,6 +192,7 @@ func _play_music(floor_number: int) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	player.handle_game_input(event)
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
 	# Keys 1-9 load levels 1-9, key 0 loads level 10.
@@ -233,6 +316,7 @@ func _enter_floor(index: int, first := false) -> void:
 	else:
 		title_label.text = "Sandbox  %s" % level.title
 	instructions.text = level.hint
+	backdrop.target_tint = level.backdrop_tint
 	_play_music(number)
 
 	if first or index > highest:
@@ -255,6 +339,17 @@ func _collect(node: Node) -> void:
 		elif child is ShellRefill:
 			refills.append(child)
 		_collect(child)
+
+
+func _rebuild_hazard_lists() -> void:
+	checkpoints.clear()
+	floods.clear()
+	refills.clear()
+	for floor_node in floors:
+		_collect(floor_node)
+	# Lowest first, so "next checkpoint" means the next one up.
+	checkpoints.sort_custom(func(a: Checkpoint, b: Checkpoint) -> bool:
+		return a.global_position.y > b.global_position.y)
 
 
 ## Index into `floors` of the floor a node belongs to.

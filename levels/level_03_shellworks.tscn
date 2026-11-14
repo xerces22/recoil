@@ -1,0 +1,256 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Shellworks" type="Node2D"]
+script = ExtResource("level")
+title = "The Shellworks"
+hint = "Chain gold shells up the spike shaft. Rest behind stone cover, then cross the cracked ledges between volleys."
+taunt = "Your last shell had better count."
+backdrop_tint = Color(0.62, 0.33, 0.30, 1)
+bounds = Rect2(0, -1008, 1920, 1728)
+is_final = true
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(704, 602)
+
+[node name="Entry" type="Marker2D" parent="."]
+position = Vector2(960, 720)
+
+[node name="Exit" type="Marker2D" parent="."]
+position = Vector2(960, -1008)
+
+[node name="WallLeft" type="StaticBody2D" parent="."]
+position = Vector2(16, -144)
+script = ExtResource("block")
+size = Vector2(32, 1728)
+
+[node name="WallRight" type="StaticBody2D" parent="."]
+position = Vector2(1904, -144)
+script = ExtResource("block")
+size = Vector2(32, 1728)
+
+[node name="CeilingLeft" type="StaticBody2D" parent="."]
+position = Vector2(433, -992)
+script = ExtResource("block")
+size = Vector2(866, 32)
+
+[node name="CeilingRight" type="StaticBody2D" parent="."]
+position = Vector2(1487, -992)
+script = ExtResource("block")
+size = Vector2(866, 32)
+
+[node name="EntryShelf" type="StaticBody2D" parent="."]
+position = Vector2(704, 628)
+script = ExtResource("block")
+size = Vector2(196, 16)
+
+[node name="WestApproach" type="StaticBody2D" parent="."]
+position = Vector2(431, 466)
+script = ExtResource("block")
+size = Vector2(150, 16)
+
+[node name="LaunchDeck" type="StaticBody2D" parent="."]
+position = Vector2(236, 303)
+script = ExtResource("checkpoint")
+size = Vector2(168, 16)
+
+[node name="Shell" type="Node2D" parent="."]
+position = Vector2(236, 127)
+script = ExtResource("refill")
+amount = 1
+
+[node name="HighDeck" type="StaticBody2D" parent="."]
+position = Vector2(547, -406)
+script = ExtResource("checkpoint")
+size = Vector2(144, 16)
+
+[node name="LowerCatch" type="StaticBody2D" parent="."]
+position = Vector2(900, 496)
+script = ExtResource("block")
+size = Vector2(128, 16)
+
+[node name="Relay" type="StaticBody2D" parent="."]
+position = Vector2(838, -511)
+script = ExtResource("crumble")
+size = Vector2(132, 16)
+delay = 0.92
+regrow = 2.0
+
+[node name="Cover" type="StaticBody2D" parent="."]
+position = Vector2(1123, -623)
+script = ExtResource("checkpoint")
+size = Vector2(150, 16)
+
+[node name="Crossfire" type="StaticBody2D" parent="."]
+position = Vector2(1400, -734)
+script = ExtResource("crumble")
+size = Vector2(126, 16)
+delay = 0.88
+regrow = 2.0
+
+[node name="Gun" type="Node2D" parent="."]
+position = Vector2(1690, -781)
+rotation = 3.14159265
+script = ExtResource("shooter")
+interval = 2.35
+bullet_speed = 335.0
+phase = 0.2
+
+[node name="Turnback" type="StaticBody2D" parent="."]
+position = Vector2(1230, -831)
+script = ExtResource("block")
+size = Vector2(126, 16)
+
+[node name="FinalApproach" type="StaticBody2D" parent="."]
+position = Vector2(1005, -869)
+script = ExtResource("block")
+size = Vector2(132, 16)
+
+[node name="Finish" type="StaticBody2D" parent="."]
+position = Vector2(747, -891)
+script = ExtResource("checkpoint")
+size = Vector2(166, 16)
+is_finish = true
+
+[node name="LowerPitLeft" type="Area2D" parent="."]
+position = Vector2(32, 698)
+script = ExtResource("spikes")
+width = 830.0
+height = 26.0
+
+[node name="LowerPitRight" type="Area2D" parent="."]
+position = Vector2(1054, 698)
+script = ExtResource("spikes")
+width = 834.0
+height = 26.0
+
+[node name="CoverTeeth" type="Area2D" parent="."]
+position = Vector2(1181, -631)
+script = ExtResource("spikes")
+width = 17.0
+height = 16.0
+
+[node name="TurnbackTeeth" type="Area2D" parent="."]
+position = Vector2(1267, -839)
+script = ExtResource("spikes")
+width = 16.0
+height = 16.0
+
+[node name="SecondShell" type="Node2D" parent="."]
+position = Vector2(236, -42)
+script = ExtResource("refill")
+amount = 1
+
+[node name="ThirdShell" type="Node2D" parent="."]
+position = Vector2(236, -211)
+script = ExtResource("refill")
+amount = 1
+
+[node name="ExitShell" type="Node2D" parent="."]
+position = Vector2(236, -369)
+script = ExtResource("refill")
+amount = 2
+
+[node name="LeftShaftWall" type="StaticBody2D" parent="."]
+position = Vector2(70, -27)
+script = ExtResource("block")
+size = Vector2(42, 620)
+
+[node name="RightShaftWall" type="StaticBody2D" parent="."]
+position = Vector2(412, -27)
+script = ExtResource("block")
+size = Vector2(46, 620)
+
+[node name="LeftShaftTeeth" type="Area2D" parent="."]
+position = Vector2(91, -337)
+rotation = 1.57079633
+script = ExtResource("spikes")
+width = 620.0
+height = 26.0
+
+[node name="RightShaftTeeth" type="Area2D" parent="."]
+position = Vector2(389, 283)
+rotation = -1.57079633
+script = ExtResource("spikes")
+width = 620.0
+height = 26.0
+
+[node name="LeftShaftCap" type="Area2D" parent="."]
+position = Vector2(49, -337)
+script = ExtResource("spikes")
+width = 42.0
+height = 24.0
+
+[node name="RightShaftCap" type="Area2D" parent="."]
+position = Vector2(389, -337)
+script = ExtResource("spikes")
+width = 46.0
+height = 24.0
+
+[node name="BypassRoof" type="StaticBody2D" parent="."]
+position = Vector2(678, -246)
+script = ExtResource("block")
+size = Vector2(486, 48)
+
+[node name="BypassTeeth" type="Area2D" parent="."]
+position = Vector2(435, -270)
+script = ExtResource("spikes")
+width = 486.0
+height = 29.0
+
+[node name="LowerGun" type="Node2D" parent="."]
+position = Vector2(590, -559)
+script = ExtResource("shooter")
+interval = 2.4
+bullet_speed = 335.0
+phase = 0.44
+
+[node name="LowerGunMount" type="StaticBody2D" parent="."]
+position = Vector2(553, -559)
+script = ExtResource("block")
+size = Vector2(36, 84)
+
+[node name="GunMount" type="StaticBody2D" parent="."]
+position = Vector2(1727, -781)
+script = ExtResource("block")
+size = Vector2(36, 92)
+
+[node name="GunCover" type="StaticBody2D" parent="."]
+position = Vector2(1260, -576)
+script = ExtResource("block")
+size = Vector2(54, 96)
+
+[node name="GunCoverTeeth" type="Area2D" parent="."]
+position = Vector2(1233, -624)
+script = ExtResource("spikes")
+width = 54.0
+height = 24.0
+
+[node name="LandingDivider" type="StaticBody2D" parent="."]
+position = Vector2(697, -414)
+script = ExtResource("block")
+size = Vector2(54, 76)
+
+[node name="LandingDividerTeeth" type="Area2D" parent="."]
+position = Vector2(670, -452)
+script = ExtResource("spikes")
+width = 54.0
+height = 24.0
+
+[node name="FinishDivider" type="StaticBody2D" parent="."]
+position = Vector2(870, -852)
+script = ExtResource("block")
+size = Vector2(42, 54)
+
+[node name="FinishDividerTeeth" type="Area2D" parent="."]
+position = Vector2(849, -879)
+script = ExtResource("spikes")
+width = 42.0
+height = 24.0
