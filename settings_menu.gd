@@ -316,7 +316,7 @@ func _build_run_menu(theme: Theme) -> void:
 
 	_title_actions = _action_list(side, 290)
 	_pause_actions = _action_list(side, 290)
-	_floor_actions = _action_list(side, 268)
+	_floor_actions = _action_list(side, 286)
 	_floor_actions.add_theme_constant_override("separation", 0)
 
 	_add_action(_title_actions, "New Game", SFX_NEW, _new_game)
@@ -477,7 +477,7 @@ func _rebuild_floors() -> void:
 		var label := "%2d  %s" % [i + 1, titles[i].to_upper() if open_floor else "?"]
 		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 12)
 		item.set_locked(not open_floor)
-		item.custom_minimum_size.y = 30
+		item.custom_minimum_size.y = 28
 	# The boss has her own row under the floors, always there (locked until you beat her once),
 	# so the menu keeps the same height either way.
 	_floor_actions.add_child(_spacer(8))
@@ -485,7 +485,7 @@ func _rebuild_floors() -> void:
 	var boss := _add_action(_floor_actions, "    BOSS  %s" % ("MRS. SANDWITCH" if beaten else "?"),
 		SFX_FLOOR, _fight_boss, 12)
 	boss.set_locked(not beaten)
-	boss.custom_minimum_size.y = 30
+	boss.custom_minimum_size.y = 28
 	_floor_actions.add_child(_spacer(6))
 	_add_action(_floor_actions, "Back", SFX_BACK, _show_screen.bind(Screen.TITLE), 16)
 
