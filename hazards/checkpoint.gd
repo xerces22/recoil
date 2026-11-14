@@ -56,6 +56,7 @@ func _light() -> void:
 	var sound := AudioStreamPlayer2D.new()
 	sound.stream = FIRE_SOUND
 	sound.volume_db = -2.0
+	sound.bus = &"SFX"
 	sound.position = Vector2(0, -size.y / 2.0 - 20.0)
 	add_child(sound)
 	sound.play()

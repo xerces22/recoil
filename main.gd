@@ -1,6 +1,6 @@
 extends Node2D
 ## Builds the tower: every floor in FLOORS stacked into one continuous climb.
-## Number keys load a single floor (or sandbox) on its own for testing. T rebuilds the tower.
+## Number keys load a single floor (or sandbox) on its own for testing. T jumps to the boss orb.
 
 const RecoilPlayer = preload("res://player.gd")
 const Preferences = preload("res://game_preferences.gd")
@@ -84,7 +84,7 @@ func _ready() -> void:
 		# Builds without the Music node in main.tscn still get music.
 		music = AudioStreamPlayer.new()
 		music.name = "Music"
-		music.volume_db = -14.0
+		music.volume_db = -6.0
 		add_child(music)
 	music.bus = &"Music"
 	music.process_mode = Node.PROCESS_MODE_ALWAYS
@@ -188,10 +188,27 @@ func reached_floor() -> int:
 	return clampi(int(config.get_value("progress", "reached", 0)), 0, FLOORS.size() - 1)
 
 
+## True once the witch has been beaten: the menu offers Level Select with the boss in it.
+func boss_beaten() -> bool:
+	var config := ConfigFile.new()
+	if config.load(PROGRESS_PATH) != OK:
+		return false
+	return bool(config.get_value("progress", "beaten", false))
+
+
+func _save_beaten() -> void:
+	var config := ConfigFile.new()
+	config.load(PROGRESS_PATH)
+	config.set_value("progress", "beaten", true)
+	config.set_value("progress", "reached", FLOORS.size() - 1)
+	config.save(PROGRESS_PATH)
+
+
 func _save_reached(index: int) -> void:
 	if index <= reached_floor():
 		return
 	var config := ConfigFile.new()
+	config.load(PROGRESS_PATH)
 	config.set_value("progress", "reached", index)
 	config.save(PROGRESS_PATH)
 
@@ -251,6 +268,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_R:
 		player.die("restart key")
+	elif event.keycode == KEY_T:
+		_teleport_to_orb()
+
+
+## TEMP test key (T): drop onto the top floor's orb platform, which starts the boss fight.
+func _teleport_to_orb() -> void:
+	if not tower_mode:
+		load_tower()
+	var top := floors.back() as Level
+	var orb := top.find_child("HexOrb", true, false) as Node2D
+	if orb == null:
+		return
+	player.cancel_shot()
+	# Just left of the orb, a little above its platform; you drop onto it.
+	player.respawn_position = orb.global_position + Vector2(-140, 120)
+	player.respawn("T to the orb")
 
 
 ## Loads every floor stacked into one tower and starts at the bottom.
@@ -488,20 +521,45 @@ func _clear() -> void:
 var _boss: BossFight
 
 
-## Final fight on its own screen. When it ends, back to the title menu.
-func _start_boss() -> void:
+## Final fight on its own screen. Beating it unlocks the boss in Level Select; running out of
+## shells offers Retry (straight back into the fight) or the menu.
+func _start_boss(retry := false) -> void:
 	if _boss != null:
 		return
 	player.cancel_shot()
 	$HUD.hide()
 	_boss = BossFight.new()
 	_boss.game = self
+	_boss.retry = retry
 	add_child(_boss)
+	_boss.won.connect(func() -> void:
+		_save_beaten()
+		get_node("Settings").pause_locked = true)
 	_boss.finished.connect(func() -> void:
 		get_node("Settings")._quit_run()
 		await get_tree().create_timer(0.4).timeout
+		_close_boss())
+	_boss.lost.connect(func(again: bool) -> void:
+		if again:
+			_close_boss()
+			_start_boss.call_deferred(true)
+		else:
+			get_node("Settings")._quit_run()
+			await get_tree().create_timer(0.4).timeout
+			_close_boss())
+
+
+func _close_boss() -> void:
+	get_node("Settings").pause_locked = false
+	if _boss != null:
 		_boss.queue_free()
-		_boss = null)
+		_boss = null
+
+
+## Level Select > the witch: the tower with you at the top, straight into the fight.
+func start_boss_from_menu() -> void:
+	continue_from(FLOORS.size() - 1)
+	_start_boss()
 
 
 ## Follows the player on both axes, leading a little in the flight direction.

@@ -4,8 +4,8 @@ extends CanvasLayer
 ## a shotgun, carried to her castle and thrown into the cellar. Panels are drawn as chunky
 ## pixel art with one line of text each.
 ##
-## Can't be skipped. A click finishes the typing, or turns the page once the line is shown
-## and the panel's action has played out. Panels also turn by themselves after a hold.
+## Click to fly through it: a click finishes the typing, the next click turns the page right
+## away. Esc skips the whole storyboard. Panels also turn by themselves after a hold.
 ## Panels in the same place flow into each other with a camera move; a change of place
 ## fades through black. Same interface as StoryCards: play(), then wait for `finished`.
 
@@ -14,6 +14,7 @@ signal finished
 const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
 const SHOTGUN := preload("res://assets/sprites/player/shotgun_hat.png")
 const STETSON := preload("res://assets/sprites/player/stetson.png")   # the hat the shotgun wears
+const WITCH_HAT := preload("res://assets/sprites/boss/witch_hat.png")  # Mrs. Sandwitch's hat
 const SFX_BUMP := preload("res://assets/sfx/impactSoft_heavy_001.ogg")
 const SFX_ZAP := preload("res://assets/sfx/portal.wav")
 const SFX_BLAST := preload("res://assets/sfx/shotgun_blast_mossberg_1.wav")
@@ -29,8 +30,9 @@ const PUSH_IN := 0.07
 const S := 5.0             # screen pixels per art pixel (256 x 144 art -> 1280 x 720)
 const GROUND := 118        # where feet stand
 const TYPE_SPEED := 0.035  # seconds per character
-const MIN_HOLD := 0.4      # a shown line stays at least this long before a click turns it
+const MIN_HOLD := 0.4      # before the page turns by itself, the line stays at least this long
 const AUTO_HOLD := 2.8     # ...and turns by itself after this long
+const CLICK_GUARD := 0.08  # ignore a second click this soon after a page turn (double-click)
 const FADE := 0.35         # fade to / from black when the place changes
 const WIDE := Vector2(128, 72)   # camera centre for the wide shot
 const PAIR := Vector2(129, 88)   # camera centre for close-ups on the two of them
@@ -86,6 +88,8 @@ var _t := 0.0            # time since the panel appeared; drives all its animati
 var _typed := false
 var _shown_for := 0.0    # time since the line finished typing
 var _busy := false       # true while fading between places
+var _closing := false
+var _since_turn := 0.0   # time since the last page turn, for CLICK_GUARD
 var _flash := 0.0
 var _zoom := 1.0         # camera, eased toward the panel's zoom and centre
 var _at := WIDE
@@ -153,8 +157,8 @@ func _ready() -> void:
 	_box.add_child(_text)
 
 	_prompt = _label(10, Color(0.65, 0.55, 0.8))
-	_prompt.text = "click"
-	_prompt.position = Vector2(1020, 108)
+	_prompt.text = "click: next   esc: skip"
+	_prompt.position = Vector2(846, 108)
 	_box.add_child(_prompt)
 
 	_fade = ColorRect.new()
@@ -224,6 +228,7 @@ func _next() -> void:
 func _show_panel(snap_camera: bool) -> void:
 	var panel: Dictionary = PANELS[_index]
 	_t = 0.0
+	_since_turn = 0.0
 	_typed = false
 	_shown_for = 0.0
 	_who.text = panel.who
@@ -293,6 +298,7 @@ func _process(delta: float) -> void:
 	if _index >= 0 and _index < PANELS.size():
 		var panel: Dictionary = PANELS[_index]
 		_t += delta
+		_since_turn += delta
 		# Ease the camera and sky toward this panel's framing.
 		var ease := 1.0 - exp(-delta * 5.0)
 		_zoom = lerpf(_zoom, panel.zoom, ease)
@@ -314,7 +320,7 @@ func _process(delta: float) -> void:
 				_typed_chars = shown
 		else:
 			_shown_for += delta
-			_prompt.visible = _ready_to_turn()
+			_prompt.visible = not _busy
 			_prompt.modulate.a = 0.55 + 0.45 * sin(_shown_for * 5.0)
 			if _ready_to_turn() and _shown_for > AUTO_HOLD:
 				_next()
@@ -333,20 +339,41 @@ func _input(event: InputEvent) -> void:
 	if not visible:
 		return
 	get_viewport().set_input_as_handled()
-	var pressed: bool = (event is InputEventMouseButton and event.pressed) \
+	var pressed: bool = (event is InputEventMouseButton and event.pressed \
+			and event.button_index == MOUSE_BUTTON_LEFT) \
 		or (event is InputEventKey and event.pressed and not event.echo \
 			and event.keycode != KEY_ESCAPE)
-	if not pressed or _busy or _index < 0 or _index >= PANELS.size():
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+		_skip()
+		return
+	if not pressed or _busy or _closing or _index < 0 or _index >= PANELS.size():
+		return
+	if _since_turn < CLICK_GUARD:
 		return
 	if not _typed:
 		# Finish the line; the animation keeps its own clock.
 		_text.visible_ratio = 1.0
 		_typed = true
-	elif _ready_to_turn():
+	else:
 		_next()
 
 
+## Esc: fade to black and go straight into the game.
+func _skip() -> void:
+	if _closing:
+		return
+	_closing = true
+	_busy = true
+	_prompt.visible = false
+	var tween := create_tween()
+	tween.tween_property(_fade, "modulate:a", 1.0, FADE)
+	tween.tween_callback(_close)
+
+
 func _close() -> void:
+	if not visible:
+		return
+	_closing = true
 	_slide_bars(false)
 	visible = false
 	get_tree().paused = false
@@ -561,10 +588,8 @@ func _witch(x: float, frame: int, mad: bool, wand_up: bool, face_right := false)
 	else:
 		_px(x - 5, g - 17, 3, 2, ROBE)
 		_stage.draw_line(_p(Vector2(x - 5, g - 16)), _p(Vector2(x - 8, g - 10)), Color("4a2e1e"), S)
-	# Pointy witch hat.
-	_px(x - 7, g - 27, 14, 2, HAIR)
-	_poly([Vector2(x - 4, g - 27), Vector2(x + 4, g - 27), Vector2(x + 3, g - 37)], HAIR)
-	_px(x - 4, g - 29, 8, 2, Color("7a3a9a"))
+	# Her pointy hat, same sprite as in the boss fight. Brim rests on top of her head.
+	_stage.draw_texture_rect(WITCH_HAT, Rect2(_p(Vector2(x - 9, g - 33)), WITCH_HAT.get_size() * S), false)
 
 
 func _star(c: Vector2, r: float) -> void:
