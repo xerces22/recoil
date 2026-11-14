@@ -199,6 +199,12 @@ func _ready() -> void:
 		_refresh()
 	)
 	_add_row(_pages[1], "Aim Guide", _aim)
+	_cursor = _graphics_button()
+	_cursor.pressed.connect(func() -> void:
+		preferences.set_cursor_visible(not preferences.values.cursor_visible)
+		_refresh()
+	)
+	_add_row(_pages[1], "Cursor While Playing", _cursor)
 	_display_hint = _label("", 9, LILAC)
 	_display_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_pages[1].add_child(_display_hint)
@@ -208,13 +214,7 @@ func _ready() -> void:
 	_shoot = _button("")
 	_shoot.pressed.connect(_listen_for_button)
 	_add_row(_pages[2], "Shoot", _shoot)
-	_cursor = _graphics_button()
-	_cursor.pressed.connect(func() -> void:
-		preferences.set_cursor_visible(not preferences.values.cursor_visible)
-		_refresh()
-	)
-	_add_row(_pages[2], "Cursor While Playing", _cursor)
-	_pages[2].add_child(_label("Hidden: aim by feel and the aim guide. Menus always show it.", 9, LILAC))
+	_pages[2].add_child(_label("That's the whole list.", 11, LILAC))
 	_controls_hint = _label("", 10, GOLD)
 	_pages[2].add_child(_controls_hint)
 
