@@ -1,0 +1,220 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/mouth.gd" id="mouth"]
+[ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Mouths" type="Node2D"]
+script = ExtResource("level")
+title = "Mimic Gates"
+hint = "Mouths snap shut on a beat. Watch for the shake. If one catches you it eats your shells and spits you out."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(300, 546)
+
+[node name="Block1" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1280, 18)
+
+[node name="Block2" type="StaticBody2D" parent="."]
+position = Vector2(275, 400)
+script = ExtResource("block")
+size = Vector2(550, 20)
+
+[node name="Block3" type="StaticBody2D" parent="."]
+position = Vector2(990, 400)
+script = ExtResource("block")
+size = Vector2(580, 20)
+
+[node name="Mouth1" type="Node2D" parent="."]
+position = Vector2(625, 400)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.8
+warn_time = 0.6
+shut_time = 0.6
+
+[node name="Block4" type="StaticBody2D" parent="."]
+position = Vector2(150, 230)
+script = ExtResource("block")
+size = Vector2(300, 20)
+
+[node name="Checkpoint1" type="StaticBody2D" parent="."]
+position = Vector2(865, 230)
+script = ExtResource("checkpoint")
+size = Vector2(830, 20)
+
+[node name="Mouth2" type="Node2D" parent="."]
+position = Vector2(375, 230)
+script = ExtResource("mouth")
+gap = Vector2(150, 36)
+open_time = 1.6
+warn_time = 0.5
+shut_time = 0.6
+phase = 0.3
+
+[node name="Block5" type="StaticBody2D" parent="."]
+position = Vector2(125, 60)
+script = ExtResource("block")
+size = Vector2(250, 20)
+
+[node name="Block6" type="StaticBody2D" parent="."]
+position = Vector2(590, 60)
+script = ExtResource("block")
+size = Vector2(420, 20)
+
+[node name="Block7" type="StaticBody2D" parent="."]
+position = Vector2(1105, 60)
+script = ExtResource("block")
+size = Vector2(350, 20)
+
+[node name="Mouth3" type="Node2D" parent="."]
+position = Vector2(315, 60)
+script = ExtResource("mouth")
+gap = Vector2(130, 36)
+open_time = 1.3
+warn_time = 0.45
+
+[node name="Mouth4" type="Node2D" parent="."]
+position = Vector2(865, 60)
+script = ExtResource("mouth")
+gap = Vector2(130, 36)
+open_time = 1.3
+warn_time = 0.45
+phase = 0.5
+
+[node name="Block8" type="StaticBody2D" parent="."]
+position = Vector2(280, -110)
+script = ExtResource("block")
+size = Vector2(560, 20)
+
+[node name="Block9" type="StaticBody2D" parent="."]
+position = Vector2(985, -110)
+script = ExtResource("block")
+size = Vector2(590, 20)
+
+[node name="Mouth5" type="Node2D" parent="."]
+position = Vector2(625, -110)
+script = ExtResource("mouth")
+gap = Vector2(130, 36)
+open_time = 1
+warn_time = 0.4
+shut_time = 0.5
+
+[node name="Spikes1" type="Area2D" parent="."]
+position = Vector2(690, -120)
+script = ExtResource("spikes")
+width = 60
+height = 26
+
+[node name="Block10" type="StaticBody2D" parent="."]
+position = Vector2(150, -280)
+script = ExtResource("block")
+size = Vector2(300, 20)
+
+[node name="Checkpoint2" type="StaticBody2D" parent="."]
+position = Vector2(850, -280)
+script = ExtResource("checkpoint")
+size = Vector2(860, 20)
+
+[node name="Mouth6" type="Node2D" parent="."]
+position = Vector2(360, -280)
+script = ExtResource("mouth")
+gap = Vector2(120, 36)
+open_time = 1
+warn_time = 0.4
+shut_time = 0.5
+phase = 0.2
+
+[node name="Block11" type="StaticBody2D" parent="."]
+position = Vector2(290, -450)
+script = ExtResource("block")
+size = Vector2(580, 20)
+
+[node name="Block12" type="StaticBody2D" parent="."]
+position = Vector2(990, -450)
+script = ExtResource("block")
+size = Vector2(580, 20)
+
+[node name="Mouth7" type="Node2D" parent="."]
+position = Vector2(640, -450)
+script = ExtResource("mouth")
+gap = Vector2(120, 36)
+open_time = 1.2
+warn_time = 0.4
+
+[node name="Block13" type="StaticBody2D" parent="."]
+position = Vector2(290, -550)
+script = ExtResource("block")
+size = Vector2(580, 20)
+
+[node name="Block14" type="StaticBody2D" parent="."]
+position = Vector2(990, -550)
+script = ExtResource("block")
+size = Vector2(580, 20)
+
+[node name="Mouth8" type="Node2D" parent="."]
+position = Vector2(640, -550)
+script = ExtResource("mouth")
+gap = Vector2(120, 36)
+open_time = 1.2
+warn_time = 0.4
+phase = 0.3
+
+[node name="Block15" type="StaticBody2D" parent="."]
+position = Vector2(100, -720)
+script = ExtResource("block")
+size = Vector2(200, 20)
+
+[node name="Block16" type="StaticBody2D" parent="."]
+position = Vector2(800, -720)
+script = ExtResource("block")
+size = Vector2(960, 20)
+
+[node name="Mouth9" type="Node2D" parent="."]
+position = Vector2(260, -720)
+script = ExtResource("mouth")
+gap = Vector2(120, 36)
+open_time = 0.9
+warn_time = 0.35
+shut_time = 0.5
+
+[node name="Spikes2" type="Area2D" parent="."]
+position = Vector2(320, -730)
+script = ExtResource("spikes")
+width = 50
+height = 26
+
+[node name="Block17" type="StaticBody2D" parent="."]
+position = Vector2(425, -890)
+script = ExtResource("block")
+size = Vector2(850, 20)
+
+[node name="Block18" type="StaticBody2D" parent="."]
+position = Vector2(1120, -890)
+script = ExtResource("block")
+size = Vector2(320, 20)
+
+[node name="Mouth10" type="Node2D" parent="."]
+position = Vector2(905, -890)
+script = ExtResource("mouth")
+gap = Vector2(110, 36)
+open_time = 0.9
+warn_time = 0.35
+phase = 0.5
+
+[node name="Finish1" type="StaticBody2D" parent="."]
+position = Vector2(620, -1062)
+script = ExtResource("checkpoint")
+size = Vector2(200, 16)
+is_finish = true
+
+[node name="Flood1" type="Node2D" parent="."]
+script = ExtResource("rising")
+trigger_y = -320
+speed = 50
+acceleration = 3

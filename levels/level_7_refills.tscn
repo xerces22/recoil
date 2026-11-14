@@ -1,0 +1,109 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Refills" type="Node2D"]
+script = ExtResource("level")
+title = "Air Refills"
+hint = "Gold rings reload your shells in midair. Chain them to climb where there's nothing to land on."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(640, 546)
+
+[node name="Block1" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="Refill1" type="Node2D" parent="."]
+position = Vector2(640, 200)
+script = ExtResource("refill")
+
+[node name="Checkpoint1" type="StaticBody2D" parent="."]
+position = Vector2(905, -142)
+script = ExtResource("checkpoint")
+size = Vector2(170, 16)
+
+[node name="Block2" type="StaticBody2D" parent="."]
+position = Vector2(460, -290)
+script = ExtResource("block")
+size = Vector2(160, 20)
+
+[node name="Spikes1" type="Area2D" parent="."]
+position = Vector2(380, -300)
+script = ExtResource("spikes")
+width = 160
+height = 26
+
+[node name="Refill2" type="Node2D" parent="."]
+position = Vector2(600, -420)
+script = ExtResource("refill")
+travel = Vector2(-250, 0)
+period = 3
+
+[node name="Refill3" type="Node2D" parent="."]
+position = Vector2(900, -380)
+script = ExtResource("refill")
+respawn_time = 0
+
+[node name="Checkpoint2" type="StaticBody2D" parent="."]
+position = Vector2(265, -612)
+script = ExtResource("checkpoint")
+size = Vector2(170, 16)
+
+[node name="Block3" type="StaticBody2D" parent="."]
+position = Vector2(490, -1020)
+script = ExtResource("block")
+size = Vector2(20, 560)
+
+[node name="Spikes2" type="Area2D" parent="."]
+position = Vector2(500, -1300)
+rotation = 1.570796
+script = ExtResource("spikes")
+width = 560
+height = 26
+
+[node name="Block4" type="StaticBody2D" parent="."]
+position = Vector2(790, -1020)
+script = ExtResource("block")
+size = Vector2(20, 560)
+
+[node name="Spikes3" type="Area2D" parent="."]
+position = Vector2(780, -740)
+rotation = -1.570796
+script = ExtResource("spikes")
+width = 560
+height = 26
+
+[node name="Refill4" type="Node2D" parent="."]
+position = Vector2(640, -820)
+script = ExtResource("refill")
+amount = 1
+
+[node name="Refill5" type="Node2D" parent="."]
+position = Vector2(640, -1010)
+script = ExtResource("refill")
+amount = 1
+
+[node name="Refill6" type="Node2D" parent="."]
+position = Vector2(640, -1200)
+script = ExtResource("refill")
+amount = 2
+respawn_time = 0
+
+[node name="Finish1" type="StaticBody2D" parent="."]
+position = Vector2(905, -1432)
+script = ExtResource("checkpoint")
+size = Vector2(170, 16)
+is_finish = true
+
+[node name="Flood1" type="Node2D" parent="."]
+script = ExtResource("rising")
+trigger_y = -700
+speed = 45
+acceleration = 2.5

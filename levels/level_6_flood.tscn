@@ -1,0 +1,134 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Flood" type="Node2D"]
+script = ExtResource("level")
+title = "The Flood"
+hint = "The flood rises as soon as you climb and keeps speeding up. Checkpoints push it back a little."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(640, 546)
+
+[node name="Block1" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="Block2" type="StaticBody2D" parent="."]
+position = Vector2(470, 388)
+script = ExtResource("block")
+size = Vector2(180, 16)
+
+[node name="Block3" type="StaticBody2D" parent="."]
+position = Vector2(805, 218)
+script = ExtResource("block")
+size = Vector2(170, 16)
+
+[node name="Block4" type="StaticBody2D" parent="."]
+position = Vector2(505, 48)
+script = ExtResource("block")
+size = Vector2(170, 16)
+
+[node name="Checkpoint1" type="StaticBody2D" parent="."]
+position = Vector2(850, -122)
+script = ExtResource("checkpoint")
+size = Vector2(180, 16)
+
+[node name="Block5" type="StaticBody2D" parent="."]
+position = Vector2(545, -292)
+script = ExtResource("block")
+size = Vector2(150, 16)
+
+[node name="Spikes1" type="Area2D" parent="."]
+position = Vector2(470, -300)
+script = ExtResource("spikes")
+width = 30
+height = 26
+
+[node name="Block6" type="StaticBody2D" parent="."]
+position = Vector2(255, -462)
+script = ExtResource("block")
+size = Vector2(150, 16)
+
+[node name="Block7" type="StaticBody2D" parent="."]
+position = Vector2(640, -460)
+script = ExtResource("block")
+size = Vector2(80, 20)
+
+[node name="Spikes2" type="Area2D" parent="."]
+position = Vector2(600, -470)
+script = ExtResource("spikes")
+width = 80
+height = 26
+
+[node name="Block8" type="StaticBody2D" parent="."]
+position = Vector2(590, -632)
+script = ExtResource("block")
+size = Vector2(140, 16)
+
+[node name="Checkpoint2" type="StaticBody2D" parent="."]
+position = Vector2(965, -802)
+script = ExtResource("checkpoint")
+size = Vector2(170, 16)
+
+[node name="Block9" type="StaticBody2D" parent="."]
+position = Vector2(625, -977)
+script = ExtResource("block")
+size = Vector2(130, 16)
+
+[node name="Spikes3" type="Area2D" parent="."]
+position = Vector2(660, -985)
+script = ExtResource("spikes")
+width = 30
+height = 26
+
+[node name="Block10" type="StaticBody2D" parent="."]
+position = Vector2(940, -1152)
+script = ExtResource("block")
+size = Vector2(120, 16)
+
+[node name="Block11" type="StaticBody2D" parent="."]
+position = Vector2(735, -1190)
+script = ExtResource("block")
+size = Vector2(70, 20)
+
+[node name="Spikes4" type="Area2D" parent="."]
+position = Vector2(700, -1200)
+script = ExtResource("spikes")
+width = 70
+height = 26
+
+[node name="Block12" type="StaticBody2D" parent="."]
+position = Vector2(590, -1327)
+script = ExtResource("block")
+size = Vector2(120, 16)
+
+[node name="Block13" type="StaticBody2D" parent="."]
+position = Vector2(280, -1502)
+script = ExtResource("block")
+size = Vector2(120, 16)
+
+[node name="Spikes5" type="Area2D" parent="."]
+position = Vector2(220, -1510)
+script = ExtResource("spikes")
+width = 25
+height = 26
+
+[node name="Finish1" type="StaticBody2D" parent="."]
+position = Vector2(645, -1682)
+script = ExtResource("checkpoint")
+size = Vector2(170, 16)
+is_finish = true
+
+[node name="Flood1" type="Node2D" parent="."]
+script = ExtResource("rising")
+trigger_y = 500
+speed = 55
+acceleration = 3
+start_gap = 340
+max_gap = 440
