@@ -49,7 +49,7 @@ Running log of the level-design work. **Read the "Where we are" section first** 
 | 7 | Library | Mind the Doors | Mimic doors (mouths) | Door hops up through gates, a corridor LEFT with a sideways door, a double gate | **Done** (solver + replay pass) |
 | 8 | Tower | It's Boiling | Flood, whole floor | Spiral: RIGHT, LEFT, RIGHT between spiked dividers, with a wisp, slider, crumble and pad | **Done** (solver + replay pass) |
 | 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor LEFT over a pit, a second diagonal tunnel going up-RIGHT, gate and aimed gargoyle | **Done** (solver + replay pass) |
-| 10 | Tower | Mrs. Sandwitch | Orb room | Gargoyle and lift, a two-door gate, then the flood up to the orb room | **Done** (solver + replay pass) |
+| 10 | Tower | Mrs. Sandwitch | Orb room | Redesigned (step 26): every section combines mechanics, no flood | **Done** (solver + replay pass) |
 
 Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor 3. The floor tables in STORY.md and LEVEL_DESIGN.md are updated to match (step 23).
 
@@ -289,7 +289,7 @@ Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor
 | 7 | `level_07_mind_the_doors.tscn` | 2560 × 1682 | Corridor left through a sideways door | double gate, 2/15 |
 | 8 | `level_08_its_boiling.tscn` | 2560 × 1892 | Spiral right, left, right (flood chase) | P10 wisp to P11, 2/8 |
 | 9 | `level_09_everything_hates_you.tscn` | 3840 × 2142 | Corridor left, **diagonal tunnel** up-right | P01 to P02 crumble, 6/24 |
-| 10 | `level_10_morwen.tscn` | 2560 × 2620 | Gate hops, a flood climb to the orb room | P01 to P02 crumble, 8/24 |
+| 10 | `level_10_morwen.tscn` | 2560 × 2780 | Combos: gargoyle bridge right, slider-and-door ferry left, the spire right | slab to P01 crumble, 2/8 |
 
 "x/y" means x of the y working solver plans also worked in the real game. Low numbers mark the precise jumps: they're possible, but worth watching in playtests.
 
@@ -303,3 +303,32 @@ Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor
 - player.gd `_brace()` now reflects your speed when the barrel hits a pad first (`max(-into * strength, min_speed)`), like the body bounce. The issue from step 9 is closed.
 - Floor 4 re-check (`tools/verify_04.txt`): **all 10 hops still work in the real game.** The teaching pad jump is unchanged at 4/15 plans, so its other failures come from other parts of those routes (where the plans land and leave the pad), not the barrel.
 - Floor 4 keeps `min_speed` 700 on its teaching pad, so the pad always gives a big launch.
+
+### 26. Floor 10 redesigned around combinations (done)
+- Floor 10 felt empty: after a hand edit removed its flood, nothing on it could kill you. The flood stays out.
+- Every section now **combines** mechanics the player knows (`floor_10()` in `tools/build_floors.py`):
+  - A, Gargoyle Bridge (right): crumbles over a spike pit, a gargoyle firing through the gap you jump across, a lift.
+  - B, Jaws Ferry (left): ride a slider over a spiked shelf and door-hop off it; a wisp and a fast crumble over a spiked gate top.
+  - C, The Spire (right): zigzag, wisp, crumble, a lift under an aimed gargoyle, a door hop into the walled orb room.
+- Solver: all 14 intended hops, no dead ends. **Real-game replay: all 14 hops work** (weakest: slab to P01 crumble 2/8, wisp P07 to crumble P08 3/8).
+- `tools/replay_floor.gd` fixed for the current main scene: the player is `main.player` (inside the world viewport), and the title menu pauses the tree, so the replay switches it to play first.
+
+### 27. Tutorial room and signs (done)
+- New `levels/tutorial_cellar.tscn` (`tutorial()` in `build_floors.py`, plain training-room look): plays once after New Game's cutscene, not part of the tower. Recoil, charge, slow-motion aim, midair reload, then all together to the brazier, which asks Keep / Hide aim guide. See TUTORIAL.md.
+- Solver: all 7 beats possible, no dead ends. **Real-game replay: all 7 work** (11 to 23 of 24 plans each).
+- Every floor has a `SignMechanic` signpost beside its start (`hazards/sign.gd`); its line shows in a small panel on the HUD. Signs were inserted into floors 1-9 directly (several have hand edits) and added to the generator for rebuilds.
+
+
+### 26. Fixed the doubled layer and wall columns at every floor join (main.gd)
+- **Bug (user screenshot):** at every join between two floors in the tower:
+  - **Doubled layer:** the lower floor's 32 px ceiling and the upper floor's 32 px ground slab were stacked on top of each other, a 64 px double band. Stacking lined up `Entry` (the bottom of the slab) with `Exit` (the top of the ceiling).
+  - **Wall columns:** each upper floor's side walls ran to the bottom of its `bounds` (y 720 local, 128–160 px below its slab), so they stuck down through the band into the room below.
+- **Fix, at runtime in `main.gd`; no level files changed:**
+  - `_stack_offset()` drops each stacked floor by `SLAB_OVERLAP` (32): its slab now sits exactly on the ceiling below, giving one layer, and the holes still line up.
+  - `_trim_walls()` cuts each stacked floor's `WallLeft`/`WallRight` off at its `Entry` y (the slab's bottom).
+- **Gameplay effect:** passing between floors now goes through 32 px of stone instead of 64, so the exit hop is a little easier. The 240 px exit-ledge rule still works, with more room to spare.
+- **Checks:**
+  - A new join check measured all 9 joins: each slab top equals the ceiling top below, and the upper walls end at the slab. **9/9 PASS.**
+  - `tools/check_tower.gd` now expects `Entry` to sit 32 px below `Exit` (the new rule): **20/20 PASS.**
+- Coordinated with the "Game jam wrap-up checklist" session, which was editing main.gd and the floor tools at the same time. I only touched `_stack_offset`, `_build` (one call) and the new `_trim_walls`, plus the one line in `check_tower.gd`.
+- **Not checked by eye:** headless Godot can't take screenshots. Please look at a floor join in the game.

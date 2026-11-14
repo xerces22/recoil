@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
 [ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
 [ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="Chimney" type="Node2D"]
 editor_description = "Floor 2. New: shell wisps. A: one wisp lifts you to a ledge you can't reach with two shells. B: wisps carry you across a spike pit. C: the Chimney, a diagonal tunnel going up-left with a spiked floor, wisps down the middle. See LEVEL_LOG.md."
@@ -480,3 +481,8 @@ amount = 1
 position = Vector2(1104, -864)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(64, 560)
+script = ExtResource("sign")
+text = "Gold wisps reload your shells in midair. Chain them where there's nothing to land on."

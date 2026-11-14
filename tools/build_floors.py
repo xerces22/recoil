@@ -32,6 +32,7 @@ def floor_02():
                     "with two shells. B: wisps carry you across a spike pit. C: the Chimney, a diagonal "
                     "tunnel going up-left with a spiked floor, wisps down the middle. See LEVEL_LOG.md.")
     f.frame(entry_x=320, exit_x=1104, start_x=128)
+    f.sign("SignMechanic", 64, 560, "Gold wisps reload your shells in midair. Chain them where there's nothing to land on.")
 
     # Section A (teach, cost 0): a ledge 410 px up. Two shells only reach ~380, so the wisp is needed.
     f.ring("P01_Wisp", 640, 380)
@@ -81,6 +82,7 @@ def floor_03():
                     "B: sliders over a spike river going left, then a lift up. C: fast slider back right "
                     "under a spiked crusher. See LEVEL_LOG.md.")
     f.frame(entry_x=2560, exit_x=1824, start_x=2752)
+    f.sign("SignMechanic", 2810, 560, "Platforms move. Wait for one to come to you, ride it, and jump with its speed.")
 
     # Section A (teach, cost 0): the ground under all of it is safe.
     f.mover("P01_Slider", cx=2280, top=440, w=160, travel=(-400, 0), period=4.0)
@@ -119,6 +121,7 @@ def floor_04():
                     "you to a ledge two shells can't reach. B: pinball run right, pad to pad over spikes. "
                     "C: shaft with bouncy walls, then back left along the top. See LEVEL_LOG.md.")
     f.frame(entry_x=400, exit_x=1504, start_x=576)
+    f.sign("SignMechanic", 660, 560, "Slime bounces you back up but never reloads. Ride the bounce, then shoot from the top.")
 
     # Pads aren't named P##: you bounce off them mid-flight, the solver only counts landings.
     # Section A (teach, cost 0): one shot up, fall onto the strong pad, ride the bounce, shoot at the top.
@@ -165,6 +168,7 @@ def floor_05():
               notes="Floor 5. New: crumbling shelves. Switchback: leg 1 left over safe floor, leg 2 right "
                     "above a spiked divider into a waiting lift, leg 3 left on fast crumbles. See LEVEL_LOG.md.")
     f.frame(entry_x=2200, exit_x=1000, start_x=2420)
+    f.sign("SignMechanic", 2490, 560, "Rotten shelves give way a moment after you land. Keep moving.")
 
     # Leg 1 (teach, cost 0): crumbling steps going left; the slab underneath is safe.
     f.crumble("P01_Crumble", cx=1940, top=440, w=144)
@@ -209,6 +213,7 @@ def floor_06():
                     "firing down the corridor. Corridor 2 left: a long slider over spikes under two gargoyles "
                     "firing down. Corridor 3 right: crumbles and an aimed gargoyle. See LEVEL_LOG.md.")
     f.frame(entry_x=400, exit_x=2240, start_x=576)
+    f.sign("SignMechanic", 660, 560, "Gargoyles spit bolts. They don't hurt, but they knock you into things that do.")
 
     # Corridor 1 (teach, cost 1 -> 3): islands on the slab, spike patches between, low roof.
     f.rect("Roof1", 700, 330, 2300, 362)
@@ -267,6 +272,7 @@ def floor_07():
                     "C: a sideways door in a corridor going left over spikes, then two gates 100 px apart. "
                     "See LEVEL_LOG.md.")
     f.frame(entry_x=1280, exit_x=760, start_x=1060)
+    f.sign("SignMechanic", 980, 560, "Doors snap shut on a beat. Wait for them to open. Get caught and they eat your shells.")
 
     # Section A (teach, cost 0): one gate 160 px above the slab, one slow door. Land on its top.
     f.gate("GateA", 400, 32, W - 32, [(700, 150)], names={1: "P01_GateA"},
@@ -314,6 +320,7 @@ def floor_08():
                     "(ledges, a wisp), leg 2 left (slider, crumble), leg 3 right (wisp, slime pad). "
                     "See LEVEL_LOG.md.")
     f.frame(entry_x=300, exit_x=1700, start_x=480)
+    f.sign("SignMechanic", 560, 560, "The cauldron is boiling over and rising. Don't stop. Checkpoints push it back.")
     f.flood(trigger_y=500, speed=48.0, acceleration=2.5, start_gap=360.0, max_gap=440.0)
 
     # Leg 1, RIGHT.
@@ -380,6 +387,7 @@ def floor_09():
                     "B: second diagonal tunnel, up-right, spiked floor, wisps. C: a door gate, an aimed gargoyle, "
                     "a wisp, the exit. See LEVEL_LOG.md.")
     f.frame(entry_x=3500, exit_x=3050, start_x=3700)
+    f.sign("SignMechanic", 3780, 560, "Nothing new up here. Everything at once.")
 
     # Section A: corridor LEFT. Spike pit on the slab from x 1408 to 3404; spiked roof at y 300.
     f.spikes_up("Pit", 1408, 560, 3404 - 1408)
@@ -429,6 +437,7 @@ def floor_10():
                     "gate top. C: zigzag, wisp, crumble, a lift under an aimed gargoyle, door hop into the walled "
                     "orb room. See LEVEL_LOG.md.")
     f.frame(entry_x=1280, exit_x=None, start_x=1480)
+    f.sign("SignMechanic", 1560, 560, "The orb is at the top. Everything you've learned, at the same time.")
 
     # Section A, RIGHT: the Gargoyle Bridge. Pit from x 1680 (300 px clear of the entry hole).
     f.spikes_up("Pit", 1680, 560, W - 32 - 1680)
@@ -470,8 +479,47 @@ def floor_10():
     return f.write(out("level_10_morwen.tscn"))
 
 
+# --------------------------------------------------------------------------------------
+# Tutorial: the cellar floor. Plays once after New Game's cutscene, not part of the tower.
+# One control per jump, safe floor under everything, then all of them at once to the brazier.
+# See TUTORIAL.md.
+# --------------------------------------------------------------------------------------
+def tutorial(finish=False):
+    W, TOP = 2240, -560
+    f = Floor("CellarFloor", title="The Cellar Floor",
+              hint="Learn to fly. Aim away from where you want to go.",
+              bounds=(0, TOP, W, 720 - TOP), plain=True,
+              notes="Tutorial (not a tower floor). Recoil, charge, slow-motion aim, midair reload, then all "
+                    "together to the brazier. Safe ground under every jump. See TUTORIAL.md.")
+    f.frame(entry_x=None, exit_x=None, start_x=150)
+
+    # 1. Recoil: a low ledge.
+    f.sign("SignRecoil", 240, 560, "Aim down. Shoot yourself up.")
+    f.ledge("P01_Low", cx=420, top=480, w=192)
+    # 2. Charge: a tap falls short of this gap, a charged shot makes it.
+    f.sign("SignCharge", 480, 480, "Hold to charge. Release to fire.", radius=130.0)
+    f.ledge("P02_Far", cx=820, top=480, w=176)
+    # 3. Slow-motion aim: a wall in the way. Shoot up past it, then steer over in slow motion.
+    f.rect("Wall", 960, 330, 992, 560)
+    f.sign("SignSlow", 790, 480, "One shell left? Hold it in midair to slow time and line up your shot.",
+           radius=150.0)
+    f.ledge("P03_Behind", cx=1120, top=340, w=176)
+    # 4. Midair reload: too high and too far for two shells, with a wisp on the natural arc.
+    f.sign("SignWisp", 1170, 340, "Fly through a glowing wisp to reload in midair.", radius=150.0)
+    f.ring("P04_Wisp", 1390, 200)
+    f.ledge("P05_High", cx=1620, top=60, w=176)
+    # 5. All together: charge, a wisp, a slow-motion last shot onto the brazier.
+    f.sign("SignBrazier", 1660, 60, "Put it all together. Light the brazier to save your progress.",
+           radius=150.0)
+    f.ring("P06_Wisp", 1880, -120, amount=1)
+    f.checkpoint("P07_Brazier", cx=2080, top=-260, w=192, **({"is_finish": True} if finish else {}))
+    # A miss on the last jump lands here instead of back on the floor.
+    f.ledge("SafetyLedge", cx=1880, top=230, w=224)
+    return f.write(out("tutorial_cellar.tscn"))
+
+
 FLOORS = {2: floor_02, 3: floor_03, 4: floor_04, 5: floor_05, 6: floor_06, 7: floor_07, 8: floor_08,
-          9: floor_09, 10: floor_10}
+          9: floor_09, 10: floor_10, 0: tutorial}
 
 if __name__ == "__main__":
     want = [int(a) for a in sys.argv[1:]] or sorted(FLOORS)

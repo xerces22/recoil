@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
 [ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
 [ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="RottenShelves" type="Node2D"]
 editor_description = "Floor 5. New: crumbling shelves. Switchback: leg 1 left over safe floor, leg 2 right above a spiked divider into a waiting lift, leg 3 left on fast crumbles. See LEVEL_LOG.md."
@@ -168,3 +169,8 @@ regrow = 2.5
 position = Vector2(1000, -1172)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(2490, 560)
+script = ExtResource("sign")
+text = "Rotten shelves give way a moment after you land. Keep moving."

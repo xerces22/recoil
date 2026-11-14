@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bmv58e4pjk54m" path="res://hazards/level.gd" id="level"]
 [ext_resource type="Script" uid="uid://d6t2qfrcvicg" path="res://hazards/mouth.gd" id="mouth"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="MindTheDoors" type="Node2D" unique_id=409042885]
 editor_description = "Floor 7. New: mimic doors. A: one gate, one slow door. B: a gate with two doors out of step. C: a sideways door in a corridor going left over spikes, then two gates 100 px apart. See LEVEL_LOG.md."
@@ -177,3 +178,8 @@ size = Vector2(545, 20)
 position = Vector2(760, -682)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(980, 560)
+script = ExtResource("sign")
+text = "Doors snap shut on a beat. Wait for them to open. Get caught and they eat your shells."

@@ -27,6 +27,7 @@ SCRIPTS = {
     "rising": "res://hazards/rising.gd",
     "refill": "res://hazards/refill.gd",
     "orb": "res://hazards/orb.gd",
+    "sign": "res://hazards/sign.gd",
 }
 
 SLAB_TOP = 560
@@ -54,12 +55,13 @@ def _val(v):
 
 
 class Floor:
-    def __init__(self, node_name, title, hint, bounds, taunt="", is_final=False, notes=""):
+    def __init__(self, node_name, title, hint, bounds, taunt="", is_final=False, notes="", plain=False):
         self.node_name = node_name
         self.title = title
         self.hint = hint
         self.taunt = taunt
         self.is_final = is_final
+        self.plain = plain
         self.bounds = bounds  # (x, y, w, h)
         self.notes = notes
         self.nodes = []  # (name, type, script, props)
@@ -193,6 +195,14 @@ class Floor:
                         acceleration=float(acceleration), start_gap=float(start_gap), max_gap=float(max_gap),
                         checkpoint_gap=float(checkpoint_gap))
 
+    def sign(self, name, x, surface_y, text, radius=230.0):
+        """A wooden signpost standing on a surface whose top is surface_y. Its text shows on screen
+        while the player is within `radius`."""
+        props = dict(position=(x, surface_y), text=text)
+        if radius != 230.0:
+            props["radius"] = float(radius)
+        return self.add(name, "Node2D", "sign", **props)
+
     def orb(self, name, x, y, spots):
         return self.add(name, "Node2D", "orb", position=(x, y), spots="Array[Vector2]([" + ", ".join(
             f"Vector2({_num(float(a))}, {_num(float(b))})" for a, b in spots) + "])")
@@ -273,7 +283,7 @@ class Floor:
         used = {"level"} | {s for _, _, s, _ in self.nodes if s}
         out = ["[gd_scene format=3]", ""]
         for key in ["level", "block", "checkpoint", "crumble", "bouncy", "mover", "spikes", "refill",
-                    "shooter", "mouth", "rising", "orb"]:
+                    "shooter", "mouth", "rising", "orb", "sign"]:
             if key in used:
                 out.append(f'[ext_resource type="Script" path="{SCRIPTS[key]}" id="{key}"]')
         out.append("")
@@ -288,6 +298,8 @@ class Floor:
             out.append("taunt = " + _val(self.taunt))
         if self.is_final:
             out.append("is_final = true")
+        if self.plain:
+            out.append("plain = true")
         out.append(f"bounds = Rect2({_num(float(bx))}, {_num(float(by))}, {_num(float(bw))}, {_num(float(bh))})")
         out.append("")
         for name, typ, script, props in self.nodes:

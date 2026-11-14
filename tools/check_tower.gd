@@ -28,7 +28,8 @@ func _initialize() -> void:
 		var above: Node2D = main.floors[i]
 		var exit := below.get_node_or_null("Exit") as Node2D
 		var entry := above.get_node_or_null("Entry") as Node2D
-		check(exit != null and entry != null and exit.global_position.distance_to(entry.global_position) < 0.5,
+		# Stacked floors overlap by the slab: the Entry (slab bottom) sits 32 px below the Exit (ceiling top).
+		check(exit != null and entry != null and exit.global_position.distance_to(entry.global_position - Vector2(0, main.SLAB_OVERLAP)) < 0.5,
 			"floor %d entry sits on floor %d exit" % [i + 1, i])
 	for i in count:
 		main.load_level(i)

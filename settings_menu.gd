@@ -84,6 +84,7 @@ var _pages: Array[VBoxContainer] = []
 var _sliders: Dictionary = {}
 var _readouts: Dictionary = {}
 var _aim: Button
+var _tips: Button
 var _display: Button
 var _display_hint: Label
 var _fps_readout: Label
@@ -207,6 +208,12 @@ func _ready() -> void:
 		_refresh()
 	)
 	_add_row(_pages[1], "Aim Guide", _aim)
+	_tips = _graphics_button()
+	_tips.pressed.connect(func() -> void:
+		preferences.set_floor_tips(not preferences.values.floor_tips)
+		_refresh()
+	)
+	_add_row(_pages[1], "Floor Tips", _tips)
 	_cursor = _graphics_button()
 	_cursor.pressed.connect(func() -> void:
 		preferences.set_cursor_visible(not preferences.values.cursor_visible)
@@ -223,6 +230,7 @@ func _ready() -> void:
 	_shoot.pressed.connect(_listen_for_button)
 	_add_row(_pages[2], "Shoot", _shoot)
 	_pages[2].add_child(_label("That's the whole list.", 11, LILAC))
+	# Stats page: filled in each time it's opened (see _refresh_stats).
 	_controls_hint = _label("", 10, GOLD)
 	_pages[2].add_child(_controls_hint)
 
@@ -793,6 +801,7 @@ func _refresh() -> void:
 		_sliders[bus].set_value_no_signal(value)
 		_readouts[bus].text = "%d%%" % value
 	_aim.text = "On" if preferences.values.aim_guide else "Off"
+	_tips.text = "On" if preferences.values.floor_tips else "Off"
 	_shoot.text = Preferences.MOUSE_NAMES[preferences.values.shoot_button]
 	_cursor.text = "Shown" if preferences.values.cursor_visible else "Hidden"
 	if _display != null:

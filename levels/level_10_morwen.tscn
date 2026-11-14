@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
 [ext_resource type="Script" path="res://hazards/mouth.gd" id="mouth"]
 [ext_resource type="Script" path="res://hazards/orb.gd" id="orb"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="Sandwitch" type="Node2D"]
 editor_description = "Floor 10 (finale, combos). A: crumbles over a pit with a gargoyle shooting the gap, a lift. B: slider over a spiked shelf, door hop off the slider, wisp and fast crumble over a spiked gate top. C: zigzag, wisp, crumble, a lift under an aimed gargoyle, door hop into the walled orb room. See LEVEL_LOG.md."
@@ -50,6 +51,11 @@ size = Vector2(2496, 32)
 
 [node name="Start" type="Marker2D" parent="."]
 position = Vector2(1480, 546)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(1560, 560)
+script = ExtResource("sign")
+text = "The orb is at the top. Everything you've learned, at the same time."
 
 [node name="Pit" type="Area2D" parent="."]
 position = Vector2(1680, 560)

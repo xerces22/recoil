@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://8e6gfbm1e3tv" path="res://hazards/mover.gd" id="mover"]
 [ext_resource type="Script" uid="uid://dhg3q41t2i7ji" path="res://hazards/shooter.gd" id="shooter"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="GargoyleGallery" type="Node2D" unique_id=1360647746]
 editor_description = "Floor 6 (exam). New: gargoyles. Corridor 1 right: islands over spike patches, a gargoyle firing down the corridor. Corridor 2 left: a long slider over spikes under two gargoyles firing down. Corridor 3 right: crumbles and an aimed gargoyle. See LEVEL_LOG.md."
@@ -229,3 +230,8 @@ size = Vector2(144, 16)
 position = Vector2(2240, -732)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(660, 560)
+script = ExtResource("sign")
+text = "Gargoyles spit bolts. They don't hurt, but they knock you into things that do."

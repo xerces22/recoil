@@ -21,6 +21,11 @@ const FLOORS: Array[String] = [
 	"res://levels/level_10_morwen.tscn",
 ]
 
+## The cellar tutorial. Plays once after New Game's cutscene; not one of the tower floors.
+const TUTORIAL := "res://levels/tutorial_cellar.tscn"
+## The tutorial ends when you light this brazier.
+const TUTORIAL_BRAZIER := "P07_Brazier"
+
 ## Test levels. Empty in the release build (see planned_release_debug).
 const SANDBOXES: Array[String] = [
 	"res://levels/level_01_counterweight.tscn",
@@ -45,6 +50,8 @@ const CELLAR_LEVELS := 2
 const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
 ## Camera: how far ahead it leads in the flight direction, and how fast the lead catches up.
+## Thickness of a floor's ground slab: stacked floors overlap the ceiling below by this much.
+const SLAB_OVERLAP := 32.0
 const LOOK_AHEAD := 120.0
 const LOOK_SPEED := 3.0
 ## The player sits this far below the screen centre, since the goal is usually above.
@@ -70,6 +77,8 @@ var floors: Array[Level] = []
 ## Tower floor number (0-based) of each loaded floor, or -1 for a sandbox.
 var floor_numbers: Array[int] = []
 var tower_mode := true
+## True while the cellar tutorial is loaded.
+var tutorial_mode := false
 ## Index into `floors` of the floor the player is in now, and the highest one reached.
 var current := 0
 var highest := 0
@@ -80,6 +89,11 @@ var level_index := 0
 var checkpoints: Array[Checkpoint] = []
 var floods: Array[RisingHazard] = []
 var refills: Array[ShellRefill] = []
+## Wooden signs in the loaded floors. The nearest one within reach shows its text on the HUD.
+var signs: Array[LevelSign] = []
+var _sign_panel: PanelContainer
+var _sign_label: Label
+var _sign_shown: LevelSign
 var deaths := 0
 var elapsed := 0.0
 var cleared := false
@@ -118,6 +132,7 @@ func _ready() -> void:
 	camera.limit_smoothed = true
 	music.finished.connect(music.play)
 	_build_banner()
+	_build_sign_panel()
 	load_tower()
 	$HUD.hide()
 	add_child(settings)
@@ -152,9 +167,10 @@ func _start_run() -> void:
 	$HUD.show()
 
 
-## New Game: story cards, then the climb from floor 1.
+## New Game: story cards, the cellar tutorial, then the climb from floor 1.
 func new_game() -> void:
-	_start_run()
+	# The tutorial room sits behind the storyboard; its last panel drops you into it.
+	_start_tutorial()
 	# Opening storyboard (Mr. Guy meets Mrs. Sandwitch). Can't be skipped; frees itself.
 	var intro: StoryIntro = preload("res://story_intro.gd").new()
 	add_child(intro)
@@ -166,7 +182,9 @@ func new_game() -> void:
 ## the top of floor 1 down onto its start ledge.
 func _drop_into_cellar() -> void:
 	var start := (floors[0].get_node("Start") as Node2D).global_position
-	player.position = start + Vector2(0, -1300)
+	# Fall from high up, but never from above the room's ceiling (the tutorial room is short).
+	var top := _area(0).position.y + 80.0
+	player.position = Vector2(start.x, maxf(start.y - 1300.0, top))
 	player.velocity = Vector2.ZERO
 	look = Vector2.ZERO
 	_update_camera(0.0)
@@ -239,6 +257,9 @@ func _end_run() -> void:
 
 
 func _restart_current_floor() -> void:
+	if tutorial_mode:
+		_start_tutorial()
+		return
 	if not tower_mode:
 		load_level(level_index)
 		return
@@ -305,6 +326,7 @@ func _teleport_to_orb() -> void:
 
 ## Loads every floor stacked into one tower and starts at the bottom.
 func load_tower() -> void:
+	tutorial_mode = false
 	tower_mode = true
 	level_index = 0
 	var numbers: Array[int] = []
@@ -315,6 +337,7 @@ func load_tower() -> void:
 
 ## Loads one floor or sandbox on its own, for testing.
 func load_level(index: int) -> void:
+	tutorial_mode = false
 	tower_mode = false
 	level_index = index
 	var number := index if index < FLOORS.size() else -1
@@ -330,10 +353,12 @@ func _build(paths: Array[String], numbers: Array[int]) -> void:
 	checkpoints.clear()
 	floods.clear()
 	refills.clear()
+	signs.clear()
 	for path in paths:
 		var next: Level = load(path).instantiate()
 		if not floors.is_empty():
 			next.position = _stack_offset(floors.back(), next)
+			_trim_walls(next)
 		level_root.add_child(next)
 		floors.append(next)
 		_collect(next)
@@ -372,11 +397,31 @@ func _stack_offset(below: Level, next: Level) -> Vector2:
 	var exit := below.get_node_or_null("Exit") as Node2D
 	var entry := next.get_node_or_null("Entry") as Node2D
 	if exit != null and entry != null:
-		return below.position + exit.position - entry.position
+		# Entry marks the bottom of the ground slab and Exit the top of the ceiling, so lining them up
+		# stacked the 32 px slab on top of the 32 px ceiling: a doubled layer. Drop the floor by the
+		# slab's thickness so the slab sits exactly on the ceiling below and they read as one floor.
+		return below.position + exit.position - entry.position + Vector2(0, SLAB_OVERLAP)
 	push_warning("%s needs an Exit and %s needs an Entry marker to line up. Stacking by bounds instead." % [
 		below.name, next.name])
 	return below.position + Vector2(below.bounds.position.x - next.bounds.position.x,
 		below.bounds.position.y - next.bounds.end.y)
+
+
+## A floor's side walls run to the bottom of its bounds, below its ground slab. Stacked in the tower,
+## that part pokes down into the floor below, so cut the walls off at the slab's bottom (the Entry marker).
+func _trim_walls(stacked: Level) -> void:
+	var entry := stacked.get_node_or_null("Entry") as Node2D
+	if entry == null:
+		return
+	var bottom := entry.position.y
+	for wall_name in ["WallLeft", "WallRight"]:
+		var wall := stacked.get_node_or_null(wall_name) as Block
+		if wall == null:
+			continue
+		var top := wall.position.y - wall.size.y / 2.0
+		if wall.position.y + wall.size.y / 2.0 > bottom and bottom > top:
+			wall.size = Vector2(wall.size.x, bottom - top)
+			wall.position.y = (top + bottom) / 2.0
 
 
 ## A floor's playable area in world space.
@@ -413,6 +458,7 @@ func _enter_floor(index: int, first := false) -> void:
 		title_label.text = "Sandbox  %s" % level.title
 	instructions.text = level.hint
 	backdrop.target_tint = level.backdrop_tint
+	backdrop.visible = not level.plain
 	_play_music(number)
 
 	if first or index > highest:
@@ -436,6 +482,8 @@ func _collect(node: Node) -> void:
 			floods.append(child)
 		elif child is ShellRefill:
 			refills.append(child)
+		elif child is LevelSign:
+			signs.append(child)
 		_collect(child)
 
 
@@ -443,6 +491,7 @@ func _rebuild_hazard_lists() -> void:
 	checkpoints.clear()
 	floods.clear()
 	refills.clear()
+	signs.clear()
 	for floor_node in floors:
 		_collect(floor_node)
 	# Lowest first, so "next checkpoint" means the next one up.
@@ -475,6 +524,7 @@ func _physics_process(_delta: float) -> void:
 
 
 func _process(delta: float) -> void:
+	_update_sign(delta)
 	_update_camera(delta)
 	if not cleared:
 		elapsed += delta
@@ -512,6 +562,10 @@ func _process(delta: float) -> void:
 
 
 func _reach(checkpoint: Checkpoint) -> void:
+	if tutorial_mode and checkpoint.name == TUTORIAL_BRAZIER and not checkpoint.reached:
+		checkpoint.reached = true
+		_finish_tutorial()
+		return
 	if _is_goal(checkpoint):
 		checkpoint.reached = true
 		_clear()
@@ -627,17 +681,21 @@ func _build_banner() -> void:
 
 ## Big "FLOOR N / title / taunt" card when the player rises into a new floor.
 func _show_banner(number: int, floor_level: Level) -> void:
+	_show_banner_text("FLOOR %d" % (number + 1), floor_level.title, floor_level.taunt)
+
+
+func _show_banner_text(heading: String, title: String, taunt: String) -> void:
 	var lines := banner.get_children()
-	(lines[0] as Label).text = "FLOOR %d" % (number + 1)
-	(lines[1] as Label).text = floor_level.title.to_upper()
-	(lines[2] as Label).text = "MRS. SANDWITCH: \"%s\"" % floor_level.taunt if floor_level.taunt != "" else ""
-	(lines[2] as Label).visible = floor_level.taunt != ""
+	(lines[0] as Label).text = heading
+	(lines[1] as Label).text = title.to_upper()
+	(lines[2] as Label).text = "MRS. SANDWITCH: \"%s\"" % taunt if taunt != "" else ""
+	(lines[2] as Label).visible = taunt != ""
 	if banner_tween != null:
 		banner_tween.kill()
 	banner.modulate.a = 0.0
 	banner_tween = create_tween()
 	banner_tween.tween_property(banner, "modulate:a", 1.0, 0.35)
-	banner_tween.tween_interval(2.4 if floor_level.taunt == "" else 3.4)
+	banner_tween.tween_interval(2.4 if taunt == "" else 3.4)
 	banner_tween.tween_property(banner, "modulate:a", 0.0, 0.8)
 
 
@@ -674,3 +732,107 @@ func _on_player_died() -> void:
 
 func _format_time(seconds: float) -> String:
 	return "%d:%04.1f" % [int(seconds) / 60, fmod(seconds, 60.0)]
+
+
+# ---------------------------------------------------------------- signs
+
+## Small panel for sign text, top centre: between the Pause button and the floor-title banner. It's on the HUD layer, not in the (possibly low-res) world
+## view, so the pixel font stays crisp at any render quality.
+func _build_sign_panel() -> void:
+	_sign_panel = PanelContainer.new()
+	_sign_panel.name = "SignPanel"
+	_sign_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color("170b22", 0.94)
+	box.border_color = Color("3a2b48")
+	box.set_border_width_all(2)
+	box.content_margin_left = 9
+	box.content_margin_right = 11
+	box.content_margin_top = 7
+	box.content_margin_bottom = 7
+	box.shadow_color = Color(0, 0, 0, 0.35)
+	box.shadow_size = 3
+	_sign_panel.add_theme_stylebox_override("panel", box)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 9)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_sign_panel.add_child(row)
+	var icon := TextureRect.new()
+	icon.texture = LevelSign.SPRITE
+	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.custom_minimum_size = Vector2(18, 20)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(icon)
+	_sign_label = Label.new()
+	_sign_label.add_theme_font_override("font", FONT)
+	_sign_label.add_theme_font_size_override("font_size", 11)
+	_sign_label.add_theme_color_override("font_color", Color("f6e8cb"))
+	_sign_label.add_theme_color_override("font_outline_color", Color("0b0512"))
+	_sign_label.add_theme_constant_override("outline_size", 2)
+	_sign_label.add_theme_constant_override("line_spacing", 5)
+	_sign_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_sign_label.custom_minimum_size = Vector2(374, 0)
+	_sign_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_sign_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	row.add_child(_sign_label)
+	_sign_panel.modulate.a = 0.0
+	$HUD.add_child(_sign_panel)
+	_place_sign_panel()
+
+
+func _place_sign_panel() -> void:
+	_sign_panel.reset_size()
+	var view := get_viewport().get_visible_rect().size
+	_sign_panel.position = Vector2((view.x - _sign_panel.size.x) / 2.0, 14.0)
+
+
+## Shows the nearest sign the player is standing near; fades out when they leave.
+func _update_sign(delta: float) -> void:
+	if _sign_panel == null:
+		return
+	var best: LevelSign = null
+	var best_d := INF
+	# Floor tips can be turned off in Settings; the tutorial's always show.
+	var allowed := tutorial_mode or bool(preferences.values.get("floor_tips", true))
+	for sign_node in signs if allowed else []:
+		if not is_instance_valid(sign_node):
+			continue
+		var d := sign_node.global_position.distance_to(player.global_position)
+		if d < sign_node.radius and d < best_d:
+			best = sign_node
+			best_d = d
+	if best != null and best != _sign_shown:
+		_sign_shown = best
+		_sign_label.text = best.text
+		_place_sign_panel()
+	var a := move_toward(_sign_panel.modulate.a, 1.0 if best != null else 0.0, delta * 5.0)
+	_sign_panel.modulate.a = a
+	if a <= 0.0:
+		_sign_shown = null
+
+
+# ---------------------------------------------------------------- tutorial
+
+## Loads the cellar tutorial room on its own.
+func _start_tutorial() -> void:
+	tower_mode = false
+	tutorial_mode = true
+	level_index = -1
+	_build([TUTORIAL], [-1])
+	# Replaces the title screen's floor 1 banner; plays as you drop in after the cutscene.
+	_show_banner_text("TUTORIAL", floors[0].title, "")
+	$HUD.show()
+
+
+## Brazier lit: ask about the aim guide, then fade into floor 1.
+func _finish_tutorial() -> void:
+	player.cancel_shot()
+	var ask: CanvasLayer = preload("res://aim_guide_prompt.gd").new()
+	ask.preferences = preferences
+	add_child(ask)
+	ask.chosen.connect(func() -> void:
+		get_node("Settings")._fade_through(func() -> void:
+			ask.queue_free()
+			_start_run()))
