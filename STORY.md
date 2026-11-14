@@ -11,7 +11,7 @@ The tone is silly but straight-faced. The characters take it seriously; the play
 ### Setup (intro card, 3 short screens)
 
 1. **Sir Barrett** was the finest witch hunter in the kingdom. He came to Hexmoor Castle with one weapon: his trusty double-barrel shotgun.
-2. The witch **Morwen the Unloaded** caught him in the cellar. She didn't kill him. She did something worse: she turned him **into the shotgun**.
+2. The witch **Mrs. Sandwitch** caught him in the cellar. She didn't kill him. She did something worse: she turned him **into the shotgun**.
 3. "A gun can't walk," she laughed, and floated up to the top of her tower. Her magic lives in the **hex orb** at the very top. Smash it and the curse breaks.
 
 Then the game starts. No more text than that. Each line fits on one screen in Press Start 2P.
@@ -24,7 +24,7 @@ Every mechanic should have an in-world reason, so the player never asks "why?":
 |---|---|
 | You only move by firing | You're a gun. Guns don't have legs. Recoil is all you've got. |
 | 2 shells | Double barrel. Barrett always carried two. |
-| Landing reloads both | Part of the curse: the castle feeds you shells every time you touch stone, so you can never run out and never stop being a gun. Morwen thinks it's funny. |
+| Landing reloads both | Part of the curse: the castle feeds you shells every time you touch stone, so you can never run out and never stop being a gun. Mrs. Sandwitch thinks it's funny. |
 | Mid-air slow-mo on the 2nd shell | Barrett's hunter instincts. Time slows when he aims. |
 | Shell refill rings | **Shell wisps**: loose pieces of the curse floating around. Fly through one and it loads you. |
 | Respawn at a checkpoint | Braziers. Barrett's spirit drifts back to the last fire he lit. |
@@ -51,7 +51,7 @@ There is **one orb**, in the orb room at the top of floor 10. It takes **3 blast
 
 When the orb shatters:
 
-1. **Cutscene.** Everything stops. Morwen appears in front of you. Your controls lock. She talks, one line per click, in Press Start 2P text boxes:
+1. **Cutscene.** Everything stops. Mrs. Sandwitch appears in front of you. Your controls lock. She talks, one line per click, in Press Start 2P text boxes:
    - "My orb! Do you know how long that took to enchant?"
    - "Fine. FINE. You win, little boomstick."
    - "But think about it. Without me, you're just a gun on the floor. Who's going to carry you?"
@@ -68,7 +68,7 @@ The ending is the only time in the game you shoot something without flying away.
 
 The climb goes **cellar → library → tower**. This matches the asset shortlist, so art and story line up.
 
-| Zone | Floors | Look (Whimsy Hallow + Dark Castle) | Music | Morwen's taunt on arrival |
+| Zone | Floors | Look (Whimsy Hallow + Dark Castle) | Music | Mrs. Sandwitch's taunt on arrival |
 |---|---|---|---|---|
 | **The Cellar** | 1–3 | Grey stone, wood, wine racks as ledges, potion shelves, sewer grates | Castle in Darkness | "Still kicking? Cute." |
 | **The Library** | 4–7 | Stone, tall bookshelves as platforms and walls, candles, gargoyle statues | MonsterVania #2 | "Shhh. This is a library." |
@@ -76,7 +76,7 @@ The climb goes **cellar → library → tower**. This matches the asset shortlis
 
 The taunt shows under the floor title on the first floor of each zone (set `taunt` on that floor). Everywhere else, `hint` stays a one-sentence mechanic tip.
 
-### Mechanics as Morwen's stuff
+### Mechanics as Mrs. Sandwitch's stuff
 
 Rename the mechanics in-world so they belong to the castle. Code names stay the same.
 
@@ -186,7 +186,7 @@ Same mechanic order as LEVEL_DESIGN.md. Each floor is a separate file; the game 
 | 7 | Library | Mind the Doors | Mimic doors (mouths) | Door hops ↑ through gates, a sideways door in a corridor ←, a double gate | 2560 × 1682 |
 | 8 | Tower | It's Boiling | The flood, whole floor | Spiral → ← → between spiked dividers | 2560 × 1892 |
 | 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor ← over a pit, second diagonal tunnel ↗, gate and aimed gargoyle | 3840 × 2142 |
-| 10 | Tower | Morwen | Finale: the orb room | Gargoyle, lift, two-door gate, then the flood up to the orb room | 2560 × 2620 |
+| 10 | Tower | Mrs. Sandwitch | Finale: the orb room | Gargoyle, lift, two-door gate, then the flood up to the orb room | 2560 × 2620 |
 
 Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sections with a brazier between each, then the exit hole. Floor 10 ends in the orb room instead.
 
@@ -202,11 +202,11 @@ Keep the "teach → test → twist" structure from LEVEL_DESIGN.md: three sectio
 4. The flood spans the level's `bounds` width and works on any floor of the tower.
 5. LEVEL_DESIGN.md describes wide floors and the floor-stacking rules.
 6. **Tower stacking.** `main.gd` loads every floor in `FLOORS` and shifts each one so its `Entry` sits on the `Exit` of the floor below. The camera's sides follow the floor you're in; checkpoints, timer and deaths run for the whole tower. A flood stops once you leave its floor.
-7. **Floor title banner.** Rising into a new floor shows "FLOOR N", its title and Morwen's taunt (if set). Music follows the floor.
+7. **Floor title banner.** Rising into a new floor shows "FLOOR N", its title and Mrs. Sandwitch's taunt (if set). Music follows the floor.
 8. **Single-floor testing.** Number keys load one floor; flying up through its `Exit` clears it. T loads the whole tower.
 
 **Next (code, not level work):**
 
 9. **Hex orb** (`hazards/orb.gd`, written, not wired in): 3 hits, hops between `spots`. On the third hit, start the ending.
 10. **Intro cards** (`story_cards.gd`, written, not wired in): the 3 setup screens before floor 1.
-11. **Ending:** Morwen's lines, the locked crosshair, one click, an instant black screen, an echoed blast, then "Thanks for playing".
+11. **Ending:** Mrs. Sandwitch's lines, the locked crosshair, one click, an instant black screen, an echoed blast, then "Thanks for playing".

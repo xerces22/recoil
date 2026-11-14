@@ -687,7 +687,7 @@ func _draw_life() -> void:
 			Kind.RAIN:
 				ci.draw_line(pos, pos + Vector2(-5, 18), Color(0.75, 0.85, 1.0, 0.55 * _look.rain), 1.5)
 			Kind.SPARK:
-				# Morwen's hex magic: brighter the higher you climb.
+				# Mrs. Sandwitch's hex magic: brighter the higher you climb.
 				var a: float = (0.3 + 0.5 * absf(sin(_time * 3.0 + p.seed))) * fade * _look.sparks
 				var c := Color(0.75, 0.45, 1.0, a) if int(p.seed) % 2 == 0 else Color(0.4, 1.0, 0.9, a)
 				ci.draw_rect(Rect2(pos - Vector2(0, 2), Vector2(1, 5)), c)

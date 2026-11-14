@@ -160,7 +160,7 @@ Now add blockers, nubs and pits (section 4) to:
 ### Step 5: the hint and the title
 
 - The `hint` is one sentence that teaches the new mechanic, in plain words, e.g. "Gold rings reload your shells in midair. Chain them to climb where there's nothing to land on."
-- The `title` comes from STORY.md. The first floor of each zone also gets Morwen's `taunt`.
+- The `title` comes from STORY.md. The first floor of each zone also gets Mrs. Sandwitch's `taunt`.
 
 ---
 

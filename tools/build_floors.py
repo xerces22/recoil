@@ -26,6 +26,7 @@ def floor_02():
     W, TOP = 2240, -1120
     f = Floor("Chimney", title="The Chimney",
               hint="Gold wisps reload your shells in midair. Fly through one, then shoot again.",
+              taunt="Smoke goes up the chimney. Shotguns don't.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 2. New: shell wisps. A: one wisp lifts you to a ledge you can't reach "
                     "with two shells. B: wisps carry you across a spike pit. C: the Chimney, a diagonal "
@@ -74,6 +75,7 @@ def floor_03():
     W, TOP = 2880, -1272
     f = Floor("ChainLift", title="The Chain Lift",
               hint="Grey platforms move and still reload you. Yellow-striped lifts wait until you land.",
+              taunt="Going up? Not on my lifts, you're not.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 3. New: moving platforms. A: a slider over safe ground, a waiting lift. "
                     "B: sliders over a spike river going left, then a lift up. C: fast slider back right "
@@ -158,6 +160,7 @@ def floor_05():
     W, TOP = 2560, -1452
     f = Floor("RottenShelves", title="Rotten Shelves",
               hint="Brown shelves crack and fall soon after you land. Don't stop to think on them.",
+              taunt="Mind the shelves. They're older than your manners.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 5. New: crumbling shelves. Switchback: leg 1 left over safe floor, leg 2 right "
                     "above a spiked divider into a waiting lift, leg 3 left on fast crumbles. See LEVEL_LOG.md.")
@@ -200,6 +203,7 @@ def floor_06():
     W, TOP = 3840, -1012
     f = Floor("GargoyleGallery", title="Gargoyle Gallery",
               hint="Gargoyle bolts don't hurt. They shove you, and the spikes do the rest. Watch the glow before each shot.",
+              taunt="My gargoyles never liked your hat either.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 6 (exam). New: gargoyles. Corridor 1 right: islands over spike patches, a gargoyle "
                     "firing down the corridor. Corridor 2 left: a long slider over spikes under two gargoyles "
@@ -257,6 +261,7 @@ def floor_07():
     W, TOP = 2560, -962
     f = Floor("MindTheDoors", title="Mind the Doors",
               hint="Mimic doors snap shut on a beat. Watch them shake, then go. If one bites you, it eats your shells.",
+              taunt="My doors are hungry. You look crunchy.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 7. New: mimic doors. A: one gate, one slow door. B: a gate with two doors out of step. "
                     "C: a sideways door in a corridor going left over spikes, then two gates 100 px apart. "
@@ -369,6 +374,7 @@ def floor_09():
     W, TOP = 3840, -1422
     f = Floor("EverythingHatesYou", title="Everything Hates You",
               hint="Nothing new. Everything at once.",
+              taunt="Everything up here hates you. I made sure of it.",
               bounds=(0, TOP, W, 720 - TOP),
               notes="Floor 9 (gauntlet). A: corridor left over a spike pit: crumbles, a slider, a gargoyle. "
                     "B: second diagonal tunnel, up-right, spiked floor, wisps. C: a door gate, an aimed gargoyle, "
@@ -405,12 +411,13 @@ def floor_09():
 
 
 # --------------------------------------------------------------------------------------
-# Floor 10: Morwen. The finale: everything, a flood over the last third, then the orb room.
+# Floor 10: Mrs. Sandwitch. The finale: everything, a flood over the last third, then the orb room.
 # --------------------------------------------------------------------------------------
 def floor_10():
     W, TOP = 2560, -1900
-    f = Floor("Morwen", title="Morwen",
+    f = Floor("Sandwitch", title="Mrs. Sandwitch",
               hint="The orb is at the top. Blast it three times.",
+              taunt="Fine. Come on up. I've got my wand ready.",
               bounds=(0, TOP, W, 720 - TOP), is_final=True,
               notes="Floor 10 (finale). A: a gargoyle, a crumble, a lift. B: a two-door gate, a full wisp. "
                     "C: the flood from the second checkpoint up, pads and wisps, into the orb room. No exit hole. "

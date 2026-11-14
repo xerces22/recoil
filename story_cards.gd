@@ -9,13 +9,13 @@ const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
 
 const INTRO: Array[String] = [
 	"Sir Barrett was the finest witch hunter in the kingdom.\n\nHe came to Hexmoor Castle with one weapon: his trusty double-barrel shotgun.",
-	"The witch Morwen the Unloaded caught him in the cellar.\n\nShe didn't kill him.\n\nShe did something worse.\n\nShe turned him INTO the shotgun.",
+	"The witch Mrs. Sandwitch caught him in the cellar.\n\nShe didn't kill him.\n\nShe did something worse.\n\nShe turned him INTO the shotgun.",
 	"\"A gun can't walk,\" she laughed, and floated up to her tower.\n\nHer magic lives in hex orbs hidden through the castle.\n\nSmash them all and the curse breaks.",
 ]
 
 const ENDING: Array[String] = [
 	"The heart orb shatters.\n\nThe curse breaks...\n\n...and bounces.",
-	"Sir Barrett is a man again.\n\nMorwen the Unloaded is a broom.\n\nHe sweeps the floor with her.",
+	"Sir Barrett is a man again.\n\nMrs. Sandwitch is a broom.\n\nHe sweeps the floor with her.",
 	"He never fired a shotgun again.\n\nHe just sort of hopped everywhere.\n\n\nTHE END",
 ]
 

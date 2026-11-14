@@ -38,7 +38,7 @@ Started 14:00, Nov 14. Hard submit: **18:00**. Jam closes 23:59.
 
 ## 4. Story scene (New Game only)
 
-- [ ] Story cards from STORY.md section 1 (Barrett → turned into a shotgun → Morwen and the orb at the top). `story_cards.gd` already exists, reuse it
+- [ ] Story cards from STORY.md section 1 (Barrett → turned into a shotgun → Mrs. Sandwitch and the orb at the top). `story_cards.gd` already exists, reuse it
 - [ ] Click to advance, skippable
 - [ ] Ends by loading floor 1
 

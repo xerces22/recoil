@@ -49,7 +49,7 @@ Running log of the level-design work. **Read the "Where we are" section first** 
 | 7 | Library | Mind the Doors | Mimic doors (mouths) | Door hops up through gates, a corridor LEFT with a sideways door, a double gate | **Done** (solver + replay pass) |
 | 8 | Tower | It's Boiling | Flood, whole floor | Spiral: RIGHT, LEFT, RIGHT between spiked dividers, with a wisp, slider, crumble and pad | **Done** (solver + replay pass) |
 | 9 | Tower | Everything Hates You | Nothing new: gauntlet | Corridor LEFT over a pit, a second diagonal tunnel going up-RIGHT, gate and aimed gargoyle | **Done** (solver + replay pass) |
-| 10 | Tower | Morwen | Orb room | Gargoyle and lift, a two-door gate, then the flood up to the orb room | **Done** (solver + replay pass) |
+| 10 | Tower | Mrs. Sandwitch | Orb room | Gargoyle and lift, a two-door gate, then the flood up to the orb room | **Done** (solver + replay pass) |
 
 Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor 3. The floor tables in STORY.md and LEVEL_DESIGN.md are updated to match (step 23).
 
@@ -129,7 +129,7 @@ Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor
 - **Floor 3 is DONE** and registered in `main.gd` after floor 2.
 
 ### 9. Floor 4, Quiet Please (done)
-- **Layout:** 3200 wide, slab at 560 to ceiling top at -1152. Entry hole at x 400, exit at x 1504. Morwen's taunt: "Shhh. This is a library."
+- **Layout:** 3200 wide, slab at 560 to ceiling top at -1152. Entry hole at x 400, exit at x 1504. Mrs. Sandwitch's taunt: "Shhh. This is a library."
   - **A (teach, cost 0):** a wide strong pad, StrongPad (x 696–1144, strength 1.2, **min_speed 700**). Ledge P01 is 415 px up: two shells can't reach it, but pad plus one shell easily can. Then checkpoint P02.
   - **B (test, cost 3):** the pinball run. Three pads (PinPad1–3) at x 1640, 1960 and 2280 carry your sideways speed. The floor under them is spiked (y 330), and so is the corridor's roof (y -330). Ends at checkpoint P03.
   - **C (twist):** a shaft with slime walls (ShaftWallLeft, ShaftWallRight). Zigzag ledges P04 and P05 go up to checkpoint P06, then back LEFT along the top: P07, past a spiked blocker, P08, an optional TopPad, then exit ledge P09.
@@ -230,7 +230,7 @@ Order change: wisps moved to floor 2 (the tunnel needs them) and movers to floor
   - B: the **second diagonal tunnel**, going up-RIGHT ("/") from above P05, its floor side spiked, wisps P06–P10 up the middle, then checkpoint P11.
   - C: GateE (y -640, door at x 2700), P12, aimed Gargoyle2, wisp P13, exit ledge P14.
   - New helper: `tunnel_cells()` builds either tunnel direction.
-- **Floor 10, Morwen** (2560 wide, top -1900, entry x 1280, no exit hole, `is_final`).
+- **Floor 10, Mrs. Sandwitch** (2560 wide, top -1900, entry x 1280, no exit hole, `is_final`).
   - A: P01, Gargoyle1, crumble P02, lift P03, checkpoint P04.
   - B: GateF (y -300, two doors out of step), P05, full wisp P06, checkpoint P07.
   - C: the flood from just above P07 (`trigger_y` -730, speed 55, acceleration 3). P08, BoilPad, wisp P09, P10, crumble P11, P12.

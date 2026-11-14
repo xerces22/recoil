@@ -8,7 +8,7 @@ const SHAFT := Rect2(0, -20000, 1280, 20720)
 
 @export var title := "Level"
 @export_multiline var hint := ""
-## Morwen's line, shown big when the level loads. Use it on the first level of each zone.
+## Mrs. Sandwitch's line, shown under the floor title when the floor is entered. Every floor has one.
 @export var taunt := ""
 ## Clearing this level plays the ending instead of loading the next one.
 @export var is_final := false

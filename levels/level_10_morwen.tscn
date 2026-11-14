@@ -12,11 +12,12 @@
 [ext_resource type="Script" path="res://hazards/rising.gd" id="rising"]
 [ext_resource type="Script" path="res://hazards/orb.gd" id="orb"]
 
-[node name="Morwen" type="Node2D"]
+[node name="Sandwitch" type="Node2D"]
 editor_description = "Floor 10 (finale). A: a gargoyle, a crumble, a lift. B: a two-door gate, a full wisp. C: the flood from the second checkpoint up, pads and wisps, into the orb room. No exit hole. See LEVEL_LOG.md."
 script = ExtResource("level")
-title = "Morwen"
+title = "Mrs. Sandwitch"
 hint = "The orb is at the top. Blast it three times."
+taunt = "Fine. Come on up. I've got my wand ready."
 is_final = true
 bounds = Rect2(0, -1900, 2560, 2620)
 

@@ -156,7 +156,7 @@ func _start_run() -> void:
 ## New Game: story cards, then the climb from floor 1.
 func new_game() -> void:
 	_start_run()
-	# Opening storyboard (Mr. Guy meets Mrs. Witch). Can't be skipped; frees itself.
+	# Opening storyboard (Mr. Guy meets Mrs. Sandwitch). Can't be skipped; frees itself.
 	var intro: StoryIntro = preload("res://story_intro.gd").new()
 	add_child(intro)
 	intro.finished.connect(_drop_into_cellar)
@@ -544,7 +544,7 @@ func _show_banner(number: int, floor_level: Level) -> void:
 	var lines := banner.get_children()
 	(lines[0] as Label).text = "FLOOR %d" % (number + 1)
 	(lines[1] as Label).text = floor_level.title.to_upper()
-	(lines[2] as Label).text = "MORWEN: \"%s\"" % floor_level.taunt if floor_level.taunt != "" else ""
+	(lines[2] as Label).text = "MRS. SANDWITCH: \"%s\"" % floor_level.taunt if floor_level.taunt != "" else ""
 	(lines[2] as Label).visible = floor_level.taunt != ""
 	if banner_tween != null:
 		banner_tween.kill()
