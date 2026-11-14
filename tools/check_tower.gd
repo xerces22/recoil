@@ -17,8 +17,8 @@ func _initialize() -> void:
 	var main: Node = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
-	# The title screen pauses the game. Press Play.
-	main.get_node("Settings")._start()
+	# The title screen pauses the game. Start from floor 1 (Continue skips the story cards).
+	main.get_node("Settings")._continue_from(0)
 	await process_frame
 	var player: CharacterBody2D = main.player
 	var count: int = main.FLOORS.size()

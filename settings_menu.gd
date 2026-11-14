@@ -10,7 +10,9 @@ const CREAM := Color("#f6e8cb")
 const GOLD := Color("#ffd583")
 const LILAC := Color("#bdb0c7")
 const ACCENT := Color("#57e08f")
-const INK := Color("#140c1b")
+const INK := Color("#170b22")
+const PURPLE := Color("#3b1d57")
+const TitleVoid = preload("res://title_void.gd")
 const EDGE := Color("#3a2b48")
 const PANEL_SIZE := Vector2(708, 560)
 ## Width of the dark side panel the menu options sit on.
@@ -57,7 +59,8 @@ var _floor_actions: VBoxContainer
 var _logo: TextureRect
 var _credits: Control
 var _particles: Node2D
-var _tint: ColorRect
+var _void: Control
+var _best: Label
 var _sfx: AudioStreamPlayer
 var _time := 0.0
 var _overlay: ColorRect
@@ -239,11 +242,11 @@ func _build_run_menu(theme: Theme) -> void:
 	_pause_button.pressed.connect(_show_screen.bind(Screen.PAUSE))
 	add_child(_pause_button)
 
-	# Slow colour wash over the castle so the room keeps shifting.
-	_tint = ColorRect.new()
-	_tint.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(_tint)
-	_tint.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	# Title backdrop: the gun tumbling through a purple void (covers the paused game).
+	_void = TitleVoid.new()
+	_void.left = SIDE_W
+	add_child(_void)
+	_void.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 	_particles = Node2D.new()
 	add_child(_particles)
@@ -261,7 +264,7 @@ func _build_run_menu(theme: Theme) -> void:
 	side.draw.connect(_draw_side.bind(side))
 	_menu_overlay.add_child(side)
 	side.set_anchors_and_offsets_preset(Control.PRESET_LEFT_WIDE)
-	side.offset_right = SIDE_W + 180.0
+	side.offset_right = SIDE_W + 8.0
 	side.resized.connect(side.queue_redraw)
 
 	_logo = TextureRect.new()
@@ -274,6 +277,10 @@ func _build_run_menu(theme: Theme) -> void:
 	_logo.pivot_offset = _logo.size / 2.0
 	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	side.add_child(_logo)
+
+	_best = _label("", 10, GOLD)
+	_best.position = Vector2(40, 636)
+	side.add_child(_best)
 
 	_menu_heading = _label("Paused", 28, ACCENT)
 	_menu_heading.position = Vector2(62, 150)
@@ -361,14 +368,29 @@ func _play(stream: AudioStream, pitch := 1.0, volume_db := -6.0) -> void:
 
 func _draw_side(side: Control) -> void:
 	var h := side.size.y
-	side.draw_rect(Rect2(0, 0, SIDE_W, h), Color(INK, 0.97))
-	# Soft fade from the panel into the castle.
-	var fade := 180.0
-	side.draw_polygon(PackedVector2Array([Vector2(SIDE_W, 0), Vector2(SIDE_W + fade, 0),
-		Vector2(SIDE_W + fade, h), Vector2(SIDE_W, h)]),
-		PackedColorArray([Color(INK, 0.97), Color(INK, 0.0), Color(INK, 0.0), Color(INK, 0.97)]))
-	side.draw_rect(Rect2(36, h - 34, 120, 2), Color(ACCENT, 0.35))
-	side.draw_string(FONT, Vector2(36, h - 16), "v1.0  jam build", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.6))
+	side.draw_rect(Rect2(0, 0, SIDE_W, h), INK)
+	# Faint brick courses so the panel reads as castle stone, not a flat box.
+	for y in range(0, int(h), 24):
+		side.draw_rect(Rect2(0, y, SIDE_W, 1), Color(PURPLE, 0.35))
+		var shift := 0 if (y / 24) % 2 == 0 else 24
+		for x in range(shift, int(SIDE_W), 48):
+			side.draw_rect(Rect2(x, y, 1, 24), Color(PURPLE, 0.22))
+	# Darken toward the bottom so the options sit on calmer ground.
+	side.draw_polygon(PackedVector2Array([Vector2(0, h * 0.4), Vector2(SIDE_W, h * 0.4), Vector2(SIDE_W, h), Vector2(0, h)]),
+		PackedColorArray([Color(INK, 0.0), Color(INK, 0.0), Color(INK, 0.85), Color(INK, 0.85)]))
+	# Pixel edge: dark gap, purple trim, green line, with studs every 48 px.
+	side.draw_rect(Rect2(SIDE_W - 2, 0, 2, h), Color("#0b0512"))
+	side.draw_rect(Rect2(SIDE_W, 0, 6, h), PURPLE)
+	side.draw_rect(Rect2(SIDE_W + 2, 0, 2, h), ACCENT.darkened(0.35))
+	for y in range(20, int(h), 48):
+		side.draw_rect(Rect2(SIDE_W - 1, y, 8, 8), PURPLE.lightened(0.25))
+		side.draw_rect(Rect2(SIDE_W + 1, y + 2, 4, 4), ACCENT)
+	# Divider under the logo and footer.
+	side.draw_rect(Rect2(40, 272, SIDE_W - 80, 2), Color(PURPLE, 0.9))
+	side.draw_rect(Rect2(40, 272, 60, 2), ACCENT)
+	side.draw_rect(Rect2(40, 662, SIDE_W - 80, 2), Color(PURPLE, 0.9))
+	side.draw_string(FONT, Vector2(40, 690), "A cursed knight. A climbing gun.", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.75))
+	side.draw_string(FONT, Vector2(40, 706), "v1.0  jam build", HORIZONTAL_ALIGNMENT_LEFT, -1, 8, Color(LILAC, 0.45))
 
 
 ## A full-screen holder that centres its child in the area right of the side panel.
@@ -468,14 +490,18 @@ func _show_screen(screen: Screen) -> void:
 	_overlay.visible = screen == Screen.SETTINGS
 	_credits.visible = screen == Screen.CREDITS
 	_particles.visible = on_title
-	_tint.visible = on_title
+	_void.visible = on_title
+	_best.visible = on_title
 	_logo.visible = on_title
 	_menu_heading.visible = _base == Screen.PAUSE
 	_title_actions.visible = on_title and screen != Screen.FLOORS
 	_pause_actions.visible = _base == Screen.PAUSE
 	_floor_actions.visible = screen == Screen.FLOORS
 	if game != null:
-		game.set_title_view(on_title)
+		# In-game HUD only while actually playing; menus get a clean screen.
+		game.get_node("HUD").visible = screen == Screen.PLAY
+	if game != null and on_title:
+		_best.text = "Highest floor  %d/%d" % [game.reached_floor() + 1, game.FLOORS.size()]
 	match screen:
 		Screen.TITLE:
 			_title_actions.get_child(0).button.grab_focus.call_deferred()
@@ -536,15 +562,9 @@ func _input(event: InputEvent) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
-	if _tint.visible:
-		# Colour drifts between castle purple and curse green, very faintly.
-		var t := (sin(_time * 0.25) + 1.0) / 2.0
-		_tint.color = Color("#2a0f3a").lerp(Color("#0d3a22"), t)
-		_tint.color.a = 0.16 + sin(_time * 0.6) * 0.03
+	if _logo.visible:
 		_logo.scale = Vector2.ONE * (1.0 + sin(_time * 1.3) * 0.012)
 		_logo.rotation = sin(_time * 0.7) * 0.012
-		if game != null:
-			game.update_title_view(delta)
 	if not _overlay.visible or _active_tab != 1:
 		return
 	_fps_readout.text = "Current FPS  %d" % Engine.get_frames_per_second()

@@ -122,7 +122,6 @@ func _ready() -> void:
 	load_tower()
 	$HUD.hide()
 	add_child(settings)
-	set_title_view(true)
 
 
 func _apply_gameplay_settings() -> void:
@@ -156,17 +155,15 @@ func _start_run() -> void:
 
 ## New Game: story cards, then the climb from floor 1.
 func new_game() -> void:
-	set_title_view(false)
 	_start_run()
-	var cards := StoryCards.new()
-	add_child(cards)
-	cards.finished.connect(cards.queue_free)
-	cards.play(StoryCards.INTRO)
+	# Opening storyboard (Mr. Guy meets Mrs. Witch). Can't be skipped; frees itself.
+	var intro: StoryIntro = preload("res://story_intro.gd").new()
+	add_child(intro)
+	intro.play()
 
 
 ## Continue: the whole tower, starting at the bottom of floor `index`.
 func continue_from(index: int) -> void:
-	set_title_view(false)
 	_start_run()
 	if index <= 0:
 		return
@@ -207,64 +204,10 @@ func floor_titles() -> Array[String]:
 	return titles
 
 
-# ---------------------------------------------------------------- title screen view
-
-const TITLE_ZOOM := 3.0
-## Where the gun sits on screen on the title: right of the side menu, a bit low.
-const TITLE_SCREEN_SPOT := Vector2(0.66, 0.6)
-var _title_view := false
-var _title_time := 0.0
-
-
-## Title screen: zoom the live castle in on the gun and let the background keep moving
-## while the game is paused behind the menu.
-func set_title_view(on: bool) -> void:
-	if on == _title_view:
-		return
-	_title_view = on
-	var mode := Node.PROCESS_MODE_ALWAYS if on else Node.PROCESS_MODE_INHERIT
-	camera.process_mode = mode
-	backdrop.process_mode = mode
-	camera.position_smoothing_enabled = not on
-	player.show_aim_guide = false if on else preferences.values.aim_guide
-	if on:
-		camera.limit_left = -10000000
-		camera.limit_right = 10000000
-		camera.limit_top = -10000000
-		camera.limit_bottom = 10000000
-		update_title_view(0.0)
-	else:
-		camera.zoom = Vector2.ONE
-		camera.offset = Vector2.ZERO
-		player.gun_angle = 0.0
-		player.queue_redraw()
-		_enter_floor(current, true)
-		_update_camera(0.0)
-		camera.reset_smoothing()
-
-
-## Called every frame by the menu while the title shows (the tree is paused).
-func update_title_view(delta: float) -> void:
-	if not _title_view:
-		return
-	_title_time += delta
-	var view := Vector2(get_viewport().get_visible_rect().size)
-	# Whole-number zoom keeps the pixels crisp. A slow drift keeps the room from sitting still.
-	var zoom := TITLE_ZOOM
-	camera.zoom = Vector2(zoom, zoom)
-	var spot := (TITLE_SCREEN_SPOT - Vector2(0.5, 0.5)) * view / zoom
-	var drift := Vector2(sin(_title_time * 0.23) * 6.0, cos(_title_time * 0.31) * 3.0)
-	camera.position = player.position - spot + drift
-	# The gun idles: a slow tilt, like it's breathing.
-	player.gun_angle = sin(_title_time * 0.9) * 0.05
-	player.queue_redraw()
-
-
 func _end_run() -> void:
 	$HUD.hide()
 	# Reset the scene behind the title and discard the ended run.
 	load_tower()
-	set_title_view(true)
 
 
 func _restart_current_floor() -> void:
@@ -430,7 +373,7 @@ func _enter_floor(index: int, first := false) -> void:
 
 	if first or index > highest:
 		highest = maxi(highest, index)
-		if tower_mode and number >= 0 and not _title_view:
+		if tower_mode and number >= 0:
 			_save_reached(number)
 		if number >= 0:
 			_show_banner(number, level)
