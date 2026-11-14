@@ -107,8 +107,8 @@ func _ready() -> void:
 	capsule.height = BODY_BACK + BODY_FRONT
 	_body_shape.shape = capsule
 	_sync_body_shape()
-	_blast = _make_player(-4.0)
-	_reload = _make_player(-6.0)
+	_blast = _make_player(-10.0)
+	_reload = _make_player(-18.0)
 	_reload.stream = RELOAD_SOUND
 	_land = _make_player(-10.0)
 	_land.stream = LAND_SOUND
@@ -524,13 +524,44 @@ func _draw() -> void:
 	if shots == 0 or debug_flying or not show_aim_guide:
 		return
 
-	# Launch direction: away from the cursor.
-	var direction := -aim
-	var tip := direction * 40.0
-	var arrow := Color(1, 1, 1, 0.55)
-	draw_line(direction * 22.0, tip, arrow, 2.0, true)
-	draw_line(tip, tip - direction.rotated(0.55) * 8.0, arrow, 2.0, true)
-	draw_line(tip, tip - direction.rotated(-0.55) * 8.0, arrow, 2.0, true)
+	_draw_aim_chevron(-aim)
+
+
+## Launch direction (away from the cursor) as a pixel-art ">" chevron, in the game's 2 px pixels.
+## It is rasterised onto the screen-aligned pixel grid (not rotated), so it stays crisp at any angle.
+func _draw_aim_chevron(direction: Vector2) -> void:
+	const DISTANCE := 34.0
+	const DEPTH := 7.0  # tip to back of the ">", in screen px
+	const SPAN := 7.0   # centre line to each arm's end
+	const THICK := 1.3  # half-thickness of the strokes
+	const OUTLINE := 2.8
+	var side := direction.orthogonal()
+	var centre := (direction * DISTANCE / Art.PX).round() * Art.PX
+	var tip := centre + direction * DEPTH * 0.5
+	var back := centre - direction * DEPTH * 0.5
+	var arm_a := back + side * SPAN
+	var arm_b := back - side * SPAN
+	var reach := int(ceil((SPAN + OUTLINE) / Art.PX))
+	var fill: Array[Vector2] = []
+	var edge: Array[Vector2] = []
+	for gx in range(-reach, reach + 1):
+		for gy in range(-reach, reach + 1):
+			var cell := centre + Vector2(gx, gy) * Art.PX
+			var mid := cell + Vector2.ONE * Art.PX * 0.5
+			var dist := minf(_segment_distance(mid, tip, arm_a), _segment_distance(mid, tip, arm_b))
+			if dist <= THICK:
+				fill.append(cell)
+			elif dist <= OUTLINE:
+				edge.append(cell)
+	var size := Vector2(Art.PX, Art.PX)
+	for cell in edge:  # dark rim so it reads on any background
+		draw_rect(Rect2(cell, size), Color(0.08, 0.04, 0.1, 0.85))
+	for cell in fill:
+		draw_rect(Rect2(cell, size), Color(1, 1, 1, 0.92))
+
+
+func _segment_distance(point: Vector2, a: Vector2, b: Vector2) -> float:
+	return point.distance_to(Geometry2D.get_closest_point_to_segment(point, a, b))
 
 
 ## Shotgun sprite turned toward the cursor, flipped so it never hangs upside down.
