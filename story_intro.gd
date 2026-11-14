@@ -18,6 +18,13 @@ const SFX_BUMP := preload("res://assets/sfx/impactSoft_heavy_001.ogg")
 const SFX_ZAP := preload("res://assets/sfx/portal.wav")
 const SFX_BLAST := preload("res://assets/sfx/shotgun_blast_mossberg_1.wav")
 const SFX_WHOOSH := preload("res://assets/sfx/fall_wind_loop.ogg")
+const SFX_TYPE := preload("res://assets/sfx/impactWood_light_002.ogg")
+const SFX_STEP := preload("res://assets/sfx/impactWood_light_000.ogg")
+const SFX_PAGE := preload("res://assets/sfx/impactPlank_medium_001.ogg")
+const SFX_THROW := preload("res://assets/sfx/impactSoft_heavy_000.ogg")
+## Cinematic black bars, and how far the camera pushes in over one panel.
+const BAR_H := 64.0
+const PUSH_IN := 0.07
 
 const S := 5.0             # screen pixels per art pixel (256 x 144 art -> 1280 x 720)
 const GROUND := 118        # where feet stand
@@ -91,6 +98,12 @@ var _text: Label
 var _prompt: Label
 var _fade: ColorRect
 var _sfx: AudioStreamPlayer
+var _blip: AudioStreamPlayer
+var _bars: Array[ColorRect] = []
+var _typed_chars := 0
+var _punch := 0.0       # quick zoom kick on big moments
+var _shake := 0.0
+var _step_frame := -1
 
 
 func _ready() -> void:
@@ -107,6 +120,15 @@ func _ready() -> void:
 	_stage = Node2D.new()
 	_stage.draw.connect(_draw_stage)
 	add_child(_stage)
+
+	for top in [true, false]:
+		var bar := ColorRect.new()
+		bar.color = Color.BLACK
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.size = Vector2(1280, BAR_H)
+		bar.position = Vector2(0, -BAR_H if top else 720.0)
+		add_child(bar)
+		_bars.append(bar)
 
 	# Comic-style speech box along the top, over the sky.
 	_box = Panel.new()
@@ -143,7 +165,13 @@ func _ready() -> void:
 
 	_sfx = AudioStreamPlayer.new()
 	_sfx.bus = &"SFX"
+	_sfx.max_polyphony = 4
 	add_child(_sfx)
+	_blip = AudioStreamPlayer.new()
+	_blip.bus = &"SFX"
+	_blip.max_polyphony = 3
+	_blip.volume_db = -22.0
+	add_child(_blip)
 
 
 func _label(size_px: int, colour: Color) -> Label:
@@ -159,7 +187,14 @@ func play() -> void:
 	get_tree().paused = true
 	_index = -1
 	_fade.modulate.a = 1.0
+	_slide_bars(true)
 	_next()
+
+
+func _slide_bars(show: bool) -> void:
+	var tween := create_tween().set_parallel().set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tween.tween_property(_bars[0], "position:y", 0.0 if show else -BAR_H, 0.6)
+	tween.tween_property(_bars[1], "position:y", 720.0 - BAR_H if show else 720.0, 0.6)
 
 
 ## Turn the page. Same place: cut straight to the next panel and let the camera glide.
@@ -195,7 +230,9 @@ func _show_panel(snap_camera: bool) -> void:
 	_who.visible = panel.who != ""
 	_text.text = panel.text
 	_text.visible_ratio = 0.0
+	_typed_chars = 0
 	_prompt.visible = false
+	_play(SFX_PAGE, -20.0, randf_range(1.1, 1.3))
 	if snap_camera:
 		_zoom = panel.zoom
 		_at = panel.at
@@ -203,18 +240,43 @@ func _show_panel(snap_camera: bool) -> void:
 	match panel.shot:
 		"bump":
 			_play(SFX_BUMP)
+			_punch = 0.12
+			_shake = 6.0
+		"guy_mad", "witch_mad":
+			_punch = 0.05
+		"wand_up":
+			_punch = 0.06
+			_shake = 2.0
 		"zap":
 			_play(SFX_ZAP)
 			_flash = 1.0
+			_punch = 0.18
+			_shake = 10.0
 		"shotgun":
 			_play(SFX_BLAST)
+			_punch = 0.1
+			_shake = 8.0
+		"throw":
+			_play(SFX_THROW, -6.0, 0.8)
+			_shake = 4.0
 		"fall":
 			_play(SFX_WHOOSH)
 
 
-func _play(stream: AudioStream) -> void:
+func _play(stream: AudioStream, volume_db := 0.0, pitch := 1.0) -> void:
 	_sfx.stream = stream
+	_sfx.volume_db = volume_db
+	_sfx.pitch_scale = pitch
 	_sfx.play()
+
+
+## Soft typing blip, pitched by who is talking: the witch low, Mr. Guy mid, narrator high.
+func _type_blip() -> void:
+	var who: String = PANELS[_index].who
+	var base := 0.75 if who == "MRS. SANDWITCH" else (1.0 if who == "MR. GUY" else 1.35)
+	_blip.stream = SFX_TYPE
+	_blip.pitch_scale = base * randf_range(0.94, 1.06)
+	_blip.play()
 
 
 func _ready_to_turn() -> bool:
@@ -236,17 +298,34 @@ func _process(delta: float) -> void:
 		_zoom = lerpf(_zoom, panel.zoom, ease)
 		_at = _at.lerp(panel.at, ease)
 		_dread = lerpf(_dread, panel.dread, ease)
+		# Footsteps on the walking panels.
+		if panel.shot in ["walk_in", "walk_on", "carry"] and _t < panel.act:
+			var frame := int(_t * 6.0)
+			if frame != _step_frame:
+				_step_frame = frame
+				_play(SFX_STEP, -18.0, randf_range(0.9, 1.1))
 		if not _typed:
 			_text.visible_ratio = minf(_t / maxf(_text.text.length() * TYPE_SPEED, 0.2), 1.0)
 			_typed = _text.visible_ratio >= 1.0
+			var shown := int(_text.visible_ratio * _text.text.length())
+			if shown > _typed_chars:
+				if shown % 2 == 0 and _text.text[shown - 1] != " ":
+					_type_blip()
+				_typed_chars = shown
 		else:
 			_shown_for += delta
 			_prompt.visible = _ready_to_turn()
 			_prompt.modulate.a = 0.55 + 0.45 * sin(_shown_for * 5.0)
 			if _ready_to_turn() and _shown_for > AUTO_HOLD:
 				_next()
-	_stage.scale = Vector2(_zoom, _zoom)
-	_stage.position = Vector2(640, 360) - _at * S * _zoom
+	_punch = maxf(_punch - delta * 0.6, 0.0)
+	_shake = maxf(_shake - delta * 20.0, 0.0)
+	var push := 1.0 + minf(_t * 0.012, PUSH_IN) + _punch
+	var zoom := _zoom * push
+	var drift := Vector2(sin(_t * 0.5) * 0.8, cos(_t * 0.37) * 0.5)
+	var jolt := Vector2(randf_range(-1, 1), randf_range(-1, 1)) * _shake
+	_stage.scale = Vector2(zoom, zoom)
+	_stage.position = Vector2(640, 360) - (_at + drift) * S * zoom + jolt
 	_stage.queue_redraw()
 
 
@@ -268,6 +347,7 @@ func _input(event: InputEvent) -> void:
 
 
 func _close() -> void:
+	_slide_bars(false)
 	visible = false
 	get_tree().paused = false
 	finished.emit()
