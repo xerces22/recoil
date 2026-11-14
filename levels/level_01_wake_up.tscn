@@ -1,149 +1,138 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cui30qkav7hjd"]
 
-[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
-[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
-[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
-[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" uid="uid://bo6hr602s6uqa" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" uid="uid://bfnfl5gj7o2rg" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" uid="uid://bmv58e4pjk54m" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
 
-[node name="WakeUp" type="Node2D"]
+[node name="WakeUp" type="Node2D" unique_id=1080684588]
 script = ExtResource("level")
 title = "Wake Up, You're a Gun"
 hint = "Hold click to charge, release to blast away from the cursor. A short hold is a short hop. Land to reload."
 taunt = "Still kicking? Cute."
 bounds = Rect2(0, -960, 1920, 1680)
 
-[node name="Start" type="Marker2D" parent="."]
+[node name="Start" type="Marker2D" parent="." unique_id=450522575]
 position = Vector2(120, 546)
 
-[node name="Exit" type="Marker2D" parent="."]
+[node name="Exit" type="Marker2D" parent="." unique_id=196907858]
 position = Vector2(1072, -960)
 
-[node name="WallLeft" type="StaticBody2D" parent="."]
+[node name="WallLeft" type="StaticBody2D" parent="." unique_id=1213114488]
 position = Vector2(16, -120)
 script = ExtResource("block")
 size = Vector2(32, 1680)
 
-[node name="WallRight" type="StaticBody2D" parent="."]
+[node name="WallRight" type="StaticBody2D" parent="." unique_id=996423607]
 position = Vector2(1904, -120)
 script = ExtResource("block")
 size = Vector2(32, 1680)
 
-[node name="CeilingLeft" type="StaticBody2D" parent="."]
+[node name="CeilingLeft" type="StaticBody2D" parent="." unique_id=1472627834]
 position = Vector2(488, -944)
 script = ExtResource("block")
 size = Vector2(976, 32)
 
-[node name="CeilingRight" type="StaticBody2D" parent="."]
+[node name="CeilingRight" type="StaticBody2D" parent="." unique_id=318751962]
 position = Vector2(1544, -944)
 script = ExtResource("block")
 size = Vector2(752, 32)
 
-[node name="Ground" type="StaticBody2D" parent="."]
+[node name="Ground" type="StaticBody2D" parent="." unique_id=455209932]
 position = Vector2(416, 576)
 script = ExtResource("block")
 size = Vector2(768, 32)
 
-[node name="P01_Step" type="StaticBody2D" parent="."]
+[node name="P01_Step" type="StaticBody2D" parent="." unique_id=1448892846]
 position = Vector2(360, 440)
 script = ExtResource("block")
 size = Vector2(176, 16)
 
-[node name="P02_Step" type="StaticBody2D" parent="."]
+[node name="P02_Step" type="StaticBody2D" parent="." unique_id=22258119]
 position = Vector2(600, 330)
 script = ExtResource("block")
-size = Vector2(160, 16)
 
-[node name="P03_Checkpoint" type="StaticBody2D" parent="."]
+[node name="P03_Checkpoint" type="StaticBody2D" parent="." unique_id=578869386]
 position = Vector2(848, 216)
 script = ExtResource("checkpoint")
 size = Vector2(192, 16)
 
-[node name="DitchFloor" type="StaticBody2D" parent="."]
+[node name="DitchFloor" type="StaticBody2D" parent="." unique_id=1262498735]
 position = Vector2(1344, 476)
 script = ExtResource("block")
 size = Vector2(1088, 32)
 
-[node name="P08_Roof" type="StaticBody2D" parent="."]
+[node name="P08_Roof" type="StaticBody2D" parent="." unique_id=590331742]
 position = Vector2(1322, 32)
 script = ExtResource("block")
 size = Vector2(756, 32)
 
-[node name="P04_Pillar" type="StaticBody2D" parent="."]
-position = Vector2(1096, 342)
-script = ExtResource("block")
-size = Vector2(112, 236)
+[node name="DitchSpikesA" type="Area2D" parent="." unique_id=897329110]
+position = Vector2(806, 458)
+script = ExtResource("spikes")
+width = 1083.0
 
-[node name="P05_Pillar" type="StaticBody2D" parent="."]
-position = Vector2(1352, 326)
-script = ExtResource("block")
-size = Vector2(112, 268)
-
-[node name="DitchSpikesA" type="Area2D" parent="."]
-position = Vector2(1408, 460)
+[node name="DitchSpikesA" type="Area2D" parent="DitchSpikesA" unique_id=93823982]
+position = Vector2(1516, 460)
 script = ExtResource("spikes")
 width = 144.0
 
-[node name="P06_Pillar" type="StaticBody2D" parent="."]
-position = Vector2(1608, 334)
-script = ExtResource("block")
-size = Vector2(112, 252)
-
-[node name="DitchSpikesB" type="Area2D" parent="."]
-position = Vector2(1664, 460)
+[node name="DitchSpikesA2" type="Area2D" parent="DitchSpikesA" unique_id=513118497]
+position = Vector2(1516, 460)
 script = ExtResource("spikes")
-width = 224.0
+width = 144.0
 
-[node name="P07_Checkpoint" type="StaticBody2D" parent="."]
-position = Vector2(1800, 184)
-script = ExtResource("checkpoint")
-size = Vector2(176, 16)
+[node name="DitchSpikesA" type="Area2D" parent="DitchSpikesA/DitchSpikesA2" unique_id=1007596352]
+position = Vector2(1516, 460)
+script = ExtResource("spikes")
+width = 144.0
 
-[node name="RoofSpikes" type="Area2D" parent="."]
+[node name="RoofSpikes" type="Area2D" parent="." unique_id=1918528400]
 position = Vector2(944, 16)
 script = ExtResource("spikes")
 width = 352.0
 
-[node name="P09_Ledge" type="StaticBody2D" parent="."]
+[node name="P09_Ledge" type="StaticBody2D" parent="." unique_id=670697657]
 position = Vector2(1432, -152)
 script = ExtResource("block")
 size = Vector2(144, 16)
 
-[node name="BlockerA" type="StaticBody2D" parent="."]
+[node name="BlockerA" type="StaticBody2D" parent="." unique_id=142769537]
 position = Vector2(1432, -320)
 script = ExtResource("block")
 size = Vector2(64, 40)
 
-[node name="BlockerASpikes" type="Area2D" parent="."]
+[node name="BlockerASpikes" type="Area2D" parent="." unique_id=1785392545]
 position = Vector2(1400, -340)
 script = ExtResource("spikes")
 width = 64.0
 
-[node name="P10_Ledge" type="StaticBody2D" parent="."]
+[node name="P10_Ledge" type="StaticBody2D" parent="." unique_id=1633631896]
 position = Vector2(1112, -328)
 script = ExtResource("block")
 size = Vector2(144, 16)
 
-[node name="BlockerB" type="StaticBody2D" parent="."]
+[node name="BlockerB" type="StaticBody2D" parent="." unique_id=1613454219]
 position = Vector2(1112, -485)
 script = ExtResource("block")
 size = Vector2(104, 30)
 
-[node name="BlockerBSpikes" type="Area2D" parent="."]
+[node name="BlockerBSpikes" type="Area2D" parent="." unique_id=1655559206]
 position = Vector2(1060, -500)
 script = ExtResource("spikes")
 width = 104.0
 
-[node name="P11_Ledge" type="StaticBody2D" parent="."]
+[node name="P11_Ledge" type="StaticBody2D" parent="." unique_id=1866412004]
 position = Vector2(1336, -504)
 script = ExtResource("block")
 size = Vector2(144, 16)
 
-[node name="P11_Nub" type="Area2D" parent="."]
+[node name="P11_Nub" type="Area2D" parent="." unique_id=494258601]
 position = Vector2(1388, -512)
 script = ExtResource("spikes")
 width = 20.0
 
-[node name="P12_ExitLedge" type="StaticBody2D" parent="."]
+[node name="P12_ExitLedge" type="StaticBody2D" parent="." unique_id=1029577183]
 position = Vector2(1072, -680)
 script = ExtResource("checkpoint")
 size = Vector2(224, 16)

@@ -12,8 +12,8 @@ config_version=5
 
 config/name="Cursed Shotgun"
 run/main_scene="res://intro.tscn"
-config/icon="res://icon.png"
 config/features=PackedStringArray("4.7")
+config/icon="res://icon.png"
 
 [display]
 

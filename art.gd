@@ -77,11 +77,12 @@ static func plank(ci: CanvasItem, tex: Texture2D, dest: Rect2, modulate := Color
 ## Wall bracket under a shelf end. `flip` mirrors it for the right end.
 static func bracket(ci: CanvasItem, tex: Texture2D, top_corner: Vector2, flip := false, modulate := Color.WHITE) -> void:
 	var size := BRACKET.size * PX
-	var x := top_corner.x - size.x if flip else top_corner.x
-	var rect := Rect2(Vector2(x, top_corner.y), size)
 	if flip:
-		rect = Rect2(rect.position + Vector2(size.x, 0), Vector2(-size.x, size.y))
-	ci.draw_texture_rect_region(tex, rect, BRACKET, modulate)
+		ci.draw_set_transform(top_corner, 0.0, Vector2(-1, 1))
+		ci.draw_texture_rect_region(tex, Rect2(Vector2.ZERO, size), BRACKET, modulate)
+		ci.draw_set_transform(Vector2.ZERO)
+	else:
+		ci.draw_texture_rect_region(tex, Rect2(top_corner, size), BRACKET, modulate)
 
 
 ## Solid stone block (walls, pillars, wide floors).
