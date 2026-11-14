@@ -5,6 +5,7 @@
 [ext_resource type="Script" uid="uid://bfnfl5gj7o2rg" path="res://hazards/checkpoint.gd" id="checkpoint"]
 [ext_resource type="Script" uid="uid://bmv58e4pjk54m" path="res://hazards/level.gd" id="level"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="QuietPlease" type="Node2D" unique_id=763962153]
 editor_description = "Floor 4 (first Library floor). New: slime pads and bounce walls. A: a strong pad lifts you to a ledge two shells can't reach. B: pinball run right, pad to pad over spikes. C: shaft with bouncy walls, then back left along the top. See LEVEL_LOG.md."
@@ -143,3 +144,8 @@ size = Vector2(128, 12)
 position = Vector2(1504, -872)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(660, 560)
+script = ExtResource("sign")
+text = "Slime bounces you back up but never reloads. Ride the bounce, then shoot from the top."

@@ -16,7 +16,7 @@ const MOUSE_NAMES := {
 }
 const DEFAULTS := {
 	"Master": 100, "Music": 100, "SFX": 100,
-	"aim_guide": true, "fullscreen": false, "shoot_button": MOUSE_BUTTON_LEFT,
+	"aim_guide": true, "floor_tips": true, "fullscreen": false, "shoot_button": MOUSE_BUTTON_LEFT,
 	"vsync": true, "frame_cap": 0, "resolution": Vector2i(1280, 720),
 	"background_detail": true,
 	"render_divisor": 1,
@@ -53,6 +53,12 @@ func load_saved() -> void:
 func set_volume(bus: String, percent: int) -> void:
 	values[bus] = clampi(percent, 0, 100)
 	_apply_volume(bus)
+	_save()
+
+
+## Signs on the tower floors show their tips. The tutorial's signs always show.
+func set_floor_tips(enabled: bool) -> void:
+	values.floor_tips = enabled
 	_save()
 
 

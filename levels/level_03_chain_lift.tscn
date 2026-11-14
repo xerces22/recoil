@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
 [ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
 [ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="ChainLift" type="Node2D"]
 editor_description = "Floor 3. New: moving platforms. A: a slider over safe ground, a waiting lift. B: sliders over a spike river going left, then a lift up. C: fast slider back right under a spiked crusher. See LEVEL_LOG.md."
@@ -132,3 +133,8 @@ size = Vector2(144, 16)
 position = Vector2(1824, -992)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(2810, 560)
+script = ExtResource("sign")
+text = "Platforms move. Wait for one to come to you, ride it, and jump with its speed."

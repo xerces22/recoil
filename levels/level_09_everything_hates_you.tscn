@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://g6x06tgo0dp5" path="res://hazards/refill.gd" id="refill"]
 [ext_resource type="Script" uid="uid://dhg3q41t2i7ji" path="res://hazards/shooter.gd" id="shooter"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="EverythingHatesYou" type="Node2D" unique_id=1352409615]
 editor_description = "Floor 9 (gauntlet). A: corridor left over a spike pit: crumbles, a slider, a gargoyle. B: second diagonal tunnel, up-right, spiked floor, wisps. C: a door gate, an aimed gargoyle, a wisp, the exit. See LEVEL_LOG.md."
@@ -534,3 +535,8 @@ amount = 1
 position = Vector2(3050, -1142)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(3780, 560)
+script = ExtResource("sign")
+text = "Nothing new up here. Everything at once."

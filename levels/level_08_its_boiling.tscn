@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://8e6gfbm1e3tv" path="res://hazards/mover.gd" id="mover"]
 [ext_resource type="Script" uid="uid://g6x06tgo0dp5" path="res://hazards/refill.gd" id="refill"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="ItsBoiling" type="Node2D" unique_id=604558338]
 editor_description = "Floor 8 (first Tower floor). Spiral: leg 1 right (ledges, a wisp), leg 2 left (slider, crumble), leg 3 right (wisp, slime pad). See LEVEL_LOG.md."
@@ -133,3 +134,8 @@ size = Vector2(176, 16)
 position = Vector2(1700, -892)
 script = ExtResource("block")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(560, 560)
+script = ExtResource("sign")
+text = "The cauldron is boiling over and rising. Don't stop. Checkpoints push it back."

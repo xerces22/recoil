@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bfnfl5gj7o2rg" path="res://hazards/checkpoint.gd" id="checkpoint"]
 [ext_resource type="Script" uid="uid://bmv58e4pjk54m" path="res://hazards/level.gd" id="level"]
 [ext_resource type="Script" uid="uid://ddvbnqgormrlm" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/sign.gd" id="sign"]
 
 [node name="WakeUp" type="Node2D" unique_id=1080684588]
 script = ExtResource("level")
@@ -136,3 +137,8 @@ width = 20.0
 position = Vector2(1072, -680)
 script = ExtResource("checkpoint")
 size = Vector2(224, 16)
+
+[node name="SignMechanic" type="Node2D" parent="."]
+position = Vector2(230, 560)
+script = ExtResource("sign")
+text = "Hold click to charge, release to blast away from the cursor. Land to reload both shells."

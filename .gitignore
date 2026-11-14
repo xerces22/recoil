@@ -7,3 +7,5 @@
 *.exe
 *.pck
 *.zip
+/build/
+__pycache__/

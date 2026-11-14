@@ -140,7 +140,8 @@ static func draw_orb(ci: CanvasItem, center: Vector2, cracks: int, scale := PX, 
 
 ## Swirling purple portal: ragged rim, then darker rings pulled to one side like a tunnel.
 static func draw_portal(ci: CanvasItem, center: Vector2, radius: float, spin: float) -> void:
-	if radius < 1.0:
+	# Below a few pixels the 36-point rim collapses and the polygon can't be triangulated.
+	if radius < 4.0:
 		return
 	var rim := PackedVector2Array()
 	for i in 36:

@@ -25,9 +25,15 @@ func _initialize() -> void:
 	main = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
+	# The game opens on the title menu, which pauses the tree: switch it to play first.
+	var menu = main.get_node_or_null("Settings")
+	if menu != null:
+		menu._show_screen(menu.Screen.PLAY)
+	paused = false
 	main.load_level(index)
 	await physics_frame
-	player = main.get_node("Player")
+	# The player lives inside the world viewport now; main.gd keeps a reference.
+	player = main.player
 	level = main.floors[0]
 	var total_fail := 0
 	print("REPLAY ", data["floor"])
