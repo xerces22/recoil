@@ -17,7 +17,10 @@ func _initialize() -> void:
 	var main: Node = load("res://main.tscn").instantiate()
 	root.add_child(main)
 	await process_frame
-	var player: CharacterBody2D = main.get_node("Player")
+	# The title screen pauses the game. Press Play.
+	main.get_node("Settings")._start()
+	await process_frame
+	var player: CharacterBody2D = main.player
 	var count: int = main.FLOORS.size()
 	check(main.floors.size() == count, "tower loads all %d floors" % count)
 	for i in range(1, count):
