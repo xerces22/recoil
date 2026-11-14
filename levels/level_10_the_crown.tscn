@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/bouncy.gd" id="bouncy"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+
+[node name="Level10" type="Node2D"]
+script = ExtResource("level")
+title = "The Crown"
+hint = "Use the lift and save a shell for the refill shaft above the checkpoint."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(560, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="crumble1" type="StaticBody2D" parent="."]
+position = Vector2(730, 426)
+script = ExtResource("crumble")
+size = Vector2(144, 16)
+delay = 0.85
+
+[node name="move2" type="AnimatableBody2D" parent="."]
+position = Vector2(565, 284)
+script = ExtResource("mover")
+size = Vector2(160, 16)
+travel = Vector2(-80, 0)
+period = 4.3
+wait_for_player = false
+
+[node name="turret3" type="Node2D" parent="."]
+position = Vector2(950, 206)
+rotation = 3.141592653589793
+script = ExtResource("shooter")
+interval = 2.3
+bullet_speed = 265.0
+knockback = 300.0
+
+[node name="block4" type="StaticBody2D" parent="."]
+position = Vector2(690, 128)
+script = ExtResource("block")
+size = Vector2(144, 16)
+
+[node name="bounce5" type="StaticBody2D" parent="."]
+position = Vector2(930, 2)
+script = ExtResource("bouncy")
+size = Vector2(16, 104)
+
+[node name="check6" type="StaticBody2D" parent="."]
+position = Vector2(820, -27)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+
+[node name="spikes7" type="Area2D" parent="."]
+position = Vector2(948, -35)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="block8" type="StaticBody2D" parent="."]
+position = Vector2(620, -158)
+script = ExtResource("block")
+size = Vector2(24, 192)
+
+[node name="spikes9" type="Area2D" parent="."]
+position = Vector2(632, -350)
+rotation = 1.5707963267948966
+script = ExtResource("spikes")
+width = 192.0
+height = 20.0
+
+[node name="refill10" type="Node2D" parent="."]
+position = Vector2(820, -314)
+script = ExtResource("refill")
+amount = 2
+
+[node name="turret11" type="Node2D" parent="."]
+position = Vector2(1040, -371)
+rotation = 3.141592653589793
+script = ExtResource("shooter")
+interval = 2.6
+bullet_speed = 260.0
+knockback = 300.0
+
+[node name="finish12" type="StaticBody2D" parent="."]
+position = Vector2(680, -477)
+script = ExtResource("checkpoint")
+size = Vector2(160, 16)
+is_finish = true
+
+[node name="spikes13" type="Area2D" parent="."]
+position = Vector2(600, -485)
+script = ExtResource("spikes")
+width = 16.0

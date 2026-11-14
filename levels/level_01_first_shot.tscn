@@ -1,0 +1,50 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level1" type="Node2D"]
+script = ExtResource("level")
+title = "First Shot"
+hint = "Start with a full charge. Land on solid ledges to reload."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(640, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="block1" type="StaticBody2D" parent="."]
+position = Vector2(730, 436)
+script = ExtResource("block")
+size = Vector2(224, 16)
+
+[node name="block2" type="StaticBody2D" parent="."]
+position = Vector2(550, 308)
+script = ExtResource("block")
+size = Vector2(208, 16)
+
+[node name="check3" type="StaticBody2D" parent="."]
+position = Vector2(670, 176)
+script = ExtResource("checkpoint")
+size = Vector2(224, 16)
+
+[node name="block4" type="StaticBody2D" parent="."]
+position = Vector2(820, 42)
+script = ExtResource("block")
+size = Vector2(192, 16)
+
+[node name="finish5" type="StaticBody2D" parent="."]
+position = Vector2(640, -92)
+script = ExtResource("checkpoint")
+size = Vector2(208, 16)
+is_finish = true
+
+[node name="spikes6" type="Area2D" parent="."]
+position = Vector2(904, 34)
+script = ExtResource("spikes")
+width = 12.0

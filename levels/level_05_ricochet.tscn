@@ -1,0 +1,66 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/bouncy.gd" id="bouncy"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level5" type="Node2D"]
+script = ExtResource("level")
+title = "Ricochet"
+hint = "Blue walls send you back across the gap. They never reload shells."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(600, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="block1" type="StaticBody2D" parent="."]
+position = Vector2(770, 428)
+script = ExtResource("block")
+size = Vector2(176, 16)
+
+[node name="check2" type="StaticBody2D" parent="."]
+position = Vector2(610, 288)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="bounce3" type="StaticBody2D" parent="."]
+position = Vector2(818, 109)
+script = ExtResource("bouncy")
+size = Vector2(16, 104)
+
+[node name="block4" type="StaticBody2D" parent="."]
+position = Vector2(535, 116)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="spikes5" type="Area2D" parent="."]
+position = Vector2(455, 108)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="bounce6" type="StaticBody2D" parent="."]
+position = Vector2(380, -41)
+script = ExtResource("bouncy")
+size = Vector2(16, 104)
+
+[node name="block7" type="StaticBody2D" parent="."]
+position = Vector2(615, -32)
+script = ExtResource("block")
+size = Vector2(144, 16)
+
+[node name="finish8" type="StaticBody2D" parent="."]
+position = Vector2(790, -182)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+is_finish = true
+
+[node name="spikes9" type="Area2D" parent="."]
+position = Vector2(854, -190)
+script = ExtResource("spikes")
+width = 24.0

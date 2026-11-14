@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level6" type="Node2D"]
+script = ExtResource("level")
+title = "Falling Steps"
+hint = "Brown ledges reload your shells and then crumble. Keep moving."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(560, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="crumble1" type="StaticBody2D" parent="."]
+position = Vector2(710, 434)
+script = ExtResource("crumble")
+size = Vector2(176, 16)
+delay = 1.05
+
+[node name="crumble2" type="StaticBody2D" parent="."]
+position = Vector2(525, 290)
+script = ExtResource("crumble")
+size = Vector2(160, 16)
+delay = 0.9
+
+[node name="check3" type="StaticBody2D" parent="."]
+position = Vector2(680, 146)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="crumble4" type="StaticBody2D" parent="."]
+position = Vector2(870, -6)
+script = ExtResource("crumble")
+size = Vector2(152, 16)
+delay = 0.8
+
+[node name="crumble5" type="StaticBody2D" parent="."]
+position = Vector2(675, -156)
+script = ExtResource("crumble")
+size = Vector2(144, 16)
+delay = 0.72
+
+[node name="spikes6" type="Area2D" parent="."]
+position = Vector2(603, -164)
+script = ExtResource("spikes")
+width = 16.0
+
+[node name="finish7" type="StaticBody2D" parent="."]
+position = Vector2(840, -308)
+script = ExtResource("checkpoint")
+size = Vector2(160, 16)
+is_finish = true

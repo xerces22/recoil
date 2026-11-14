@@ -1,0 +1,51 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level4" type="Node2D"]
+script = ExtResource("level")
+title = "Hang Time"
+hint = "Follow the gold ring across the gap. It reloads both shells."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(610, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="block1" type="StaticBody2D" parent="."]
+position = Vector2(760, 426)
+script = ExtResource("block")
+size = Vector2(192, 16)
+
+[node name="check2" type="StaticBody2D" parent="."]
+position = Vector2(590, 286)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="refill3" type="Node2D" parent="."]
+position = Vector2(590, -4)
+script = ExtResource("refill")
+amount = 2
+
+[node name="spikes4" type="Area2D" parent="."]
+position = Vector2(686, 278)
+script = ExtResource("spikes")
+width = 120.0
+
+[node name="SpikeBase" type="StaticBody2D" parent="."]
+position = Vector2(746, 286)
+script = ExtResource("block")
+size = Vector2(120, 16)
+
+[node name="finish5" type="StaticBody2D" parent="."]
+position = Vector2(710, -150)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+is_finish = true

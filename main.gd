@@ -1,147 +1,190 @@
 extends Node2D
+## Ten connected floors share one world and one player.
 
 const RecoilPlayer = preload("res://player.gd")
-const LOWER_CHECKPOINT := Rect2(475, -90, 160, 16)
-const UPPER_CHECKPOINT := Rect2(695, -650, 155, 16)
-const CHECKPOINTS: Array[Rect2] = [LOWER_CHECKPOINT, UPPER_CHECKPOINT]
-const FINISH := Rect2(520, -1350, 160, 16)
-const PLATFORMS: Array[Rect2] = [
-	Rect2(130, 560, 1020, 18),
-	Rect2(680, 405, 210, 16),
-	Rect2(390, 240, 185, 16),
-	Rect2(255, 65, 150, 16),
-	Rect2(645, 100, 150, 16),
-	LOWER_CHECKPOINT,
-	Rect2(770, -265, 160, 16),
-	Rect2(480, -460, 180, 16),
-	UPPER_CHECKPOINT,
-	Rect2(870, -805, 200, 16),
-	Rect2(630, -975, 180, 16),
-	Rect2(785, -1170, 185, 16),
-	FINISH,
+const FLOOR_HEIGHT := 1376.0
+const WIDTH := 2496.0
+const BOUNDS := Rect2(0, -14080, WIDTH, 14800)
+const LOOK_AHEAD := 120.0
+const LOOK_SPEED := 3.0
+const CAMERA_LIFT := 100.0
+const FLOORS: Array[PackedScene] = [
+	preload("res://levels/tower_floor_01.tscn"),
+	preload("res://levels/tower_floor_02.tscn"),
+	preload("res://levels/tower_floor_03.tscn"),
+	preload("res://levels/tower_floor_04.tscn"),
+	preload("res://levels/tower_floor_05.tscn"),
+	preload("res://levels/tower_floor_06.tscn"),
+	preload("res://levels/tower_floor_07.tscn"),
+	preload("res://levels/tower_floor_08.tscn"),
+	preload("res://levels/tower_floor_09.tscn"),
+	preload("res://levels/tower_floor_10.tscn"),
 ]
-const SPIKED_BLOCKS: Array[Rect2] = [
-	Rect2(540, 310, 115, 20),
-	Rect2(625, -190, 110, 20),
-	Rect2(615, -565, 74, 20),
-	Rect2(655, -808, 70, 80),
-	Rect2(1005, -1000, 65, 85),
-	Rect2(545, -1140, 67, 72),
-	Rect2(680, -1305, 75, 65),
-]
-const SPIKED_EDGES: Array[Rect2] = [
-	Rect2(390, 240, 20, 26),
-	Rect2(255, 65, 40, 26),
-	Rect2(755, 100, 40, 26),
-	Rect2(890, -265, 40, 26),
-	Rect2(620, -460, 40, 26),
-	Rect2(1050, -805, 20, 26),
-	Rect2(630, -975, 20, 26),
-	Rect2(950, -1170, 20, 26),
-]
-const SPIKE_WIDTH := 20
+const TITLES: Array[String] = ["Wake Up, You’re a Gun", "The Chain Lift", "Loose Shells", "Quiet Please", "Rotten Shelves", "Gargoyle Gallery", "The Stacks", "The Windward Stair", "The Bell Walk", "Morwen’s Crown"]
+const HINTS: Array[String] = ["Hold left-click to charge. Release to recoil away from the mouse.", "Land on the striped lift to start its trip.", "Gold wisps refill your shells in midair.", "Blue walls bounce you back. Save a shell for the redirect.", "Brown shelves reload you, then crumble. Charge as soon as you land.", "Wait for the flash, then cross the firing lane.", "Use the moving shelf to line up the climb past the gargoyles.", "Move quickly across rotten shelves and use the gold wisps to recover.", "Watch the lift and the firing lanes before committing to the next jump.", "Climb to the summit. Aim at Morwen’s heart orb to break the curse."]
+const ZONES := ["Cellar", "Library", "Tower"]
+const TAUNTS := {0: "Still kicking? Cute.", 3: "Shhh. This is a library.", 7: "You're not supposed to be up here."}
+const ZONE_COLORS := [Color("#d5c7b6"), Color("#bec0cf"), Color("#afbcca")]
+const FLOOR_ENTRANCES := [360.0, 1600.0, 500.0, 1920.0, 550.0, 1890.0, 470.0, 2250.0, 290.0, 2270.0]
 
 @onready var player: RecoilPlayer = $Player
 @onready var camera: Camera2D = $Camera2D
+@onready var level_root: Node2D = $Level
+@onready var title_label: Label = $HUD/Title
 @onready var instructions: Label = $HUD/Instructions
-var active_checkpoint := -1
+@onready var stats: Label = $HUD/Stats
+
+var sections: Array[Node2D] = []
+var checkpoints: Array[Checkpoint] = []
+var refills: Array[ShellRefill] = []
+var look := Vector2.ZERO
+var floor_index := -1
+var cleared := false
+var elapsed := 0.0
+var deaths := 0
 
 
 func _ready() -> void:
-	for rect in PLATFORMS:
-		add_platform(rect)
-	for rect in SPIKED_BLOCKS:
-		add_platform(rect)
-		add_spike_row(Rect2(rect.position, Vector2(rect.size.x, 26)))
-	for row in SPIKED_EDGES:
-		add_spike_row(row)
-
-
-func _process(_delta: float) -> void:
-	camera.position.y = minf(360.0, player.position.y - 120.0)
-	camera.force_update_scroll()
-	if player.is_on_floor():
-		var feet := player.position + Vector2(0, 13)
-		if FINISH.has_point(feet):
-			if instructions.text != "Course clear.":
-				instructions.text = "Course clear."
-				player.debug_event.emit("Course clear at %s" % player.position.round())
-		else:
-			for index in range(active_checkpoint + 1, CHECKPOINTS.size()):
-				var platform := CHECKPOINTS[index]
-				if platform.has_point(feet):
-					active_checkpoint = index
-					player.respawn_position = Vector2(platform.get_center().x, platform.position.y - 14)
-					player.debug_event.emit("Checkpoint %d at %s" % [index + 1, player.position.round()])
-					instructions.text = "Checkpoint set. Save your second shot for the turn."
-					queue_redraw()
-					break
+	player.bounds = BOUNDS
+	camera.limit_left = int(BOUNDS.position.x)
+	camera.limit_right = int(BOUNDS.end.x)
+	camera.limit_top = int(BOUNDS.position.y)
+	camera.limit_bottom = int(BOUNDS.end.y)
+	camera.position_smoothing_enabled = true
+	camera.position_smoothing_speed = 6.0
+	$HUD/Keys.visible = OS.is_debug_build()
+	for index in range(FLOORS.size()):
+		var section := FLOORS[index].instantiate() as Node2D
+		section.position.y = 560.0 - FLOOR_HEIGHT * index
+		level_root.add_child(section)
+		sections.append(section)
+		for child in section.get_children():
+			if child is Checkpoint:
+				checkpoints.append(child)
+			elif child is ShellRefill:
+				refills.append(child)
+			elif child is HexOrb:
+				child.broken.connect(_on_orb_broken.bind(index))
+	for x in [0.0, WIDTH - 24.0]:
+		var wall := Block.new()
+		wall.size = Vector2(24.0, BOUNDS.size.y)
+		wall.position = Vector2(x + 12.0, BOUNDS.get_center().y)
+		level_root.add_child(wall)
+	var roof := Block.new()
+	roof.size = Vector2(WIDTH, 24.0)
+	roof.position = Vector2(WIDTH / 2.0, BOUNDS.position.y + 12.0)
+	level_root.add_child(roof)
+	player.died.connect(_on_player_died)
+	player.shot_fired.connect(_on_shot)
+	player.respawn_position = Vector2(360, 546)
+	player.respawn("tower start")
+	camera.position = player.position - Vector2(0.0, CAMERA_LIFT)
+	camera.reset_smoothing()
 
 
 func _draw() -> void:
-	for index in range(CHECKPOINTS.size()):
-		var label := "CHECKPOINT SET" if index <= active_checkpoint else "CHECKPOINT"
-		draw_string(ThemeDB.fallback_font, CHECKPOINTS[index].position + Vector2(12, -10),
-			label, HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
-	draw_string(ThemeDB.fallback_font, FINISH.position + Vector2(12, -10),
-		"FINISH", HORIZONTAL_ALIGNMENT_LEFT, -1, 14, Color.BLACK)
+	for index in range(FLOORS.size()):
+		var zone := _zone(index)
+		var bottom := 560.0 - FLOOR_HEIGHT * index
+		var top := bottom - FLOOR_HEIGHT
+		if index == FLOORS.size() - 1:
+			top = BOUNDS.position.y
+		if index == 0:
+			bottom = BOUNDS.end.y
+		draw_rect(Rect2(0.0, top, WIDTH, bottom - top), ZONE_COLORS[zone].lightened(0.05 if index % 2 == 0 else 0.0))
+		var ink: Color = ZONE_COLORS[zone].darkened(0.12)
+		for x in range(100, int(WIDTH), 224):
+			match zone:
+				0:
+					for y in range(int(top) + 80, int(bottom), 144):
+						draw_line(Vector2(x, y), Vector2(x + 144, y), ink, 2.0)
+				1:
+					draw_rect(Rect2(x, top + 96, 116, bottom - top - 192), ink, false, 4.0)
+					for y in range(int(top) + 220, int(bottom) - 96, 164):
+						draw_line(Vector2(x, y), Vector2(x + 116, y), ink, 3.0)
+				2:
+					for y in range(int(top) + 160, int(bottom) - 100, 360):
+						draw_arc(Vector2(x + 50, y), 50, PI, TAU, 24, ink, 3.0, true)
+						draw_rect(Rect2(x, y, 100, 172), ink, false, 3.0)
 
 
-func add_platform(rect: Rect2) -> void:
-	var body := StaticBody2D.new()
-	body.position = rect.get_center()
+func _process(delta: float) -> void:
+	if not player.is_air_charging():
+		look = look.lerp((player.velocity * 0.2).limit_length(LOOK_AHEAD), minf(1.0, LOOK_SPEED * delta))
+	camera.position = player.position + look - Vector2(0.0, CAMERA_LIFT)
+	if camera.get_screen_center_position().distance_to(camera.position) > 900.0:
+		camera.reset_smoothing()
 
-	var shape := RectangleShape2D.new()
-	shape.size = rect.size
-	var collision := CollisionShape2D.new()
-	collision.shape = shape
-	body.add_child(collision)
-	add_child(body)
+	var current := clampi(floori((560.0 - player.position.y) / FLOOR_HEIGHT), 0, FLOORS.size() - 1)
+	if current != floor_index:
+		floor_index = current
+		title_label.text = "%s  •  %02d/10  %s" % [ZONES[_zone(current)], current + 1, TITLES[current]]
+		instructions.text = HINTS[current]
+		if TAUNTS.has(current):
+			instructions.text += "\nMorwen: “%s”" % TAUNTS[current]
+	if not cleared:
+		elapsed += delta
+	if player.is_on_floor():
+		var feet := player.global_position + Vector2(0.0, 13.0)
+		for checkpoint in checkpoints:
+			if checkpoint.world_rect().has_point(feet) and not checkpoint.reached:
+				var spawn := Vector2(checkpoint.position.x, checkpoint.world_rect().position.y - 14.0)
+				if spawn.y < player.respawn_position.y:
+					checkpoint.reached = true
+					player.respawn_position = spawn
+					player.debug_event.emit("Brazier lit at %s" % spawn.round())
+				break
 
-	var surface := Polygon2D.new()
-	surface.polygon = PackedVector2Array([
-		rect.position,
-		Vector2(rect.end.x, rect.position.y),
-		rect.end,
-		Vector2(rect.position.x, rect.end.y),
-	])
-	surface.color = Color.BLACK
-	add_child(surface)
-
-
-func add_spike_row(row: Rect2) -> void:
-	var hazard := Area2D.new()
-	hazard.position = row.position
-	hazard.body_entered.connect(_on_spike_entered)
-
-	# Cover the top surface continuously, including the seams between triangles.
-	var strip := RectangleShape2D.new()
-	strip.size = Vector2(row.size.x, 4.0)
-	var strip_collision := CollisionShape2D.new()
-	strip_collision.position = Vector2(row.size.x / 2.0, -1.0)
-	strip_collision.shape = strip
-	hazard.add_child(strip_collision)
-
-	var count := ceili(row.size.x / SPIKE_WIDTH)
-	var width := row.size.x / count
-	for index in range(count):
-		var left := index * width
-		var points := PackedVector2Array([
-			Vector2(left, 0),
-			Vector2(left + width / 2.0, -row.size.y),
-			Vector2(left + width, 0),
-		])
-		var collision := CollisionPolygon2D.new()
-		collision.polygon = points
-		hazard.add_child(collision)
-
-		var triangle := Polygon2D.new()
-		triangle.polygon = points
-		triangle.color = Color.BLACK
-		hazard.add_child(triangle)
-	add_child(hazard)
+	stats.text = "Time %.1fs   Deaths %d" % [elapsed, deaths]
+	if cleared:
+		instructions.text = "The curse breaks. Barrett is himself again. Morwen is a broom."
+		stats.text = "TOWER CLEAR   " + stats.text
 
 
-func _on_spike_entered(body: Node2D) -> void:
-	if body == player:
-		player.respawn.call_deferred("spikes")
+func _zone(index: int) -> int:
+	return 0 if index < 3 else (1 if index < 7 else 2)
+
+
+func _on_shot(blast_direction: Vector2) -> void:
+	for index in range(sections.size()):
+		var orb := sections[index].get_node("Orb") as HexOrb
+		if orb.try_hit(player.global_position, blast_direction):
+			return
+
+
+func _on_orb_broken(index: int) -> void:
+	player.debug_event.emit("Hex orb broken on floor %d" % (index + 1))
+	if index == sections.size() - 1:
+		cleared = true
+	else:
+		var hatch := sections[index].get_node("Hatch") as Block
+		hatch.open_as_one_way()
+		instructions.text = "The hatch opened. Shoot upward to keep climbing."
+
+
+func _on_player_died() -> void:
+	deaths += 1
+	look = Vector2.ZERO
+	camera.position = player.position - Vector2(0.0, CAMERA_LIFT)
+	camera.reset_smoothing()
+	for refill in refills:
+		refill.reset()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not OS.is_debug_build() or not (event is InputEventKey and event.pressed and not event.echo):
+		return
+	if event.keycode == KEY_R:
+		player.die("restart key")
+		return
+	var index: int = 9 if event.keycode == KEY_0 else event.keycode - KEY_1
+	if index >= 0 and index < sections.size():
+		var start := Vector2(FLOOR_ENTRANCES[index], 546.0 - FLOOR_HEIGHT * index)
+		if index > 0:
+			var hatch := sections[index - 1].get_node("Hatch") as Block
+			hatch.open_as_one_way()
+		player.respawn_position = start
+		player.respawn("debug floor %d" % (index + 1))
+		look = Vector2.ZERO
+		camera.position = player.position - Vector2(0.0, CAMERA_LIFT)
+		camera.reset_smoothing()

@@ -1,0 +1,57 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level3" type="Node2D"]
+script = ExtResource("level")
+title = "The Lift"
+hint = "Land on the striped lift and ride it before jumping off."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(550, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="move1" type="AnimatableBody2D" parent="."]
+position = Vector2(695, 428)
+script = ExtResource("mover")
+size = Vector2(176, 16)
+travel = Vector2(0, -170)
+period = 5
+wait_for_player = true
+
+[node name="check2" type="StaticBody2D" parent="."]
+position = Vector2(885, 200)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="move3" type="AnimatableBody2D" parent="."]
+position = Vector2(690, 62)
+script = ExtResource("mover")
+size = Vector2(192, 16)
+travel = Vector2(-96, 0)
+period = 5
+wait_for_player = false
+
+[node name="block4" type="StaticBody2D" parent="."]
+position = Vector2(490, -72)
+script = ExtResource("block")
+size = Vector2(176, 16)
+
+[node name="finish5" type="StaticBody2D" parent="."]
+position = Vector2(650, -216)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+is_finish = true
+
+[node name="spikes6" type="Area2D" parent="."]
+position = Vector2(714, -224)
+script = ExtResource("spikes")
+width = 24.0

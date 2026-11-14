@@ -1,0 +1,65 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+
+[node name="Level8" type="Node2D"]
+script = ExtResource("level")
+title = "The Detour"
+hint = "Use the lift, then take a refill through the open side of the overhang."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(560, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="move1" type="AnimatableBody2D" parent="."]
+position = Vector2(715, 432)
+script = ExtResource("mover")
+size = Vector2(168, 16)
+travel = Vector2(0, -112)
+period = 4
+wait_for_player = true
+
+[node name="check2" type="StaticBody2D" parent="."]
+position = Vector2(900, 236)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+
+[node name="block3" type="StaticBody2D" parent="."]
+position = Vector2(756, 64)
+script = ExtResource("block")
+size = Vector2(100, 24)
+
+[node name="spikes4" type="Area2D" parent="."]
+position = Vector2(706, 52)
+script = ExtResource("spikes")
+width = 100.0
+
+[node name="refill5" type="Node2D" parent="."]
+position = Vector2(930, -40)
+script = ExtResource("refill")
+amount = 2
+
+[node name="spikes6" type="Area2D" parent="."]
+position = Vector2(988, 228)
+script = ExtResource("spikes")
+width = 104.0
+
+[node name="SpikeBase" type="StaticBody2D" parent="."]
+position = Vector2(1040, 236)
+script = ExtResource("block")
+size = Vector2(104, 16)
+
+[node name="finish7" type="StaticBody2D" parent="."]
+position = Vector2(790, -198)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+is_finish = true

@@ -1,0 +1,60 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+
+[node name="Level2" type="Node2D"]
+script = ExtResource("level")
+title = "Spike Steps"
+hint = "Aim for the middle of each ledge. Save a shell for corrections."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(590, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="block1" type="StaticBody2D" parent="."]
+position = Vector2(730, 430)
+script = ExtResource("block")
+size = Vector2(192, 16)
+
+[node name="spikes2" type="Area2D" parent="."]
+position = Vector2(802, 422)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="block3" type="StaticBody2D" parent="."]
+position = Vector2(540, 286)
+script = ExtResource("block")
+size = Vector2(176, 16)
+
+[node name="spikes4" type="Area2D" parent="."]
+position = Vector2(452, 278)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="check5" type="StaticBody2D" parent="."]
+position = Vector2(680, 142)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+
+[node name="block6" type="StaticBody2D" parent="."]
+position = Vector2(850, -2)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="spikes7" type="Area2D" parent="."]
+position = Vector2(906, -10)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="finish8" type="StaticBody2D" parent="."]
+position = Vector2(650, -146)
+script = ExtResource("checkpoint")
+size = Vector2(192, 16)
+is_finish = true

@@ -10,6 +10,8 @@ Mouse-only recoil climber made for 17 GameJam. Hold left-click to charge and rel
 
 Open `project.godot` in Godot 4.7.2 and press F5. Push changes to `main` to publish a new Windows playtest build.
 
+The continuous tower uses the ten `levels/tower_floor_*.tscn` scenes. Break each hex orb to open the hatch above it. In editor playtests, use **1–9** and **0** to jump to floors 1–10, **R** to retry from the brazier, and **F7** for debug flight.
+
 Godot editor runs show live recoil stats and recent events. Each run writes a timestamped log in `playtest_logs/` in the project folder. If the project folder is read-only, the log goes to Godot's user data folder. Release builds hide the overlay and skip logging.
 
 ## Final draft

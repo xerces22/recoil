@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+
+[node name="Level7" type="Node2D"]
+script = ExtResource("level")
+title = "Crossfire"
+hint = "Watch for the turret flash. Bolts knock you off course."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(570, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="block1" type="StaticBody2D" parent="."]
+position = Vector2(735, 434)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="turret2" type="Node2D" parent="."]
+position = Vector2(958, 359)
+rotation = 3.141592653589793
+script = ExtResource("shooter")
+interval = 2.7
+bullet_speed = 220.0
+knockback = 300.0
+
+[node name="block3" type="StaticBody2D" parent="."]
+position = Vector2(540, 288)
+script = ExtResource("block")
+size = Vector2(160, 16)
+
+[node name="spikes4" type="Area2D" parent="."]
+position = Vector2(460, 280)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="check5" type="StaticBody2D" parent="."]
+position = Vector2(690, 138)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+
+[node name="turret6" type="Node2D" parent="."]
+position = Vector2(396, 56)
+script = ExtResource("shooter")
+interval = 2.4
+bullet_speed = 245.0
+knockback = 300.0
+
+[node name="block7" type="StaticBody2D" parent="."]
+position = Vector2(870, -16)
+script = ExtResource("block")
+size = Vector2(144, 16)
+
+[node name="spikes8" type="Area2D" parent="."]
+position = Vector2(918, -24)
+script = ExtResource("spikes")
+width = 24.0
+
+[node name="finish9" type="StaticBody2D" parent="."]
+position = Vector2(665, -170)
+script = ExtResource("checkpoint")
+size = Vector2(168, 16)
+is_finish = true

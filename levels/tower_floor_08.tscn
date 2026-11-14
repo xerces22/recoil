@@ -1,0 +1,120 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/hex_orb.gd" id="hex_orb"]
+
+[node name="Floor8" type="Node2D"]
+
+[node name="Ledge1" type="StaticBody2D" parent="."]
+position = Vector2(2070, -120)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge2" type="StaticBody2D" parent="."]
+position = Vector2(1890, -240)
+script = ExtResource("crumble")
+size = Vector2(152, 16)
+delay = 0.86
+
+[node name="Ledge3" type="StaticBody2D" parent="."]
+position = Vector2(1710, -368)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes3" type="Area2D" parent="."]
+position = Vector2(1634, -376)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge4" type="StaticBody2D" parent="."]
+position = Vector2(1530, -496)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge5" type="StaticBody2D" parent="."]
+position = Vector2(1350, -616)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge6" type="StaticBody2D" parent="."]
+position = Vector2(1170, -744)
+script = ExtResource("checkpoint")
+size = Vector2(200, 16)
+
+[node name="Ledge7" type="StaticBody2D" parent="."]
+position = Vector2(990, -864)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes7" type="Area2D" parent="."]
+position = Vector2(914, -872)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge8" type="StaticBody2D" parent="."]
+position = Vector2(810, -992)
+script = ExtResource("crumble")
+size = Vector2(152, 16)
+delay = 0.86
+
+[node name="Ledge9" type="StaticBody2D" parent="."]
+position = Vector2(630, -1120)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes9" type="Area2D" parent="."]
+position = Vector2(554, -1128)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge10" type="StaticBody2D" parent="."]
+position = Vector2(450, -1240)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="ShellWisp" type="Node2D" parent="."]
+position = Vector2(1080, -912)
+script = ExtResource("refill")
+amount = 1
+
+[node name="OrbRoom" type="StaticBody2D" parent="."]
+position = Vector2(204, -1218)
+script = ExtResource("checkpoint")
+size = Vector2(320, 16)
+
+[node name="HatchLeft" type="StaticBody2D" parent="."]
+position = Vector2(109, -1364)
+script = ExtResource("block")
+size = Vector2(218, 24)
+
+[node name="HatchRight" type="StaticBody2D" parent="."]
+position = Vector2(1429, -1364)
+script = ExtResource("block")
+size = Vector2(2134, 24)
+
+[node name="Hatch" type="StaticBody2D" parent="."]
+position = Vector2(290, -1364)
+script = ExtResource("checkpoint")
+size = Vector2(144, 24)
+
+[node name="LeftLintelSpikes" type="Area2D" parent="."]
+position = Vector2(24, -1376)
+script = ExtResource("spikes")
+width = 61.0
+
+[node name="RightLintelSpikes" type="Area2D" parent="."]
+position = Vector2(495, -1376)
+script = ExtResource("spikes")
+width = 1977.0
+
+[node name="Orb" type="Node2D" parent="."]
+position = Vector2(200, -1278)
+script = ExtResource("hex_orb")
+spots = PackedVector2Array(0, 0, 68, -38, -63, -58)

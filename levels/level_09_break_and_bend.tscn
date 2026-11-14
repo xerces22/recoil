@@ -1,0 +1,84 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/level.gd" id="level"]
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/bouncy.gd" id="bouncy"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/mover.gd" id="mover"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+
+[node name="Level9" type="Node2D"]
+script = ExtResource("level")
+title = "Break and Bend"
+hint = "Charge early on cracked ledges and steer clear of the firing lanes."
+
+[node name="Start" type="Marker2D" parent="."]
+position = Vector2(570, 546)
+
+[node name="block0" type="StaticBody2D" parent="."]
+position = Vector2(640, 569)
+script = ExtResource("block")
+size = Vector2(1020, 18)
+
+[node name="crumble1" type="StaticBody2D" parent="."]
+position = Vector2(735, 426)
+script = ExtResource("crumble")
+size = Vector2(144, 16)
+delay = 0.85
+
+[node name="turret2" type="Node2D" parent="."]
+position = Vector2(1000, 355)
+rotation = 3.141592653589793
+script = ExtResource("shooter")
+interval = 2.3
+bullet_speed = 250.0
+knockback = 300.0
+
+[node name="bounce3" type="StaticBody2D" parent="."]
+position = Vector2(400, 310)
+script = ExtResource("bouncy")
+size = Vector2(16, 104)
+
+[node name="block4" type="StaticBody2D" parent="."]
+position = Vector2(530, 280)
+script = ExtResource("block")
+size = Vector2(136, 16)
+
+[node name="check5" type="StaticBody2D" parent="."]
+position = Vector2(690, 128)
+script = ExtResource("checkpoint")
+size = Vector2(176, 16)
+
+[node name="crumble6" type="StaticBody2D" parent="."]
+position = Vector2(870, -24)
+script = ExtResource("crumble")
+size = Vector2(136, 16)
+delay = 0.72
+
+[node name="turret7" type="Node2D" parent="."]
+position = Vector2(410, -101)
+script = ExtResource("shooter")
+interval = 2.1
+bullet_speed = 270.0
+knockback = 300.0
+
+[node name="move8" type="AnimatableBody2D" parent="."]
+position = Vector2(680, -178)
+script = ExtResource("mover")
+size = Vector2(152, 16)
+travel = Vector2(-80, 0)
+period = 4.2
+wait_for_player = false
+
+[node name="finish9" type="StaticBody2D" parent="."]
+position = Vector2(845, -334)
+script = ExtResource("checkpoint")
+size = Vector2(144, 16)
+is_finish = true
+
+[node name="spikes10" type="Area2D" parent="."]
+position = Vector2(893, -342)
+script = ExtResource("spikes")
+width = 24.0

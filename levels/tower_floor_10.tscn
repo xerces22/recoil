@@ -1,0 +1,124 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://hazards/block.gd" id="block"]
+[ext_resource type="Script" path="res://hazards/crumble.gd" id="crumble"]
+[ext_resource type="Script" path="res://hazards/spikes.gd" id="spikes"]
+[ext_resource type="Script" path="res://hazards/checkpoint.gd" id="checkpoint"]
+[ext_resource type="Script" path="res://hazards/refill.gd" id="refill"]
+[ext_resource type="Script" path="res://hazards/bouncy.gd" id="bouncy"]
+[ext_resource type="Script" path="res://hazards/shooter.gd" id="shooter"]
+[ext_resource type="Script" path="res://hazards/hex_orb.gd" id="hex_orb"]
+
+[node name="Floor10" type="Node2D"]
+
+[node name="Ledge1" type="StaticBody2D" parent="."]
+position = Vector2(2090, -104)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge2" type="StaticBody2D" parent="."]
+position = Vector2(1910, -224)
+script = ExtResource("crumble")
+size = Vector2(152, 16)
+delay = 0.86
+
+[node name="Ledge3" type="StaticBody2D" parent="."]
+position = Vector2(1730, -336)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes3" type="Area2D" parent="."]
+position = Vector2(1654, -344)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge4" type="StaticBody2D" parent="."]
+position = Vector2(1550, -448)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge5" type="StaticBody2D" parent="."]
+position = Vector2(1370, -568)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge6" type="StaticBody2D" parent="."]
+position = Vector2(1190, -680)
+script = ExtResource("checkpoint")
+size = Vector2(200, 16)
+
+[node name="Ledge7" type="StaticBody2D" parent="."]
+position = Vector2(1010, -792)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes7" type="Area2D" parent="."]
+position = Vector2(934, -800)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge8" type="StaticBody2D" parent="."]
+position = Vector2(830, -912)
+script = ExtResource("crumble")
+size = Vector2(152, 16)
+delay = 0.86
+
+[node name="Ledge9" type="StaticBody2D" parent="."]
+position = Vector2(650, -1024)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Spikes9" type="Area2D" parent="."]
+position = Vector2(574, -1032)
+script = ExtResource("spikes")
+width = 24.0
+height = 22.0
+
+[node name="Ledge10" type="StaticBody2D" parent="."]
+position = Vector2(470, -1136)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="Ledge11" type="StaticBody2D" parent="."]
+position = Vector2(290, -1256)
+script = ExtResource("block")
+size = Vector2(152, 16)
+
+[node name="ShellWisp" type="Node2D" parent="."]
+position = Vector2(1100, -844)
+script = ExtResource("refill")
+amount = 1
+
+[node name="SlimeWall" type="StaticBody2D" parent="."]
+position = Vector2(1590, -413)
+script = ExtResource("bouncy")
+size = Vector2(16, 106)
+min_speed = 300.0
+
+[node name="Gargoyle3" type="Node2D" parent="."]
+position = Vector2(1434, -286)
+script = ExtResource("shooter")
+rotation = 0
+interval = 2.9
+bullet_speed = 210.0
+knockback = 235.0
+
+[node name="Gargoyle7" type="Node2D" parent="."]
+position = Vector2(714, -742)
+script = ExtResource("shooter")
+rotation = 0
+interval = 2.9
+bullet_speed = 210.0
+knockback = 235.0
+
+[node name="OrbRoom" type="StaticBody2D" parent="."]
+position = Vector2(556, -1218)
+script = ExtResource("checkpoint")
+size = Vector2(320, 16)
+
+[node name="Orb" type="Node2D" parent="."]
+position = Vector2(560, -1278)
+script = ExtResource("hex_orb")
+spots = PackedVector2Array(0, 0, -68, -38, 63, -58)
