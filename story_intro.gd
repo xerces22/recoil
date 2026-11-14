@@ -10,6 +10,8 @@ signal finished
 
 const FONT := preload("res://assets/fonts/PressStart2P-Regular.ttf")
 const SHOTGUN := preload("res://assets/sprites/player/shotgun_hat.png")
+const STETSON := preload("res://assets/sprites/player/stetson.png")   # the hat the shotgun wears
+const SFX_WHOOSH := preload("res://assets/sfx/fall_wind_loop.ogg")
 const SFX_BUMP := preload("res://assets/sfx/impactSoft_heavy_001.ogg")
 const SFX_ZAP := preload("res://assets/sfx/portal.wav")
 const SFX_BLAST := preload("res://assets/sfx/shotgun_blast_mossberg_1.wav")
@@ -21,15 +23,17 @@ const AUTO_HOLD := 3.2   # seconds a finished line stays before it turns by itse
 
 # Each panel: what to draw, who talks (empty = narrator) and the line.
 const PANELS := [
-	{"shot": "walk_in", "who": "", "text": "This is Mr. Guy."},
+	{"shot": "walk_in", "who": "", "text": "This is Mr. Guy. He really loves his hat."},
 	{"shot": "walk_on", "who": "", "text": "Mr. Guy was taking his usual walk through the village..."},
 	{"shot": "bump", "who": "", "text": "*BUMP*"},
 	{"shot": "guy_mad", "who": "MR. GUY", "text": "HEY! Watch where you're going!"},
 	{"shot": "witch_mad", "who": "MRS. WITCH", "text": "Excuse me?! You talk to ME like that?"},
 	{"shot": "wand_up", "who": "MRS. WITCH", "text": "Let's see how tough you are... as a SHOTGUN!"},
 	{"shot": "zap", "who": "", "text": "ZZZAP!"},
-	{"shot": "shotgun", "who": "", "text": "...and that is how Mr. Guy became a shotgun."},
-	{"shot": "tower", "who": "", "text": "To break the curse, he has to blast his way up her tower."},
+	{"shot": "shotgun", "who": "", "text": "...and that is how Mr. Guy became a shotgun. A very small, very angry shotgun."},
+	{"shot": "carry", "who": "MRS. WITCH", "text": "Oh, stop hopping. You're coming with me."},
+	{"shot": "throw", "who": "MRS. WITCH", "text": "Enjoy the cellar! My tower is right on top of it... if you can climb."},
+	{"shot": "fall", "who": "", "text": "Down... down... down..."},
 ]
 
 # Close-up zoom per shot (others are the wide shot).
@@ -174,6 +178,8 @@ func _show_panel() -> void:
 			_flash = 1.0
 		"shotgun":
 			_play(SFX_BLAST)
+		"fall":
+			_play(SFX_WHOOSH)
 
 
 func _play(stream: AudioStream) -> void:
@@ -272,13 +278,33 @@ func _draw_stage() -> void:
 			_guy_glow(116.0)
 		"shotgun":
 			_village(0.3)
-			_witch(196.0, 0, false, false)
-			_smoke(Vector2(100, 110))
-			var size := Vector2(SHOTGUN.get_size()) * 2.0
-			var at := _p(Vector2(100, GROUND)) - Vector2(size.x * 0.5 * S, size.y * S)
-			_stage.draw_texture_rect(SHOTGUN, Rect2(at, size * S), false)
-		"tower":
-			_tower()
+			_witch(150.0, 0, false, false)
+			_smoke(Vector2(116, 110))
+			# Tiny cursed shotgun hopping about in a huff.
+			var hop := absf(sin(_t * 7.0))
+			var x := 116.0 + sin(_t * 1.6) * 14.0
+			_gun(Vector2(x, GROUND - 4 - hop * 16.0), sin(_t * 7.0) * 0.35, 0.5)
+		"carry":
+			_castle()
+			var k := minf(_t / 3.5, 1.0)
+			var wx := lerpf(30.0, 110.0, k)
+			_witch(wx, int(_t * 5.0) % 2, false, false, true)
+			# Dangling from her hand by the barrel, wriggling.
+			_gun(Vector2(wx + 10, GROUND - 6), PI * 0.5 + sin(_t * 9.0) * 0.4, 0.5)
+		"throw":
+			_castle()
+			_witch(110.0, 0, false, true, true)
+			var k := minf(_t / 1.2, 1.0)
+			var from := Vector2(122, GROUND - 28)
+			var to := Vector2(176, GROUND - 4)
+			var pos := from.lerp(to, k) + Vector2(0, -sin(k * PI) * 30.0)
+			if k < 1.0:
+				_gun(pos, _t * 12.0, 0.5)
+			else:
+				_word("CLANG!", Vector2(176, 92), 20, Color.WHITE)
+		"fall":
+			_shaft()
+	_stage.draw_set_transform(Vector2.ZERO)
 	if _flash > 0.0:
 		_stage.draw_rect(Rect2(-5000, -5000, 10000, 10000), Color(1, 1, 1, _flash))
 
@@ -341,17 +367,6 @@ func _tree(x: float) -> void:
 	_stage.draw_circle(_p(Vector2(x + 4, 82)), 6 * S, Color("3b5e46"))
 
 
-## The stetson Mr. Guy wears (and later the shotgun). Mrs. Witch wears the same one.
-func _hat(x: float, y: float, band: Color) -> void:
-	_px(x - 7, y + 4, 14, 2, HAT_DARK)
-	_px(x - 8, y + 3, 2, 1, HAT_DARK)
-	_px(x + 6, y + 3, 2, 1, HAT_DARK)
-	_px(x - 4, y - 1, 8, 5, HAT)
-	_px(x - 3, y - 1, 3, 1, HAT_LIGHT)
-	_px(x - 1, y - 2, 2, 1, HAT_DARK)
-	_px(x - 4, y + 2, 8, 1, band)
-
-
 ## Mr. Guy faces right. x is his middle, feet on GROUND.
 func _guy(x: float, frame: int, mad: bool) -> void:
 	var g := GROUND
@@ -375,11 +390,19 @@ func _guy(x: float, frame: int, mad: bool) -> void:
 		_px(x, g - 25, 1, 1, DARK)
 		_px(x + 1, g - 24, 2, 1, DARK)            # angry brow
 		_px(x + 1, g - 20, 2, 1, DARK)            # shouting mouth
-	_hat(x, g - 32, BAND)
+	# The very same stetson the shotgun wears in the game.
+	var hat := Vector2(STETSON.get_size()) * 0.5
+	_stage.draw_texture_rect(STETSON, Rect2(_p(Vector2(x - hat.x * 0.5, g - 26 - hat.y + 2)), hat * S), false)
 
 
 ## Mrs. Witch faces left.
-func _witch(x: float, frame: int, mad: bool, wand_up: bool) -> void:
+func _witch(x: float, frame: int, mad: bool, wand_up: bool, face_right := false) -> void:
+	if face_right:
+		# Mirror her around x so she can walk toward the castle.
+		_stage.draw_set_transform(Vector2(2.0 * x * S, 0), 0.0, Vector2(-1, 1))
+		_witch(x, frame, mad, wand_up)
+		_stage.draw_set_transform(Vector2.ZERO)
+		return
 	var g := GROUND
 	var sway := 1.0 if frame == 1 else 0.0
 	_poly([Vector2(x - 3, g - 19), Vector2(x + 3, g - 19), Vector2(x + 6 + sway, g),
@@ -401,7 +424,10 @@ func _witch(x: float, frame: int, mad: bool, wand_up: bool) -> void:
 	else:
 		_px(x - 5, g - 17, 3, 2, ROBE)
 		_stage.draw_line(_p(Vector2(x - 5, g - 16)), _p(Vector2(x - 8, g - 10)), Color("4a2e1e"), S)
-	_hat(x, g - 32, Color("7a3a9a"))
+	# Pointy witch hat.
+	_px(x - 7, g - 27, 14, 2, HAIR)
+	_poly([Vector2(x - 4, g - 27), Vector2(x + 4, g - 27), Vector2(x + 3, g - 37)], HAIR)
+	_px(x - 4, g - 29, 8, 2, Color("7a3a9a"))
 
 
 func _star(c: Vector2, r: float) -> void:
@@ -457,22 +483,53 @@ func _smoke(c: Vector2) -> void:
 		_stage.draw_circle(_p(c + Vector2.from_angle(a) * r * Vector2(1.4, 0.6)), 5.0 * S, Color(0.75, 0.7, 0.8, alpha))
 
 
-## Last panel: the witch's tower against the night sky, the orb glowing at the top.
-func _tower() -> void:
+## The hatted shotgun at art position `c`, turned by `angle`, `scale` art px per texel.
+func _gun(c: Vector2, angle: float, scale: float) -> void:
+	var size := Vector2(SHOTGUN.get_size()) * scale * S
+	_stage.draw_set_transform(_p(c), angle)
+	_stage.draw_texture_rect(SHOTGUN, Rect2(-size * 0.5, size), false)
+	_stage.draw_set_transform(Vector2.ZERO)
+
+
+## Her castle at nightfall, with the cellar grate at the foot of the wall.
+func _castle() -> void:
 	for i in SKY.size():
-		_px(0, i * 24, 256, 24, Color("150c22").lerp(Color("3a1f4a"), i / 6.0))
-	for i in 30:
-		_px(fmod(i * 53.0, 256.0), 34.0 + fmod(i * 29.0, 70.0), 1, 1, Color(1, 1, 1, 0.5 + 0.5 * sin(_t * 3.0 + i)))
-	_px(108, 62, 40, 82, Color("2b2236"))
-	_px(104, 58, 48, 6, Color("3a2e48"))
-	for i in 5:
-		_px(104 + i * 10, 54, 6, 4, Color("3a2e48"))
+		_px(0, i * 16, 256, 16, SKY[i].lerp(Color("1c1030"), 0.55))
+	_stage.draw_circle(_p(Vector2(40, 70)), 10 * S, Color("e8d8b0"))
+	_poly([Vector2(0, 96), Vector2(60, 88), Vector2(130, 94), Vector2(256, 86), Vector2(256, 110), Vector2(0, 110)], HILL)
+	var stone := Color("2e2440")
+	var trim := Color("40345a")
+	_px(140, 60, 116, 46, stone)
+	for i in 12:
+		_px(140 + i * 10, 56, 6, 4, stone)
+	_px(196, 34, 30, 72, trim.darkened(0.2))          # the tower, going up out of frame
+	for i in 3:
+		_px(207, 44 + i * 14, 8, 8, Color("ffd27a") if i != 1 else Color("120a18"))
+	_px(150, 70, 6, 8, Color("ffd27a"))
+	_px(236, 70, 6, 8, Color("ffd27a"))
+	_px(160, 84, 20, 22, Color("120a18"))             # main gate
+	_poly([Vector2(160, 84), Vector2(170, 78), Vector2(180, 84)], Color("120a18"))
+	_px(0, 106, 256, 38, GROUND_C)
+	_px(0, 110, 256, 12, PATH_C)
+	# Cellar grate, low in the wall.
+	_px(170, 110, 14, 6, Color("0a0610"))
 	for i in 4:
-		_px(124, 72 + i * 16, 8, 9, Color("ffd27a") if i % 2 == 0 else Color("120a18"))
-	var glow := 5.0 + sin(_t * 4.0) * 1.2
-	_stage.draw_circle(_p(Vector2(128, 45)), glow * 1.8 * S, Color(0.6, 1.0, 0.5, 0.25))
-	_stage.draw_circle(_p(Vector2(128, 45)), glow * S, Color("9cff7a"))
-	_px(0, 136, 256, 8, HILL)
-	# Our hero, waiting at the bottom.
-	var size := Vector2(SHOTGUN.get_size())
-	_stage.draw_texture_rect(SHOTGUN, Rect2(_p(Vector2(36, 136)) - Vector2(0, size.y * S), size * S), false)
+		_px(171 + i * 4, 110, 1, 6, Color("6a6070"))
+
+
+## Falling down the dark cellar shaft, walls rushing past.
+func _shaft() -> void:
+	_px(0, 0, 256, 144, Color("0d0812"))
+	var scroll := fmod(_t * 160.0, 16.0)
+	for side in [0.0, 196.0]:
+		_px(side, 0, 60, 144, Color("241c2e"))
+		for row in 11:
+			var y := row * 16.0 - scroll
+			_px(side, y, 60, 1, Color("120c18"))
+			_px(side + (20.0 if row % 2 == 0 else 40.0), y, 1, 16, Color("120c18"))
+	for i in 8:
+		var x := 80.0 + fmod(i * 37.0, 96.0)
+		var y := fmod(i * 53.0 - _t * 220.0, 160.0)
+		if y < 0: y += 160.0
+		_px(x, y, 1, 10, Color(1, 1, 1, 0.25))
+	_gun(Vector2(128, 88 + sin(_t * 3.0) * 4.0), _t * 5.0, 0.8)

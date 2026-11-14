@@ -159,7 +159,19 @@ func new_game() -> void:
 	# Opening storyboard (Mr. Guy meets Mrs. Witch). Can't be skipped; frees itself.
 	var intro: StoryIntro = preload("res://story_intro.gd").new()
 	add_child(intro)
+	intro.finished.connect(_drop_into_cellar)
 	intro.play()
+
+
+## The storyboard ends with her throwing him in the cellar: start the run falling from
+## the top of floor 1 down onto its start ledge.
+func _drop_into_cellar() -> void:
+	var start := (floors[0].get_node("Start") as Node2D).global_position
+	player.position = start + Vector2(0, -1300)
+	player.velocity = Vector2.ZERO
+	look = Vector2.ZERO
+	_update_camera(0.0)
+	camera.reset_smoothing()
 
 
 ## Continue: the whole tower, starting at the bottom of floor `index`.
