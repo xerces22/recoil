@@ -459,6 +459,8 @@ func _process(delta: float) -> void:
 	_update_camera(delta)
 	if not cleared:
 		elapsed += delta
+	# Lifetime stats: total play time, plus time on this floor or in the boss fight.
+	GameStats.tick(delta, _stats_key())
 
 	# Standing on a checkpoint with the body or resting the barrel on it both count.
 	for ground in player.standing_on:
@@ -532,6 +534,8 @@ func _start_boss(retry := false) -> void:
 	player.cancel_shot()
 	$HUD.hide()
 	_boss = BossFight.new()
+	# Running out of shells counts as a death in the boss fight.
+	_boss.lost.connect(func(_retry: bool) -> void: GameStats.add_death("boss"))
 	_boss.game = self
 	_boss.retry = retry
 	add_child(_boss)
@@ -631,8 +635,18 @@ func skip_to_next_checkpoint() -> void:
 			return
 
 
+## Stats bucket for where the player is now: "boss", "floor_N" in the tower, or "" (total only).
+func _stats_key() -> String:
+	if _boss != null:
+		return "boss"
+	if tower_mode and current < floor_numbers.size() and floor_numbers[current] >= 0:
+		return "floor_%d" % floor_numbers[current]
+	return ""
+
+
 func _on_player_died() -> void:
 	deaths += 1
+	GameStats.add_death(_stats_key())
 	for flood in floods:
 		flood.reset()
 	for refill in refills:

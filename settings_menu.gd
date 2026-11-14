@@ -140,7 +140,7 @@ func _ready() -> void:
 	var pages := Control.new()
 	pages.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	layout.add_child(pages)
-	for title in ["Audio", "Graphics", "Controls"]:
+	for title in ["Audio", "Graphics", "Controls", "Stats"]:
 		var tab := _button(title)
 		tab.toggle_mode = true
 		tab.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -475,19 +475,30 @@ func _rebuild_floors() -> void:
 	for i in titles.size():
 		var open_floor := i <= reached
 		var label := "%2d  %s" % [i + 1, titles[i].to_upper() if open_floor else "?"]
-		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 12)
+		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 10)
 		item.set_locked(not open_floor)
 		item.custom_minimum_size.y = 28
+		if open_floor:
+			_set_row_stats(item, "floor_%d" % i)
 	# The boss has her own row under the floors, always there (locked until you beat her once),
 	# so the menu keeps the same height either way.
 	_floor_actions.add_child(_spacer(8))
 	var beaten: bool = game.boss_beaten()
 	var boss := _add_action(_floor_actions, "    BOSS  %s" % ("MRS. SANDWITCH" if beaten else "?"),
-		SFX_FLOOR, _fight_boss, 12)
+		SFX_FLOOR, _fight_boss, 10)
 	boss.set_locked(not beaten)
 	boss.custom_minimum_size.y = 28
+	if beaten:
+		_set_row_stats(boss, "boss")
 	_floor_actions.add_child(_spacer(6))
 	_add_action(_floor_actions, "Back", SFX_BACK, _show_screen.bind(Screen.TITLE), 16)
+
+
+## Time spent and deaths on the right of a floor-select row.
+func _set_row_stats(item: MenuItem, key: String) -> void:
+	item.detail_time = GameStats.format_time(GameStats.time_of(key))
+	item.detail_deaths = GameStats.deaths_of(key)
+	item.queue_redraw()
 
 
 func _fight_boss() -> void:
@@ -596,6 +607,8 @@ func _animate_in(screen: Screen) -> void:
 
 func _show_screen(screen: Screen) -> void:
 	player.cancel_shot()
+	if screen != Screen.PLAY:
+		GameStats.save()
 	if screen in [Screen.TITLE, Screen.PAUSE, Screen.PLAY]:
 		_base = screen
 	_screen = screen
@@ -767,6 +780,8 @@ func _restore_defaults() -> void:
 
 func _select_tab(index: int) -> void:
 	_active_tab = index
+	if index == 3:
+		_refresh_stats()
 	for i in _pages.size():
 		_pages[i].visible = i == index
 		_tabs[i].set_pressed_no_signal(i == index)
@@ -925,3 +940,50 @@ func _square(px: int, colour: Color) -> ImageTexture:
 	image.fill(colour)
 	image.fill_rect(Rect2i(0, px - 3, px, 3), colour.darkened(0.35))
 	return ImageTexture.create_from_image(image)
+
+
+## Stats tab: overall play time and deaths, then a row per floor you've reached and the boss.
+func _refresh_stats() -> void:
+	var page := _pages[3]
+	for child in page.get_children():
+		page.remove_child(child)
+		child.queue_free()
+	page.add_theme_constant_override("separation", 5)
+	var summary := HBoxContainer.new()
+	summary.add_theme_constant_override("separation", 40)
+	page.add_child(summary)
+	for pair in [["TOTAL PLAY TIME", GameStats.format_time(GameStats.time_of("total"))],
+			["TOTAL DEATHS", str(GameStats.deaths_of("total"))],
+			["HIGHEST FLOOR", "%d/%d" % [game.reached_floor() + 1, game.FLOORS.size()]]]:
+		var box := VBoxContainer.new()
+		box.add_child(_label(pair[0], 8, LILAC))
+		box.add_child(_label(pair[1], 14, ACCENT))
+		summary.add_child(box)
+	page.add_child(_spacer(4))
+	page.add_child(_stats_row("FLOOR", "TIME", "DEATHS", LILAC, 8))
+	var titles: Array[String] = game.floor_titles()
+	var reached: int = game.reached_floor()
+	for i in titles.size():
+		if i > reached:
+			page.add_child(_stats_row("%2d  ?" % (i + 1), "-", "-", Color(LILAC, 0.5), 9))
+			continue
+		var key := "floor_%d" % i
+		page.add_child(_stats_row("%2d  %s" % [i + 1, titles[i].to_upper()],
+			GameStats.format_time(GameStats.time_of(key)), str(GameStats.deaths_of(key)), CREAM, 9))
+	var beaten: bool = game.boss_beaten()
+	page.add_child(_stats_row("    BOSS  %s" % ("MRS. SANDWITCH" if beaten else "?"),
+		GameStats.format_time(GameStats.time_of("boss")) if beaten else "-",
+		str(GameStats.deaths_of("boss")) if beaten else "-", GOLD if beaten else Color(LILAC, 0.5), 9))
+
+
+func _stats_row(name_text: String, time_text: String, deaths_text: String, tint: Color, size_px: int) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	var title := _label(name_text, size_px, tint)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(title)
+	for value in [[time_text, 110], [deaths_text, 90]]:
+		var cell := _label(value[0], size_px, tint)
+		cell.custom_minimum_size.x = value[1]
+		cell.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(cell)
+	return row
