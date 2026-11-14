@@ -1,6 +1,6 @@
 extends Node2D
 ## Builds the tower: every floor in FLOORS stacked into one continuous climb.
-## Number keys load a single floor (or sandbox) on its own for testing. T jumps to the boss orb.
+## R respawns at the last checkpoint. No debug keys in the release build.
 
 const RecoilPlayer = preload("res://player.gd")
 const Preferences = preload("res://game_preferences.gd")
@@ -268,8 +268,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_R:
 		player.die("restart key")
-	elif event.keycode == KEY_T:
-		_teleport_to_orb()
 
 
 ## TEMP test key (T): drop onto the top floor's orb platform, which starts the boss fight.
