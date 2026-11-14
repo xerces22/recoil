@@ -411,44 +411,62 @@ def floor_09():
 
 
 # --------------------------------------------------------------------------------------
-# Floor 10: Mrs. Sandwitch. The finale: everything, a flood over the last third, then the orb room.
+# Floor 10: Mrs. Sandwitch. The finale: no new mechanic, every section COMBINES old ones.
+# A (right): crumbles over a pit with a gargoyle firing through the gap, then a lift.
+# B (left): ride a slider over a spiked shelf and hop up through a jaw door off it; a wisp and
+#           a fast crumble across a spiked gate top.
+# C (right): zigzag, wisp, crumble, a lift under an aimed gargoyle, a door hop into the orb room.
+# No flood: a teammate removed it by hand in the editor, so the redesign leaves it out.
 # --------------------------------------------------------------------------------------
 def floor_10():
-    W, TOP = 2560, -1900
+    W, TOP = 2560, -2060
     f = Floor("Sandwitch", title="Mrs. Sandwitch",
-              hint="The orb is at the top. Blast it three times.",
+              hint="Nothing new. Everything you've learned, at the same time. The orb is at the top.",
               taunt="Fine. Come on up. I've got my wand ready.",
               bounds=(0, TOP, W, 720 - TOP), is_final=True,
-              notes="Floor 10 (finale). A: a gargoyle, a crumble, a lift. B: a two-door gate, a full wisp. "
-                    "C: the flood from the second checkpoint up, pads and wisps, into the orb room. No exit hole. "
-                    "See LEVEL_LOG.md.")
-    f.frame(entry_x=1280, exit_x=None, start_x=1080)
+              notes="Floor 10 (finale, combos). A: crumbles over a pit with a gargoyle shooting the gap, a lift. "
+                    "B: slider over a spiked shelf, door hop off the slider, wisp and fast crumble over a spiked "
+                    "gate top. C: zigzag, wisp, crumble, a lift under an aimed gargoyle, door hop into the walled "
+                    "orb room. See LEVEL_LOG.md.")
+    f.frame(entry_x=1280, exit_x=None, start_x=1480)
 
-    # Section A: up-right.
-    f.ledge("P01_Ledge", cx=1500, top=410, w=160)
-    f.turret("Gargoyle1", 2380, 300, angle=3.14159, interval=1.6, speed=280)
-    f.crumble("P02_Crumble", cx=1800, top=290, w=144, delay=0.4)
-    f.mover("P03_Lift", cx=2100, top=180, w=144, travel=(0, -260), period=3.5)
-    f.checkpoint("P04_Checkpoint", cx=1840, top=-140)
+    # Section A, RIGHT: the Gargoyle Bridge. Pit from x 1680 (300 px clear of the entry hole).
+    f.spikes_up("Pit", 1680, 560, W - 32 - 1680)
+    f.crumble("P01_Crumble", cx=1800, top=450, w=144, delay=0.45)
+    f.crumble("P02_Crumble", cx=2100, top=360, w=144, delay=0.45)
+    # Fires left at y 400: the height you cross between the two crumbles. A hit shoves you into the pit.
+    f.turret("Gargoyle1", 2496, 400, angle=3.14159, interval=1.6, speed=280)
+    f.mover("P03_Lift", cx=2360, top=300, w=144, travel=(0, -300), period=3.6)
+    f.checkpoint("P04_Checkpoint", cx=2060, top=-60)
 
-    # Section B: a gate with two doors, then a full wisp across to the left.
-    f.gate("GateF", -300, 32, W - 32, [(900, 140, {"phase": 0.5}), (1690, 150)], names={1: "P05_GateF"},
-           open_time=1.1, warn_time=0.4, shut_time=0.5)
-    f.ring("P06_Wisp", 950, -600)
-    f.checkpoint("P07_Checkpoint", cx=600, top=-700)
+    # Section B, LEFT: the Jaws Ferry. A spiked shelf under the slider, a full-width gate above it.
+    f.rect("SpikeShelf", 1100, -20, 1800, -4)
+    f.spikes_up("SpikeShelfSpikes", 1100, -20, 700)
+    f.mover("P05_Slider", cx=1900, top=-120, w=144, travel=(-400, 0), period=3.4)
+    # The door sits right above the slider's left end: ride over, hop straight up through the jaws.
+    f.gate("GateG", -300, 32, W - 32, [(1500, 150)], names={0: "P06_GateG"},
+           open_time=1.3, warn_time=0.45, shut_time=0.5)
+    # The gate's top is spiked left of a safe landing strip beside the door.
+    f.spikes_up("GateGSpikes", 200, -300, 950)
+    f.ring("P07_Wisp", 920, -470, amount=1)
+    f.crumble("P08_Crumble", cx=620, top=-560, w=144, delay=0.4)
+    f.checkpoint("P09_Checkpoint", cx=260, top=-720)
 
-    # Section C: the flood starts just above checkpoint P07.
-    f.flood(trigger_y=-730, speed=55.0, acceleration=3.0, start_gap=340.0, max_gap=420.0)
-    f.ledge("P08_Ledge", cx=900, top=-860, w=160)
-    f.pad("BoilPad", cx=1200, top=-760, w=160)
-    f.ring("P09_Wisp", 1500, -1000, amount=1)
-    f.ledge("P10_Ledge", cx=1800, top=-1080, w=160)
-    f.crumble("P11_Crumble", cx=2100, top=-1220, w=144, delay=0.35)
-    f.ledge("P12_Ledge", cx=1800, top=-1380, w=160)
+    # Section C, RIGHT: the Spire.
+    f.ledge("P10_Ledge", cx=600, top=-900, w=144)
+    f.ring("P11_Wisp", 900, -1060, amount=1)
+    f.crumble("P12_Crumble", cx=1180, top=-1150, w=128, delay=0.35)
+    f.mover("P13_Lift", cx=1480, top=-1200, w=144, travel=(0, -260), period=3.0)
+    # Aimed gargoyle on the right wall: hover on the lift too long and it knocks you off.
+    f.turret("Gargoyle2", 2496, -1330, angle=3.14159, interval=1.7, speed=320, aimed=True)
 
-    # The orb room: a wide safe floor. The finish platform ends the run until the orb is wired in.
-    f.checkpoint("P13_OrbRoom", cx=1260, top=-1520, w=480, is_finish=True)
-    f.orb("HexOrb", 1260, -1680, [(1060, -1760), (1460, -1800)])
+    # The orb room: walled off on the left, entered only through the door above the lift's top.
+    f.rect("OrbRoomWall", 1068, TOP + 32, 1100, -1580)
+    f.rect("OrbRoomFloorL", 1100, -1600, 1405, -1580)
+    f.mouth("OrbDoor", 1480, -1590, gap=(150, 36), open_time=1.2, warn_time=0.45, shut_time=0.5)
+    f.checkpoint("P14_OrbRoom", cx=1795, top=-1600, w=480, is_finish=True)
+    f.rect("OrbRoomFloorR", 2035, -1600, W - 32, -1580)
+    f.orb("HexOrb", 1795, -1770, [(1595, -1850), (1995, -1890)])
     return f.write(out("level_10_morwen.tscn"))
 
 
