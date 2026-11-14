@@ -11,6 +11,7 @@ editor_description = "Floor 2. New: shell wisps. A: one wisp lifts you to a ledg
 script = ExtResource("level")
 title = "The Chimney"
 hint = "Gold wisps reload your shells in midair. Fly through one, then shoot again."
+taunt = "Smoke goes up the chimney. Shotguns don't."
 bounds = Rect2(0, -1120, 2240, 1840)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]

@@ -15,6 +15,7 @@ editor_description = "Floor 9 (gauntlet). A: corridor left over a spike pit: cru
 script = ExtResource("level")
 title = "Everything Hates You"
 hint = "Nothing new. Everything at once."
+taunt = "Everything up here hates you. I made sure of it."
 bounds = Rect2(0, -1422, 3840, 2142)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]

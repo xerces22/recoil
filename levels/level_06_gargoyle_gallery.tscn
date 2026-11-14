@@ -13,6 +13,7 @@ editor_description = "Floor 6 (exam). New: gargoyles. Corridor 1 right: islands 
 script = ExtResource("level")
 title = "Gargoyle Gallery"
 hint = "Gargoyle bolts don't hurt. They shove you, and the spikes do the rest. Watch the glow before each shot."
+taunt = "My gargoyles never liked your hat either."
 bounds = Rect2(0, -1012, 3840, 1732)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]

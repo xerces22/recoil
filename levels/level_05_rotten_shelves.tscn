@@ -12,6 +12,7 @@ editor_description = "Floor 5. New: crumbling shelves. Switchback: leg 1 left ov
 script = ExtResource("level")
 title = "Rotten Shelves"
 hint = "Brown shelves crack and fall soon after you land. Don't stop to think on them."
+taunt = "Mind the shelves. They're older than your manners."
 bounds = Rect2(0, -1452, 2560, 2172)
 
 [node name="WallLeft" type="StaticBody2D" parent="."]
