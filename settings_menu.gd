@@ -477,11 +477,16 @@ func _rebuild_floors() -> void:
 		var label := "%2d  %s" % [i + 1, titles[i].to_upper() if open_floor else "?"]
 		var item := _add_action(_floor_actions, label, SFX_FLOOR, _continue_from.bind(i), 12)
 		item.set_locked(not open_floor)
-	# Beat her once and you can come back for a rematch any time.
+		item.custom_minimum_size.y = 30
+	# The boss has her own row under the floors, always there (locked until you beat her once),
+	# so the menu keeps the same height either way.
+	_floor_actions.add_child(_spacer(8))
 	var beaten: bool = game.boss_beaten()
-	if beaten:
-		_add_action(_floor_actions, "%2d  BOSS FIGHT" % (titles.size() + 1), SFX_FLOOR, _fight_boss, 12)
-	_floor_actions.add_child(_spacer(0 if beaten else 14))
+	var boss := _add_action(_floor_actions, "    BOSS  %s" % ("MRS. SANDWITCH" if beaten else "?"),
+		SFX_FLOOR, _fight_boss, 12)
+	boss.set_locked(not beaten)
+	boss.custom_minimum_size.y = 30
+	_floor_actions.add_child(_spacer(6))
 	_add_action(_floor_actions, "Back", SFX_BACK, _show_screen.bind(Screen.TITLE), 16)
 
 
