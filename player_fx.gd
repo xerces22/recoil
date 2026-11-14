@@ -192,7 +192,7 @@ func _advance_death(delta: float) -> void:
 	var before := _t
 	_t += delta
 	if before < PORTAL_A_OPEN.x and _t >= PORTAL_A_OPEN.x:
-		_play(PORTAL_SOUND, -8.0, 1.15)
+		_play(PORTAL_SOUND, -18.0, 1.15)
 	for p in _pieces:
 		if _t < BREAK_TIME and _broken:
 			p.vel = p.vel * 0.9 + Vector2(0, 300) * delta
@@ -203,14 +203,14 @@ func _advance_death(delta: float) -> void:
 		player.respawn_after_death()
 		_respawn_pos = player.global_position
 	if before < PORTAL_B_OPEN.x and _t >= PORTAL_B_OPEN.x:
-		_play(PORTAL_SOUND, -10.0, 1.3)
+		_play(PORTAL_SOUND, -20.0, 1.3)
 	if not _ejected and _t >= EJECT_AT:
 		_ejected = true
 		gun_hidden = false
 		dying = false
 		player.velocity = EJECT_VELOCITY
 		_shine_t = 0.0
-		_play(SHINE_SOUND, -6.0)
+		_play(SHINE_SOUND, -16.0)
 
 
 func _update_wind(delta: float) -> void:
