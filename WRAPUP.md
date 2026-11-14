@@ -6,10 +6,12 @@ Started 14:00, Nov 14. Hard submit: **18:00**. Jam closes 23:59.
 
 ## 0. Get the repo in one place (first 15 min)
 
-- [ ] Commit the uncommitted work on `playtest1` (floors 8–10, main.gd, tools, docs)
-- [ ] Merge `playtest1` into `main` (main is behind: it only has the level-design doc on top)
-- [ ] Friend pushes the menu/settings branch. **It is not on the remote yet** (only `assets-test`, `charge-mechanic`, `level-redesign`, `main`, `playtest1`)
-- [ ] Merge friend's branch into `main` and fix conflicts (likely `project.godot` main scene + autoloads)
+- [x] Commit the uncommitted work on `playtest1` (floors 8–10, main.gd, tools, docs)
+- [x] New working branch **`planned_release`** (from `playtest1`) + merged `origin/main` (level design doc)
+- [x] Merged friend's `level-redesign` (title screen, settings, SubViewport world, audio buses, stetson, 3 extra floors as sandboxes, WIP level editor not wired in)
+- [x] Skipped `tower-draft`: an older parallel 10-floor tower with its own hazards; ours replaces it
+- [ ] Push `planned_release`, friend switches to it
+- [ ] Decide: use friend's Counterweight / Switchyard / Shellworks floors in the tower, or leave them as sandboxes
 
 ## 1. Intro logo
 
