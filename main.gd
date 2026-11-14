@@ -21,20 +21,8 @@ const FLOORS: Array[String] = [
 	"res://levels/level_10_morwen.tscn",
 ]
 
-## Old one-mechanic test levels. Not part of the tower. Reachable with the number keys
-## after the floors.
-const SANDBOXES: Array[String] = [
-	"res://levels/level_01_counterweight.tscn",
-	"res://levels/level_02_switchyard.tscn",
-	"res://levels/level_03_shellworks.tscn",
-	"res://levels/level_1_basics.tscn",
-	"res://levels/level_2_bounce.tscn",
-	"res://levels/level_3_moving.tscn",
-	"res://levels/level_4_turrets.tscn",
-	"res://levels/level_5_mouths.tscn",
-	"res://levels/level_6_flood.tscn",
-	"res://levels/level_7_refills.tscn",
-]
+## Test levels. Empty in the release build (see planned_release_debug).
+const SANDBOXES: Array[String] = []
 
 ## Music: cellar track for the first CELLAR_LEVELS floors, final track on the last floor,
 ## main climb track for everything between. Works for any number of floors.
@@ -195,16 +183,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	player.handle_game_input(event)
 	if not (event is InputEventKey and event.pressed and not event.echo):
 		return
-	# Keys 1-9 load levels 1-9, key 0 loads level 10.
-	var number: int = 9 if event.keycode == KEY_0 else event.keycode - KEY_1
-	if number >= 0 and number < levels.size():
-		load_level(number)
-	elif event.keycode == KEY_T:
-		load_tower()
-	elif event.keycode == KEY_R:
+	if event.keycode == KEY_R:
 		player.die("restart key")
-	elif event.keycode == KEY_N:
-		skip_to_next_checkpoint()
 
 
 ## Loads every floor stacked into one tower and starts at the bottom.
@@ -400,8 +380,6 @@ func _process(delta: float) -> void:
 		var next: String
 		if tower_mode:
 			next = "You reached the top!"
-		elif level_index + 1 < levels.size():
-			next = "Press %d for the next level, T for the whole tower." % ((level_index + 2) % 10)
 		else:
 			next = "That was the last level."
 		status = "CLEAR!  " + status + "\n" + next

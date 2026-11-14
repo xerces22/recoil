@@ -126,16 +126,6 @@ func _make_player(volume_db: float) -> AudioStreamPlayer:
 
 
 func handle_game_input(event: InputEvent) -> void:
-	if OS.is_debug_build() and event is InputEventKey and event.keycode == KEY_F2:
-		if event.pressed and not event.echo:
-			debug_flying = not debug_flying
-			velocity = Vector2.ZERO
-			charging = false
-			charge_seconds = 0.0
-			pending_shot = Vector2.ZERO
-			debug_event.emit("Debug flight on" if debug_flying else "Debug flight off")
-		return
-
 	if debug_flying or _fx.dying:
 		return
 
