@@ -6,6 +6,7 @@ const CREAM := Color("#f6e8cb")
 const GOLD := Color("#ffd583")
 const LILAC := Color("#bdb0c7")
 const PANEL_SIZE := Vector2(708, 574)
+const LOGO := preload("res://assets/sprites/logo/logo_color.png")
 
 signal start_requested
 signal restart_requested
@@ -23,6 +24,7 @@ var _menu_heading: Label
 var _title_actions: VBoxContainer
 var _pause_actions: VBoxContainer
 var _shotgun_preview: Control
+var _logo: TextureRect
 var _overlay: ColorRect
 var _panel: Control
 var _tabs: Array[Button] = []
@@ -217,6 +219,14 @@ func _build_run_menu(theme: Theme) -> void:
 	_menu_heading = _label("", 22)
 	_menu_heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	layout.add_child(_menu_heading)
+	_logo = TextureRect.new()
+	_logo.texture = LOGO
+	_logo.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_logo.custom_minimum_size.y = 230
+	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	layout.add_child(_logo)
 	_shotgun_preview = Control.new()
 	_shotgun_preview.custom_minimum_size.y = 120
 	_shotgun_preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -278,7 +288,10 @@ func _show_screen(screen: Screen) -> void:
 	_overlay.visible = screen == Screen.SETTINGS
 	_title_actions.visible = screen == Screen.TITLE
 	_pause_actions.visible = screen == Screen.PAUSE
-	_shotgun_preview.visible = screen == Screen.TITLE
+	# Title shows the logo (it already has the hatted shotgun). Pause shows the heading.
+	_logo.visible = screen == Screen.TITLE
+	_menu_heading.visible = screen != Screen.TITLE
+	_shotgun_preview.visible = false
 	match screen:
 		Screen.TITLE:
 			_menu_heading.text = "Cursed Shotgun"
