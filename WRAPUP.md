@@ -1,4 +1,6 @@
-# Wrap-up checklist (submit by 18:00)
+# Wrap-up checklist: Cursed Shotgun (submit by 18:00)
+
+The game is called **Cursed Shotgun**. Use that name everywhere: title screen, window title, exports, jam page, logo, credits.
 
 Started 14:00, Nov 14. Hard submit: **18:00**. Jam closes 23:59.
 

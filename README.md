@@ -1,10 +1,10 @@
-# Recoil Launcher
+# Cursed Shotgun
 
 Mouse-only recoil climber made for 17 GameJam. Hold left-click to charge and release to launch away from the cursor. Each shot sets your velocity from your aim and charge. Charging the second shot in midair slows your movement so you can aim. Land to refill both shots.
 
 ## Play on Windows
 
-[Download the latest playtest build](https://github.com/xerces22/recoil/releases/latest/download/RecoilLauncher-Windows.zip). Extract it and open `RecoilLauncher.exe`. Keep the EXE and PCK together.
+[Download the latest playtest build](https://github.com/xerces22/recoil/releases/latest/download/CursedShotgun-Windows.zip). Extract it and open `CursedShotgun.exe`. Keep the EXE and PCK together.
 
 ## Work on the game
 

@@ -1,6 +1,6 @@
 # Story and world
 
-The story behind Recoil Launcher, and how it shapes each level. Read this with [LEVEL_DESIGN.md](LEVEL_DESIGN.md), which has the movement numbers and mechanics.
+The story behind Cursed Shotgun, and how it shapes each level. Read this with [LEVEL_DESIGN.md](LEVEL_DESIGN.md), which has the movement numbers and mechanics.
 
 The tone is silly but straight-faced. The characters take it seriously; the player shouldn't.
 
@@ -58,7 +58,7 @@ When the orb shatters:
    - "...You're aiming at me. Why are you aiming at me?"
 2. **One click.** The cursor turns into a red crosshair locked on her. The charge bar fills on its own. A heartbeat sound. The player clicks once to fire.
 3. **Black screen, instantly.** Cut to pure black on the click, no fade. The shotgun blast plays with a long **echo** that rolls away into silence.
-4. **The game ends.** After the echo fades, show the title "RECOIL" and "Thanks for playing" in small text, then credits or back to the start. *(Optional: the time and death count from the whole run.)*
+4. **The game ends.** After the echo fades, show the title "CURSED SHOTGUN" and "Thanks for playing" in small text, then credits or back to the start. *(Optional: the time and death count from the whole run.)*
 
 The ending is the only time in the game you shoot something without flying away. That's the point: the last shot is the only one that isn't recoil.
 

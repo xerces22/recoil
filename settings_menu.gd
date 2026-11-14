@@ -281,7 +281,7 @@ func _show_screen(screen: Screen) -> void:
 	_shotgun_preview.visible = screen == Screen.TITLE
 	match screen:
 		Screen.TITLE:
-			_menu_heading.text = "Recoil Launcher"
+			_menu_heading.text = "Cursed Shotgun"
 			_title_actions.get_child(0).grab_focus()
 		Screen.PAUSE:
 			_menu_heading.text = "Paused"

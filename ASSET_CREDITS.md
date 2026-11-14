@@ -1,4 +1,4 @@
-# Recoil Launcher asset credits
+# Cursed Shotgun asset credits
 
 ## Free packs in use
 
@@ -14,7 +14,7 @@
 | `assets/sfx/fall_wind_loop.ogg` | [wind whoosh loop](https://opengameart.org/content/wind-whoosh-loop) | SketchMan3 | CC0 | Air rushing past when the gun flies or falls fast. |
 | `assets/sfx/portal.wav` | [Teleport Spell](https://opengameart.org/content/teleport-spell) | Ogrebane | CC0 | Death portals opening and closing. |
 | `assets/sfx/respawn_shine.ogg` | [50 CC0 retro / synth SFX](https://opengameart.org/content/50-cc0-retro-synth-sfx) (`power_up_01`) | rubberduck | CC0 | Shine when the gun comes back fixed. |
-| `assets/sfx/charge.wav` | Original, generated for this game | Recoil Launcher team | Ours | Charge-up while holding the shot: a mellow synth riser. |
+| `assets/sfx/charge.wav` | Original, generated for this game | Cursed Shotgun team | Ours | Charge-up while holding the shot: a mellow synth riser. |
 | `assets/sfx/spike_hit.ogg`, `assets/sfx/spike_break.ogg`, `assets/sfx/wall_hit.ogg` | [75 CC0 breaking / falling / hit sfx](https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx) (`bfh1_metal_hit_02`, `bfh1_metal_falling_01`, `bfh1_hit_05`) | rubberduck | CC0 | Gun snapping on spikes; bonk when hitting a wall or ceiling hard. |
 | `assets/sfx/impact*.ogg` | [Impact Sounds](https://kenney.nl/assets/impact-sounds) | Kenney | CC0 | Landing and hit sounds. |
 | `assets/music/jingles/jingles_NES*.ogg` | [Music Jingles](https://kenney.nl/assets/music-jingles) (8-Bit jingles) | Kenney | CC0 | Level-clear and fail stings. |
