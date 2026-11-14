@@ -50,18 +50,18 @@ jobs:
         run: |
           set -euo pipefail
           editor="$HOME/godot-tools/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
-          build="$RUNNER_TEMP/recoil-windows"
+          build="$RUNNER_TEMP/cursed-shotgun-windows"
           mkdir -p "$build"
-          "$editor" --headless --path "$GITHUB_WORKSPACE" --export-release "Windows Desktop" "$build/RecoilLauncher.exe"
-          test -s "$build/RecoilLauncher.exe"
-          test -s "$build/RecoilLauncher.pck"
+          "$editor" --headless --path "$GITHUB_WORKSPACE" --export-release "Windows Desktop" "$build/CursedShotgun.exe"
+          test -s "$build/CursedShotgun.exe"
+          test -s "$build/CursedShotgun.pck"
           cd "$build"
-          zip "$RUNNER_TEMP/RecoilLauncher-Windows.zip" RecoilLauncher.exe RecoilLauncher.pck
+          zip "$RUNNER_TEMP/CursedShotgun-Windows.zip" CursedShotgun.exe CursedShotgun.pck
 
       - name: Publish the latest playtest build
         shell: bash
         run: |
           gh release create "playtest-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}" \
-            "$RUNNER_TEMP/RecoilLauncher-Windows.zip" \
+            "$RUNNER_TEMP/CursedShotgun-Windows.zip" \
             --target "$GITHUB_SHA" --latest --generate-notes \
             --title "Windows playtest ${GITHUB_RUN_NUMBER}"

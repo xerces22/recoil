@@ -179,4 +179,4 @@ func _save() -> void:
 		config.set_value("settings", key, values[key])
 	var result := config.save(save_path)
 	if result != OK:
-		push_warning("Could not save Recoil Launcher settings: %s" % error_string(result))
+		push_warning("Could not save Cursed Shotgun settings: %s" % error_string(result))

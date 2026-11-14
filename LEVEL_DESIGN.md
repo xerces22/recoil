@@ -1,6 +1,6 @@
 # Level design guide
 
-This is the toolkit for building Recoil Launcher levels. It lists every mechanic, the numbers behind the movement, and the rules for keeping levels fair, fun and gradually harder. It's written so an AI (or a person) can mix and match mechanics into new levels.
+This is the toolkit for building Cursed Shotgun levels. It lists every mechanic, the numbers behind the movement, and the rules for keeping levels fair, fun and gradually harder. It's written so an AI (or a person) can mix and match mechanics into new levels.
 
 **Current goal:** build the **10 floors** of the tower, each one wide, and playtest each one until the difficulty climbs smoothly. Castle art is being swapped in alongside.
 
