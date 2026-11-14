@@ -18,6 +18,9 @@ var locked := false
 var click_sound: AudioStream
 var hover_sound: AudioStream
 var play_sound: Callable
+## Optional stats on the right of the row: a time string and a death count (-1 hides it).
+var detail_time := ""
+var detail_deaths := -1
 
 var button := Button.new()
 var _glow := 0.0
@@ -96,6 +99,7 @@ func _on_pressed() -> void:
 
 
 func _draw() -> void:
+	_draw_detail()
 	if _glow <= 0.01:
 		return
 	# Diamond marker to the left of the text, and a thin underline that grows with the glow.
@@ -109,3 +113,30 @@ func _draw() -> void:
 		line.a = _glow * 0.35
 		var width := button.get_theme_font("font").get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
 		draw_rect(Rect2(button.position.x + 26.0, size.y - 6.0, width * _glow, 2.0), line)
+
+
+## Time and deaths, right-aligned: "12:34" then a tiny pixel skull and the count.
+func _draw_detail() -> void:
+	if detail_time == "" and detail_deaths < 0:
+		return
+	var font := button.get_theme_font("font")
+	var px := 9
+	var y := size.y / 2.0 + px / 2.0
+	var colour := Color(DIM.lightened(0.25), 0.9) if not locked else Color(DIM, 0.6)
+	var right := size.x - 6.0
+	if detail_deaths >= 0:
+		var count := str(detail_deaths)
+		var w := font.get_string_size(count, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+		draw_string(font, Vector2(right - w, y), count, HORIZONTAL_ALIGNMENT_LEFT, -1, px, colour)
+		# 7x7 pixel skull.
+		var sx := right - w - 12.0
+		var sy := size.y / 2.0 - 4.0
+		draw_rect(Rect2(sx + 1, sy, 5, 4), colour)
+		draw_rect(Rect2(sx, sy + 1, 7, 3), colour)
+		draw_rect(Rect2(sx + 1, sy + 4, 5, 2), colour)
+		draw_rect(Rect2(sx + 1, sy + 2, 2, 1), Color("#170b22"))
+		draw_rect(Rect2(sx + 4, sy + 2, 2, 1), Color("#170b22"))
+		right = sx - 10.0
+	if detail_time != "":
+		var tw := font.get_string_size(detail_time, HORIZONTAL_ALIGNMENT_LEFT, -1, px).x
+		draw_string(font, Vector2(right - tw, y), detail_time, HORIZONTAL_ALIGNMENT_LEFT, -1, px, colour)
