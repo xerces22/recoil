@@ -34,7 +34,7 @@ const S := 5.0                        # screen pixels per art pixel, same as the
 const GUN_POS := Vector2(640, 505)
 const GUN_SCALE := 4.0
 const ORB_R := 34.0
-const CRACKS_TO_SWOOP := 4
+const CRACKS_TO_SWOOP := 7
 const COOLDOWN := 0.7
 
 ## Teleport fight, osu-style. Each cycle: HOVER (orb shielded) -> WARN (pixel chevrons march
@@ -69,7 +69,7 @@ const SHIELD_R := HIT_R + 8.0
 ## A miss costs the shell and a short pump of the action.
 const MISS_COOLDOWN := 0.35
 ## Shells for the whole fight: 4 cracks + the final shot = 5 needed.
-const SHELLS := 12
+const SHELLS := 10
 const LOST_LINES: Array[String] = ["Out of shells? How embarrassing.", "Click, click. Ha!"]
 const DEFLECT: Array[String] = ["Nope!", "Too slow, boomstick!", "Missed me!", "Shielded, dear."]
 
@@ -365,6 +365,13 @@ func _pop(word: String, col: Color, at := Vector2.INF) -> void:
 
 func _orb_visible() -> bool:
 	return _phase != Phase.FIGHT or _witch_sc > 0.5
+
+
+## Orb sprite stage (0 whole .. 4 nearly broken, 5 shattered), spread over all the cracks.
+func _orb_stage() -> int:
+	if _phase == Phase.REBOUND:
+		return _cracks
+	return roundi(_cracks * 4.0 / CRACKS_TO_SWOOP)
 
 
 ## 0 at the first crack, 1 at the last one before she swoops.
@@ -820,7 +827,7 @@ func _draw_orb(c: Control, at: Vector2) -> void:
 	if k > 0.0:
 		at += Vector2(randf_range(-1, 1), randf_range(-1, 1)) * (1.0 + k * 5.0)
 	# Sprite has one crack stage per hit: 0..4 in the fight, 5 when it finally breaks.
-	Art.draw_orb(c, at.round(), _cracks, 3.0, _orb_flash)
+	Art.draw_orb(c, at.round(), _orb_stage(), 3.0, _orb_flash)
 	# In the finale, more cracks creep out from the middle until it bursts.
 	for path in _crack_paths:
 		var shown := int(ceil(k * (path.size() - 1)))
@@ -1041,10 +1048,10 @@ func _draw_hud(c: Control) -> void:
 	if _phase == Phase.LOST:
 		_draw_lost(c)
 		return
-	# Orb health: five pips, top centre.
+	# Orb health: one pip per crack plus the final shot, top right.
 	if _phase in [Phase.FIGHT, Phase.SWOOP, Phase.TAUNT, Phase.FINISH]:
 		c.draw_string(FONT, Vector2(760, 44), "HEX ORB", HORIZONTAL_ALIGNMENT_LEFT, -1, 12, CREAM)
-		for i in 5:
+		for i in CRACKS_TO_SWOOP + 1:
 			var col := Color("3a2b48") if i < _cracks else ORB
 			c.draw_rect(Rect2(880 + i * 30, 30, 22, 16), col)
 	if _phase == Phase.FINISH:
