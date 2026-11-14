@@ -331,9 +331,8 @@ func _build_run_menu(theme: Theme) -> void:
 	_continue_item = _add_action(_title_actions, "Continue", SFX_CONTINUE, _show_screen.bind(Screen.FLOORS))
 	_add_action(_title_actions, "Settings", SFX_SETTINGS, open)
 	_add_action(_title_actions, "Credits", SFX_CREDITS, _toggle_credits)
-	if not OS.has_feature("web"):
-		_title_actions.add_child(_spacer(96))
-		_add_action(_title_actions, "Exit", SFX_EXIT, _exit_game)
+	_title_actions.add_child(_spacer(96))
+	_add_action(_title_actions, "Exit", SFX_EXIT, _exit_game)
 
 	_add_action(_pause_actions, "Resume", SFX_CONTINUE, _show_screen.bind(Screen.PLAY))
 	_add_action(_pause_actions, "Restart Floor", SFX_NEW, _restart)
@@ -528,7 +527,54 @@ func _continue_from(index: int) -> void:
 
 
 func _exit_game() -> void:
-	_fade_through(get_tree().quit, 0.5)
+	if not OS.has_feature("web"):
+		_fade_through(get_tree().quit, 0.5)
+		return
+	# A browser game can't close its own tab, so leave fullscreen and show a goodbye screen
+	# that goes back to the title on click.
+	if _busy:
+		return
+	_busy = true
+	_fader.mouse_filter = Control.MOUSE_FILTER_STOP
+	var tween := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+	tween.tween_property(_fader, "color:a", 1.0, 0.5).set_trans(Tween.TRANS_SINE)
+	tween.tween_callback(_show_goodbye)
+
+
+func _show_goodbye() -> void:
+	if DisplayServer.window_get_mode() in [DisplayServer.WINDOW_MODE_FULLSCREEN,
+			DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN]:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	var layer := CanvasLayer.new()
+	layer.layer = 101
+	layer.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(layer)
+	var screen := ColorRect.new()
+	screen.color = Color(0, 0, 0, 1)
+	screen.theme = _menu_overlay.theme
+	screen.mouse_filter = Control.MOUSE_FILTER_STOP
+	layer.add_child(screen)
+	screen.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	var col := VBoxContainer.new()
+	col.alignment = BoxContainer.ALIGNMENT_CENTER
+	col.add_theme_constant_override("separation", 24)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	screen.add_child(col)
+	col.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	for line in [["Thanks for playing", 28, GOLD], ["Cursed Shotgun", 16, ACCENT],
+			["You can close this tab now.", 10, LILAC], ["Click to return to the menu", 10, CREAM]]:
+		var label := _label(line[0], line[1], line[2])
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		col.add_child(label)
+	screen.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed:
+			layer.queue_free()
+			var back := create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
+			back.tween_property(_fader, "color:a", 0.0, 0.5).set_trans(Tween.TRANS_SINE)
+			back.tween_callback(func() -> void:
+				_fader.mouse_filter = Control.MOUSE_FILTER_IGNORE
+				_busy = false))
 
 
 func _restart() -> void:
